@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+</body>
+<script>
+  // 访问对象的 obj.__proto__ 属性，默认走的是 Object.prototype 对象上 __proto__ 属性的 get/set 方法
+  Object.defineProperty(Object.prototype, '__proto__', {
+    get () {
+      console.log('get')
+    }
+  })
+
+  console.log((new Object()).__proto__)
+
+  // __proto__ 是对象独有的，并且 __proto__ 是一个对象指向另外一个对象，也就是他的原型对象。我们也可以理解为父类对象，它的作用就是当你访问一个对象属性的时候，如果该对象内部不存在这个属性，那么就回去它的 __proto__ 属性指向的对象（父类对象）上进行查找，如果父类对象依旧不存在这个属性，那就去其父类的 __proto__ 属性所很指向的父类上去查找。以此类推，直到找到 null，而这个查找的过程，也就构成了我们常说的原型链
+
+
+  // 在规范里， prototype 被定义为：给其它对象提供共享属性的对象。 prototype 自己也是对象，只是被用以承担某个职能
+  // 所有对象，都可以作为另一个对象的 prototype 来用
+
+</script>
+
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>作用域</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+</body>
+
+<script>
+  // 静态作用域
+  // var value = 1
+  
+  // function foo () {
+  //   console.log(value)
+  // }
+
+  // function bar () {
+  //   var value = 2
+  //   foo()
+  // }
+
+  // bar() // 1 根据foo() 书写位置查找上一层的代码
+
+  // var scope = 'global scope'
+  // function checkscope (){
+  //   var scope = 'local scope'
+  //   function f() {
+  //       return scope
+  //   }
+  //   return f()
+  // }
+  // console.log(checkscope()) // local scope
+
+  // var scope = 'global scope'
+  // function checkscope () {
+  //   var scope = 'local scope'
+  //   function f () {
+  //     return scope
+  //   }
+  //   return f
+  // }
+  // console.log(checkscope()()) // local scope
+
+  function a () {}
+  var a = function _a () {}
+  console.log(typeof a)
+  console.log(typeof _a)
+  console.log(window)
+</script>
+
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Page Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+</body>
+
+<script>
+  // 观察者
+  class Observer {
+    constructor (fn) {
+      this.update = fn
+    }
+  }
+
+  // 被观察者
+  class Subject {
+    constructor () {
+      this.observers = [] // 观察者队列
+    }
+    addObserver (observer) {
+      this.observers.push(observer) // 往观察者队列添加观察者
+    }
+    notify () { // 通知所有观察者，实际上是把观察者的 update() 都执行了一边
+      this.observers.forEach(observer => {
+        observer.update()
+      })
+    }
+  }
+
+  let subject = new Subject       // 被观察者
+  const update = () => { console.log('被观察者发出的通知') } // 收到广播时要执行的方法
+  let ob1 = new Observer(update) // 观察者1
+  let ob2 = new Observer(update) // 观察者2
+  console.log(ob2, Node.PROCESSING_INSTRUCTION_NODE)
+  subject.addObserver(ob1)
+  subject.addObserver(ob2)
+  subject.notify()
+
+</script>
+
+</html>

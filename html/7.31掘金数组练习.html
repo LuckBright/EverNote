@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Page Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+  <script src="main.js"></script>
+</head>
+<body>
+</body>
+<script>
+
+  // var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+
+  // https://juejin.im/post/6854818587820736526 （关于数组的一些骚操作）
+  // 数组内部元素随机打乱
+  // 遍历数组，每次循环都随机一个在数组长度范围内的数，并交换本次循环的位置和随机数位置上的元素
+  // function randomSort1(arr) {
+  //   for (let i = 0, l = arr.length; i < l; i++) {
+  //     let rc = parseInt(Math.random() * l)
+  //     // 让当前循环的数组元素和随机出来的数组元素交换位置
+  //     const empty = arr[i]
+  //     arr[i] = arr[rc]
+  //     arr[rc] = empty
+  //   }
+  //   return arr
+  // }
+  // // 下面两次的结果肯定是不一样的；
+  // console.log(randomSort1(arr1))
+  // console.log(randomSort1(arr1))
+
+  // 使用 splice 方法
+  // function randomSort2 (arr) {
+  //   let list = []
+  //   while (arr.length > 0) {
+  //     let rc = parseInt(Math.random() * arr.length)
+  //     list.push(arr[rc])
+  //     arr.splice(rc, 1)
+  //   }
+  //   return list
+  // }
+
+  // console.log(randomSort2(arr))
+
+  var arr = [1, [2, 3, [4, 5, [6, 7]]]]
+  // 数组扁平化，ES6方法 flat 
+  // ary = arr.flat(Infinity)
+  // console.log([1, [2, 3, [4, 5, [6, 7]]]].flat(Infinity))
+
+</script>
+</html>

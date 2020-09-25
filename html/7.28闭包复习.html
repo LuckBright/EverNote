@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Page Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+</head>
+<script>
+  // for (var i = 0; i < 5; i++) {
+  //   setTimeout(function () {
+  //     console.log(i)
+  //   }, 1000)
+  // }
+  // console.log(i, '===') // 5 => 5, 5, 5, 5, 5
+
+  // for (var i = 0; i < 5; i++) {
+  //   setTimeout(() => {
+  //     console.log(i)
+  //   }, 1000)
+  // }
+  // console.log(i) 5 => 5, 5, 5, 5, 5
+
+  for (var i = 0; i < 5; i++) {
+    setTimeout(function (j) {
+      console.log(j)
+    }, 1000, i)
+  }
+  console.log(i)
+
+</script>
+</html>

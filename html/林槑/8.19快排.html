@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Page Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+</body>
+<script>
+  // 快排思路
+  /* 
+  * 1、选取基准元素
+  * 2、比基准元素小的元素放左边，大的放右边
+  * 3、在左右子数组中重复步骤一二、直到数组中只剩下一个元素
+  * 4、向上逐级合并数组
+  */
+  // 此方法不太适合，浪费内存
+  // function quickSort (arr) {
+  //   if (arr.length <= 1) return arr // 递归终止 条件
+  //   const pivot = arr.length / 2 | 0
+  //   const pivotValue = arr.splice(pivot, 1)[0]
+  //   const leftArr = []
+  //   const rightArr = []
+  //   arr.forEach(val => {
+  //     val > pivotValue ? rightArr.push(val) : leftArr.push(val)
+  //   })
+  //   return [...quickSort(leftArr), pivotValue, ...quickSort(rightArr)]
+  // }
+
+  // console.log(quickSort([23, 32, 5, 72, 12, 1, 2], 0, 5))
+
+  // 快速排序 方法二 原地快排
+  // 定义一个 pos 指针，标识等待置换的元素位置，然后逐一遍历数组元素，遇到比基准数小的就和 arr[pos] 交换位置，然后 pos++
+  function quickSort (arr, left, right) { //  left 和 right 代表分区后的“新数组”的区间下标
+    if (left < right) {
+      let pos = left - 1                  //   pos 是 “被置换的位置”，第一趟为 -1
+      for (let i = left; i <= right; i++) {  // 循环遍历数组，置换元素
+        let pivot = arr[right]            // 选取数组最后一位作为基准数
+        if (arr[i] <= pivot) {            // 若小于等于基准数，pos++，并置换元素，这里使用小于等于而不是小于，其实是为了避免因为重复数据而进入死循环
+          pos++
+          let temp = arr[pos]
+          arr[pos] = arr[i]
+          arr[i] = temp
+        }
+      }
+      // 一趟排序完成后，pos 位置即基准数的位置，以 pos 的位置分割数组
+      quickSort(arr, left, pos - 1)
+      quickSort(arr, pos + 1, right)
+    }
+    return arr // 数组只包含1或0个元素时（即left >=right），递归终止
+  }
+</script>
+
+</html>

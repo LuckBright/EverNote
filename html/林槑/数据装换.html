@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+</body>
+
+<script>
+  // 数字转布尔值
+  // console.log(Boolean(0)) // false
+  // console.log(Boolean(-0)) // false
+  // console.log(Boolean(NaN)) // false
+
+  // console.log(Boolean(1)) // true
+  // console.log(Boolean(Infinity)) // true
+  // console.log(Boolean(-Infinity)) // true
+  // console.log(Boolean(100n)) // true
+  // console.log(Boolean(BigInt(100))) // true
+
+  // 规律：0、-0、NaN 为 false 其他全部都是 true
+
+
+  // 字符串转布尔值
+  // console.log(Boolean("")) // false
+  // console.log(Boolean("1")) // true
+  // console.log(Boolean("NaN")) // true
+  // console.log(Boolean("aaa")) // true
+
+  // 规律：'' 字符串为 false 其他全部为 true
+
+
+  // 其它类型转布尔值
+  // var divs = document.getElementsByTagName('div')
+  // console.log(Boolean(null)) // false
+  // console.log(Boolean(undefined)) // false
+
+  // console.log(Boolean({})) // true
+  // console.log(Boolean({ name: 'obj' })) // true
+  // console.log(Boolean([])) // true
+  // console.log(Boolean(divs)) // true
+  // console.log(Boolean(new Date())) // true
+  // console.log(Boolean(/(\[|\])/g)) // true
+
+  // console.log(typeof document.all) // undefined
+  // console.log(Boolean(document.all)) // false
+
+  // 规律：null、undefined 为 false，引用类型，如果对象、数组、类数组、日期、正则都为 true
+  // document.all 是一个例外，在非 IE 下用 typeof 检测为 undefined 所以会被转为 false
+
+
+  // 原始值转字符串
+
+  // undefined => 'undefined'
+  // null => 'null'
+  // Boolean => 如果参数是 true 则为 'true' 反之 则为 'false'
+  // Number => 相当于字符串拼接 0 + '' => '0'
+  // String => 返回原值
+  // Symbol => 'Symbol' String(Symbol('3')) => 'Symbol(3)'
+
+  // 原始值转数字
+  // undefined => NaN
+  // Null => +0
+  // NaN => NaN
+  // Boolean => 如果参数是 true 则为 1 反之 则为 0
+  // Number => 返回原值
+  // String => 纯数字的字符串（报错小数和负数、各进制的数）、会被转为相应的数字，否则为 NaN
+  // Symbol => 报错
+
+  // 布尔值转数字
+  // Number(true) => 1
+  // Number(false) => 0
+
+  // 还有一种大家可能会用到的转数字的方式，那就是使用：
+
+  // parsetInt，将结果转换为整数
+  // parseFloat，将结果转换为整数或者浮点数
+
+  // 它们在转换为数字的时候是有这么几个特点的：
+
+  // 如果字符串以0x或者0X开头的话，parseInt会以十六进制数转换规则将其转换为十进制，而parseFloat会解析为0
+  // 它们两在解析的时候都会跳过开头任意数量的空格，往后执行
+  // 执行过程中会尽可能多的解析数值字符，如果碰到不能解析的字符则会跳出解析忽略后面的内容
+  // 如果第一个不是非空格，或者开头不是0x、-的数字字面量，将最终返回NaN
+
+
+  // String 对象
+  // 可以看到，它本质上是一个构造函数，String.__proto__指向的是Function.prototype。
+  // String其实有两种用法，一种是配合new来当构造函数用，一种是不用new：
+
+  // 当 String() 和运算符 new 一起作为构造函数使用时，它返回一个新创建的 String 对象，存放的是字符串 s 或 s 的字符串表示(不过自从推出了Symbol之后就不推荐使用new String这种做法了)。
+  // 当不用 new 运算符调用 String() 时，它只把 s 转换成原始的字符串，并返回转换后的值
+
+
+  // 基本包装对象
+  // Number(1) // Number{1} 基本类型的包装对象
+
+  // 利用 toString 准确判断某个数据类型
+  // Object.prototype.toString.call 获取 class 内部属性
+
+  // function getClass (obj) {
+  //   let typeString = Object.prototype.toString.call(obj) // '[Object Object]'
+  //   return typeString.slice(8, -1)
+  // }
+
+  // console.log(getClass(new Map())) // Array
+
+  // 不同数据类型调用toString()
+
+  // 原始数据类型调用时，把它的原始值换成了字符串
+  // 数组的toString方法是将每一项转换为字符串然后再用","连接
+  // 普通的对象(比如{name: 'obj'}这种)转为字符串都会变为"[object Object]"
+  // 函数(class)、正则会被转为源代码字符串
+  // 日期会被转为本地时区的日期字符串
+  // 原始值的包装对象调用toString会返回原始值的字符串
+  // 拥有Symbol.toStringTag内置属性的对象在调用时会变为对应的标签"[object Map]"
+
+  // Symbol.toStringTag // 允许自定义标签
+  // class Super {
+  //   get [Symbol.toStringTag] () {
+  //     return 'Validator'
+  //   }
+  // }
+  // // Super 本身还是一个函数，只有 Super 产生的实例对象才会用到我们的自定义标签
+  // Object.prototype.toString.call(Super) // [Object Function]
+  // Object.prototype.toString.call(new Super()) // [Object Validator]
+  
+
+  // valueOf()
+  // 主要作用 把对象转换成一个基本类型的值
+  // toString 主要吧对象转换为字符串
+
+  // 基本用法
+  // 基本数据类型调用，返回调用者原本的值
+  // 非日期对象的其它引用类型调用valueOf()默认是返回它本身
+  // 而日期对象会返回一个1970 年 1 月 1 日以来的毫秒数(类似于1585370128307)。
+
+
+  // 对象转字符串
+  // 如果对象具有 toString 方法，则调用这个方法。如果他返回一个原始值，JavaScript 将这个值转换为字符串，并返回这个字符串结果。
+  // 如果对象没有 toString 方法，或者这个方法并不返回一个原始值，那么 JavaScript 会调用 valueOf 方法。如果存在这个方法，则 JavaScript 调用它。如果返回值是原始值，JavaScript 将这个值转换为字符串，并返回这个字符串的结果。()
+  // 否则，JavaScript 无法从 toString 或者 valueOf 获得一个原始值，这时它将抛出一个类型错误异常。
+
+  // 其实也就是走的toPrimitive(object, 'string')这种情况。
+
+  // 对象转数字
+  // 所以对于对象转数字，总结来说和对象转字符串差不多：
+  // 如果对象具有 valueOf 方法，且返回一个原始值，则 JavaScript 将这个原始值转换为数字并返回这个数字
+  // 否则，如果对象具有 toString 方法，且返回一个原始值，则 JavaScript 将其转换并返回。
+  // 否则，JavaScript 抛出一个类型错误异常。
+
+  // 重写 toString 和 valueOf
+
+  // var b = {
+  //   toString () {
+  //     console.log('toString')
+  //     return 1
+  //   },
+  //   valueOf () {
+  //     console.log('valueOf')
+  //     return [1, 2]
+  //   }
+  // }
+
+  // console.log(Number(b)) // 数字类型 1 执行了 valueOf => toString
+  // console.log(String(b)) // 字符串 1 执行了 toString
+
+  // 重写 join 方法
+
+  // var arr = [1, 2, 3]
+
+  // arr['join'] = function () {
+  //   let target = [...this]
+  //   return target.join('~')
+  // }
+
+  // 说明 String 过程中，隐式调用了 join 方法
+  // console.log(String(arr)) // 1~2~3
+
+  // 重写 toString 方法
+
+  // var arr = [1, 2]
+
+  // arr['toString'] = function () {
+  //   let target = [...this]
+  //   return target.join('*')
+  // }
+
+  // arr['join'] = function () {
+  //   let target = [...this]
+  //   return target.join('~')
+  // }
+  // // 说明 String 过程中，也隐式调用了 toString 并且 toString 的优先级要比 join 高
+  // console.log(String(arr)) // 1*2
+
+  // Symbol.toPrimitive
+
+  // var b = {
+  //   toString () {
+  //     console.log('toString')
+  //     return { name: 'b' }
+  //   },
+  //   valueOf () {
+  //     console.log('valueOf')
+  //     return [1, 2]
+  //   },
+  //   [Symbol.toPrimitive] () {
+  //     console.log('Symbol')
+  //     return '1'
+  //   }
+  // }
+
+  // console.log(String(b)) // 字符串 1 执行 Symbol.toPrimitive
+  // console.log(Number(b)) // 数字 1 执行 Symbol.toPrimitive
+
+  // 带参数的 Symbol.toPrimitive
+  // 接收一个字符串类型的参数：hint，表示要转换到的原始值的预期类型
+  // 参数的取值 为以下字符串的其中一个
+  // number string default
+
+  // 尝试
+  // var b = {
+  //   toString () {
+  //     console.log('toString')
+  //     return '1'
+  //   },
+  //   valueOf () {
+  //     console.log('valueOf')
+  //     return [1, 2]
+  //   },
+  //   [Symbol.toPrimitive] (hint) { // 它的优先级最高，并且不会执行上面的两个方法了
+  //     console.log('symbol')
+  //     const keyObj = {
+  //       'string': '1',
+  //       'number': 1,
+  //       'default': 'default'
+  //     }
+  //     return keyObj[hint]
+  //   }
+  // }
+
+  // console.log(String(b))
+  // console.log(Number(b))
+
+  // class Person {
+  //   constructor (name) {
+  //     this.name = name
+  //   }
+  //   [Symbol.toPrimitive] (hint) { // 使用 String() 调用时， hint 为 'string', 使用 Number() 调用时， hint 为 'number', hint 参数的值从开始调用的时候就已经确地了
+  //     console.log(hint)
+  //   }
+  // }
+
+  // let p1 = new Person('p1')
+
+  // 使用 == 比较时的类型装换
+  // 当使用==进行比较的时候，会有以下转换规则（判断规则）：
+
+  // 两边类型如果相同，值相等则相等，如 2 == 3肯定是为false的了
+  // 比较的双方都为基本数据类型：
+
+
+  // 若是一方为null、undefined，则另一方必须为null或者undefined才为true，也就是null == undefined为true或者null == null为true，因为undefined派生于null
+  // 其中一方为String，是的话则把String转为Number再来比较
+  // 其中一方为Boolean，是的话则将Boolean转为Number再来比较
+
+
+  // 比较的一方有引用类型：
+  // 将引用类型遵循ToNumber的转换形式来进行比较(实际上它的hint是default，也就是toPrimitive(obj, 'default')，但是default的转换规则和number很像，具体可以看3.10)
+  // 两方都为引用类型，则判断它们是不是指向同一个对象
+
+
+  // 将引用类型遵循ToNumber的转换形式来进行比较(实际上它的hint是default，也就是toPrimitive(obj, 'default')，但是default的转换规则和number很像，具体可以看3.10)
+  // 两方都为引用类型，则判断它们是不是指向同一个对象
+
+
+  // var b = {
+  //   valueOf () {
+  //     console.log('b.valueOf')
+  //     return '1'
+  //   },
+  //   toString () {
+  //     console.log('b.toString')
+  //     return '2'
+  //   }
+  // }
+  // var c = {
+  //   valueOf () {
+  //     console.log('c.valueOf')
+  //     return {}
+  //   },
+  //   toString () {
+  //     console.log('c.toString')
+  //     return '2'
+  //   }
+  // }
+
+  // console.log(b == 1) // true
+  // console.log(c == 2) // true
+
+
+
+  // +、-、*、/、% 的类型转换
+
+  // 总结-运算符的类型转换
+  // 对于几种常用运算符的类型转换：
+
+  // -、*、/、%这四种都会把符号两边转成数字来进行运算
+  // +由于不仅是数字运算符，还是字符串的连接符，所以分为两种情况：
+
+
+  // 两端都是数字则进行数字计算(一元正号+b这种情况相当于转换为数字)
+  // 有一端是字符串，就会把另一端也转换为字符串进行连接
+
+  // 对象的+号类型转换：
+
+  // 对象在进行+号字符串连接的时候，toPrimitive的参数hint是default，但是default的执行顺序和number一样都是先判断有没有valueOf，有的话执行valueOf，然后判断valueof后的返回值，若是是引用类型则继续执行toString。(类似题4.5和4.6)
+  // 日期在进行+号字符串连接的时候，优先调用toString()方法。(类似题4.7)
+  // 一元正号是转换其他对象到数值的最快方法,也是最推荐的做法，因为 它不会对数值执行任何多余操作。
+
+
+  // 让if (a == 1 && a == 2 && a == 3)条件成立？
+  // class A {
+  //   constructor () {
+  //     this.value = 0
+  //   }
+  //   valueOf () {
+  //     console.log('走了')
+  //     return ++this.value
+  //   }
+  // }
+  // var a = new A()
+  // if (a == 1 && a == 2 && a == 3) {
+  //   console.log(a, '成立')
+  // }
+
+  // 利用数组转字符串会隐式调用 join()
+  // let a = [1, 2, 3]
+  // a['join'] = function () {
+  //   return this.shift() // 数组 a 执行 shift 方法，将第一项去除然后返回
+  // }
+  // if (a == 1 && a == 2 && a == 3) { // a == 1 隐式调用了 a['join'] 方法 后面同理
+  //   console.log(a, '成立')
+  // }
+
+  // 定义 class 继承 Array 并重写 join()
+  // A 这个类通过 extends 继承于 Array，这样通过 new A 创建的就是一个数组
+  // class A extends Array {
+  //   // 重写 join 方法，join = this.shift 相当于 join = function () { return this.shift() }
+  //   join = this.shift
+  // }
+  // var a = new A(1, 2, 3)
+  // // 每次 调用 a == xx 的时候，就会隐式调用我们自定义的 join 方法，执行方法同上述一样
+  // if (a == 1 && a == 2 && a == 3) {
+  //   console.log(a, '成立')
+  // }
+
+
+  // 让if (a === 1 && a === 2 && a === 3)条件成立？
+  // var value = 1
+  // // 使用 Object.defineProperty() 方法劫持全局变量 window 上面的属性 a
+  // Object.defineProperty(window, 'a',{
+  //   // 当每次调用 a 的时候 将 value 自增，并且返回自增后的值
+  //   get () {
+  //     return this.value++
+  //   }
+  // })
+  // if (a === 1 && a === 2 && a === 3) {
+  //   console.log(a, '成立')
+  // }
+
+  // 实现 f(1)(2) == 3
+  function f () {
+    let args = [...arguments]
+    var add = function () {
+      args.push(...arguments)
+      return add
+    }
+    add.valueOf = function () {
+      return args.reduce((cur, pre) => {
+        return cur + pre
+      })
+    }
+    return add
+  }
+
+
+  console.log(f(1)(2) == 3)
+  
+</script>
+</html>

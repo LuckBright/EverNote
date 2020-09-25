@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+</body>
+<script>
+  // HTML 相关
+  // 标签：新增语义话标签（aside/figure/ section / header / footer / nav ）等，增加多媒体标签 video 和 audio ，使得样式和结构更加分离
+  // 属性：增强标签，主要增强了 input 的 type 属性；meta 增加 charset 以设置字符集； script 增加 async 以异步加载脚本
+  // 存储：增加 localStorage、sessionStorage 和 indexedDB ，引入了 application cache 对 web 和应用进行缓存
+  // API：增加 拖放API、地理定位、SVG绘图、canvas绘图、Web Worker、WebSocket
+
+  // 集中前端存储以及区别
+  // cookies：HTML5之前本地存储的主要方式，大小只有4K，HTTP请求头会自动带上 cookie，兼容性好
+  // localStorage：HTML5新特性，持久性存储，即使页面关闭也不会被清除，以键值对的方式存储，大小为5M
+  // sessionStorage：HTML5新特性，操作及大小同 localStorage ，和 localStorage 的区别在于 sessionStorage 在选项卡（页面）被关闭时即清除，且不同选项卡之间的 sessionStorage 不互通
+  // indexedDB：NoSQL 型数据库，类比 MongoDB,使用键值对进行存储，异步操作数据库，支持事务，存储空间可以在 250MB 以上，但是 indexedDB 受同源策略限制
+  // Web SQL：是在浏览器上模拟的关系型数据库，开发者可以通过 SQL 语句来操作 Web SQL，是HTML5以外一套独立的规范，兼容性差
+
+  // href 和 src 有什么区别
+  // href（hyperReference）即超文本引用，当浏览器遇到 href 时，会并行的下载资源，不会阻塞页面解析， 例如我们使用 <link> 引入 CSS，浏览器会并行下载 CSS 而不阻塞页面解析，因此我们再引入 CSS 时建议使用 <link> 而不是 @import
+  // <link href="style.css" rel="stylesheet" />
+  
+  // src （resource） 即资源，当浏览器遇到src 时，会暂停页面解析，知道该资源下载或执行完毕，这也是 script 标签之所以放底部的原因
+  // <script src="script.js">
+
+  // meta 有哪些属性，作用是什么
+  // meta 标签用于描述网页的 元信息，如网站作者、描述、关键词，meta 通过 name=XXXX 和 content=XXXX 的形式来定义信息，常用设置如下：
+  // charset：定义HTML的字符集
+  // <meta charset="UTF-8">
+  // http-equiv：可用于模拟 http 请求头，可设置过期时间、缓存、刷新
+  // <meta http-equiv="expires" content="Web, 20 jun 2019 22:33:00 GMT">
+  // viewport：视口，用于控制页面宽高及缩放比例
+  // <meta 
+  //   name="viewport" 
+  //   content="width=device-width, initial-scale=1, maximum-scale=1">
+  // viewport 有哪些参数，作用是什么
+  // width/height，宽高，默认宽度 980px
+  // initial-scale，初始缩放比例，1~10
+  // maximun-scale/minimum-scale，允许用户缩放的最大/小比例
+  // user-scalable，用户是否可以缩放（yes/no）
+
+  // http-equive 属性的作用和参数（其实对于现在的 http 1.1 以及以上版本来说用处不大）
+  // expires，指定过期时间
+  // progma，设置no-cache可以禁止缓存
+  // refresh，定时刷新
+  // set-cookie，可以设置 cookie
+  // X-UA-Compatible，使用浏览器版本
+  // apple-mobile-web-app-status-bar-style，针对WebApp全屏模式，隐藏状态栏/设置状态栏颜色
+
+  //  什么是BFC
+  // BFC 全称 Block Formatting Context 即 块级格式上下文，简单来说，BFC是页面上的一个隔离的独立容器，不受外界干扰活干扰外界
+
+  // 如果触发 BFC
+  // float 不为 none
+  // overflow 的值不为 visible
+  // position 为 absolute 或 fixed
+  // display 的值为 inline-block 或 table-cell或 table-caption 或 grid
+
+  // BFC 的渲染规则是什么
+  // BFC 是页面上的一个隔离的独立容器，不受外界干扰或干扰外界
+  // 计算 BFC 的高度时，浮动子元素也参与计算（即内部有浮动元素时也不会发生高度塌陷）
+  // BFC 的区域不会与 float 的元素区域重叠
+  // BFC 内部的元素会在垂直方向上重置
+  // BFC 内部的两个相邻元素的 margin 会发生重叠
+
+  // BFC 的应用场景
+  // 清楚浮动：BFC 内部的浮动元素会参与高度计算，因此可用于清除浮动，防止高度塌陷
+  // 避免某元素被浮动元素覆盖：BFC 的区域不会与浮动元素的区域重叠
+  // 阻止外边距重叠：属于同一个 BFC 的两个相邻 BOX 的 margin 会发生折叠，不同 BFC 不会发生折叠
+
+</script>
+
+
+</html>

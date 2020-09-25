@@ -1,0 +1,39 @@
+<script>
+  // ES5 写法
+  // 示例
+  function student (name, gender, score) {
+    this.name = name
+    this.gender = gender
+    this.score = score
+    this.mathematics = 100
+
+    // this.sumUp = function () { // 这样写也可以，但是 new 一次的时候就会重新生成一份新的 sumUp ，实际上对于这个功能来说，一个就够了
+    //   return this.score + this.mathematics
+    // }
+  }
+  // 这个时候可以采用原型的方式，给 student 这个对象的原型上添加 sumUp 方法，那么所有new出来的对象都能使用这个公用方法，并且都指向这一个
+  student.prototype.sumUp = function () {
+    return this.score + this.mathematics
+  }
+
+  // ES6 写法
+  // 实例
+  class Student {
+    // constructor 是这个类的初始化函数，每次生成这个类的时候都会初始化一份
+    constructor (name, gender, score) {
+      this.name = name
+      this.gender = gender
+      this.score = score
+      this.mathematics = 100
+    }
+    sumUp () {
+      return this.score + this.mathematics
+    }
+  }
+
+  var whh = new student('王花花', '女', 80)
+  var lsd = new student('李双旦', '男', 50)
+  console.log(whh.name, whh.sumUp())
+  console.log(lsd.name, lsd.sumUp())
+
+</script>

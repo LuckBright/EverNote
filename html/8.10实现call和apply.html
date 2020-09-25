@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>手动实现call和apply</title>
+</head>
+<body>
+</body>
+<script>
+  // call() 方法在使用一个指定的 this 值和若干个指定的参数值的前提下调用某个函数或方法
+  // 简易版 call()
+  // Function.prototype.call2 = function (context) {
+  //   context.fn = this
+  //   context.fn()
+  //   console.log(context)
+  //   delete context.fn
+  // }
+  // var foo = {
+  //   value: 1
+  // }
+
+  // function bar () {
+  //   console.log(this.value)
+  // }
+
+  // bar.call2(foo)
+
+  // 第二版
+  // Function.prototype.call2 = function (context) {
+  //   context.fn = this
+  //   var args = []
+  //   for (var i = 1; i < arguments.length; i++) {
+  //     args.push('arguments[' + i + ']')
+  //   }
+  //   eval('context.fn(' + args + ')')
+  //   console.log(args, context)
+  //   delete context.fn
+  // }
+
+  // var foo = {
+  //   value: 1
+  // }
+
+  // function bar (name, age) {
+  //   console.log(name)
+  //   console.log(age) 
+  //   console.log(this.value)
+  // }
+
+  // // bar.call2(foo, 'kevin', 18)
+  // bar.call('kevin', 18, foo)
+  // console.log(bar.call(obj, 'kevin', 18))
+
+  // 第三版
+  // Function.prototype.call2 = function (context) {
+  //   // Object 方法将 context 转化为对象
+  //   var context = Object.keys(Object(context)).length ? Object(context) : window
+  //   context.fn = this
+
+  //   var args = []
+  //   var len = arguments.length
+  //   for (var i = 1; i < len; i++) {
+  //     args.push('arguments[' + i + ']')
+  //   }
+
+  //   var result = eval('context.fn(' + args + ')')
+  //   delete context.fn
+  //   return result
+  // }
+
+  // var value = 2
+
+  // var obj = {
+  //   value: 1
+  // }
+
+  // function bar (name, age) {
+  //   console.log(this)
+  //   return {
+  //     value: this.value,
+  //     name,
+  //     age
+  //   }
+  // }
+  // console.log(bar.call2([]))
+  // console.log(bar.call())
+
+  // apply apply 跟call方法类似
+  function generateFunctionCode (len) {
+    var code = 'return arguments[0][arguments[1]]('
+    for (var i = 0; i < len; i++) {
+      if (i > 0) {
+        code += ','
+      }
+      code += 'arguments[2][' + i + ']'
+    }
+    code += ')'
+    return code
+  }
+  Function.prototype.apply2 = function (context, arr) {
+    if (typeof this !== 'function') {
+      throw new TypeError(this + 'is not a function')
+    }
+    // 如果arr 是null 或者 undefined 则初始化arr
+    if (typeof arr === 'undefined' || arr === null) {
+      arr = []
+    }
+    // 如果arr 不是 Object 抛出异常
+    if (arr !== new Object(arr)) {
+      throw new TypeError('CreateListFromArrayLike called on non-object')
+    }
+    // context 是 undefined 或者 null 指向window
+    if (typeof context === 'undefined' || context === null) {
+      context = window
+    }
+    context = new Object(context)
+    var _fn = '_' + new Date().getTime()
+    var originalVal = context[_fn]
+    // 是否有原始值
+    var hasOriginalVal = context.hasOwnProperty(_fn)
+    context[_fn] = this
+    var code = generateFunctionCode(arr.length)
+    var result = (new Function(code))(context, _fn, arr)
+    delete context[_fn]
+    if (hasOriginalVal) {
+      context[_fn] = originalVal
+    }
+    // return result
+  }
+
+  var value = 2
+
+  var obj = {
+    value: 1
+  }
+
+  function bar (name, age) {
+    console.log(this.value)
+    return {
+      value: this.value,
+      name,
+      age
+    }
+  }
+  console.log(bar.apply2(obj))
+</script>
+</html>

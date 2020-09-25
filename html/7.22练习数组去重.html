@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+</body>
+<script>
+  let str = 'adsahjafsfasdairjahhruyakhksaghdgjf'
+
+  // function changeStr (str) {
+  //   let arr = [...str]
+  //   let obj = {}
+  //   let newArr = []
+  //   arr.forEach(item => {
+  //     if (!newArr.includes(item)) {
+  //       newArr.push(item)
+  //       obj[item] = 1
+  //     } else {
+  //       obj[item] += 1
+  //     }
+  //   })
+  //   console.log(obj)
+  //   return newArr.join()
+  // }
+
+  // console.log(changeStr(str), 'changStr')
+  let obj = {}
+  let arr = [...str]
+  // 方案一  数据大的话需要提升每一项的 i 性能损耗比较大
+  // for (let i = 0; i < arr.length; i++) {
+  //   const item = arr[i]
+  //   if (obj[item] === item) {
+  //     arr.splice(i, 1)
+  //     i--
+  //     continue
+  //   }
+  //   obj[item] = item
+  // }
+
+  /*
+    方案二 数据大的话需要提升每一项的 i 性能损耗比较大
+  */
+  // arr.forEach((item, index) => {
+  //   if (obj[item] !== item) {
+  //     obj[item] = item
+  //   } else {
+  //     arr.splice(index, 1)
+  //      index--
+  //   }
+  // })
+  /*
+    方案三 性能比较好
+    1.获取数组中的每一项
+    2.拿每一项和它之后的每一项进行比较
+    3.把最后一项替换到当前这一项
+    4.删除最后一项
+    5.删除之后 i 回退 1 （因为最后一位替换了i，下一次比较的时候还需要重新从i开始）
+  */
+  // for (let i = 0; i < arr.length; i++) {
+  //   const item = arr[i]
+  //   if (obj[item] !== undefined) {
+  //     arr[i] = arr[arr.length - 1]
+  //     arr.pop()
+  //     i--
+  //     continue
+  //   }
+  //   obj[item] = item
+  // }
+  /**
+    方案四
+    set
+  */
+  // arr = [...new Set(arr)]
+  // console.log(arr)
+
+</script>
+</html>

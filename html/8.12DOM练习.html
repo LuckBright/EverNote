@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Page Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <input type="text">
+</body>
+<script>
+  // // 测试代码，循环读取一百万次 DOM 中的 body  元素的耗时是读取 JSON对象耗时的10倍
+
+  // // 测试次数：一百万次
+  // const times = 1000000
+  // // 缓存body 元素
+  // console.time('object')
+  // let body = document.body
+  // // 循环复制对象作为对照参考
+  // for (let i = 0; i < times; i++) {
+  //   let tmp = body
+  // }
+
+  // console.timeEnd('object') // 10ms
+
+  // console.time('dom')
+  // // 循环读取 body 元素 引发线程切换
+  // for (let i = 0; i < times; i++) {
+  //   let tmp = document.body
+  // }
+  // console.timeEnd('dom') // 80ms
+
+  // 通过修改 div 元素的边距来触发重排
+  // const times = 100000
+  // let html = ''
+  // for (let i = 0; i < times; i++) {
+  //   html += `<div>${i}</div>`
+  // }
+  // document.body.innerHTML += html
+  // const divs = document.querySelectorAll('div')
+  // Array.prototype.forEach.call(divs, (div, i) => {
+  //   div.style.margin = i % 2 ? '10px' : 0
+  // })
+
+  // 通过修改 div 元素字体颜色来触发重绘
+  // const times = 100000
+  // let html = ''
+  // for (let i = 0; i < times; i++) {
+  //   html += `<div>${i}</div>`
+  // }
+  // document.body.innerHTML += html
+  // const divs = document.querySelectorAll('div')
+  // console.log(Array.prototype)
+  // Array.prototype.forEach.call(divs, (div, i) => {
+  //   div.style.color = i % 2 ? 'red' : 'green'
+  // })
+
+
+  //万级数据DOM操作
+  
+  // const times = 20000
+  // let html = ''
+  // for (let i = 0; i < times; i++) {
+  //   html += `<div>${i}</div>`
+  // }
+  // document.body.innerHTML += html
+
+  // let queue = [] // 创建缓存样式的数组
+  // let microTask // 执行修改样式的微任务
+  // const st = (i) => {
+  //   const divs = document.querySelectorAll('div')
+  //   // 合并样式
+  //   const style = queue.reduce((acc, cur) => ({...acc, ...cur}),{})
+  //   for (let prop in style) {
+  //     divs[i].style[prop] = style[prop]
+  //   }
+    
+  //   queue = []
+  //   microTask = null
+  // }
+
+  // const setStyle = (style, i) => {
+  //   queue.push(style)
+  //   microTask = Promise.resolve().then(st(i))
+  // }
+
+  // for (let i = 0; i < times; i++) {
+  //   const style = {
+  //     fontSize: (i % 12) + 12 + 'px',
+  //     color: i % 2 ? 'red' : 'green',
+  //     margin: (i % 12) + 12 + 'px'
+  //   }
+  //   setStyle(style, i)
+  // }
+
+  const ipt = document.querySelector('input')
+  
+
+  // // 防抖函数
+  // const debounceAjax = debounce(aa, 22)
+  // ipt.addEventListener('input', e => {
+  //   debounceAjax(e)
+  // })
+
+  // function debounce (func, delay = 200) {
+  //   console.log(func, delay)
+  //   let timer
+  //   return function (...args) {
+  //     if (timer) {
+  //       clearTimeout(timer)
+  //     }
+  //     timer = setTimeout(() => {
+  //       return func.apply(this, args)
+  //     }, delay)
+  //   }
+  // }
+
+
+  // // const debounce = (func, wait = 0) => {
+  // //   console.log(func, wait)
+  // //   let timeout = null
+  // //   let args
+  // //   debounced()
+  // //   function debounced (...arg) {
+  // //     console.log(arg)
+  // //     args = arg
+  // //     if (timeout) {
+  // //       clearTimeout(timeout)
+  // //       timeout = null
+  // //     }
+  // //     return new Promise((res, rej) => {
+  // //       timeout = setTimeout(async () => {
+  // //         try {
+  // //           const result = await func.apply(this, args)
+  // //           res(result)
+  // //         } catch (e) {
+  // //           rej(e)
+  // //         }
+  // //       }, wait)
+  // //     })
+  // //   }
+  // // }
+  
+  function aa (e) {
+    console.log(e, '---')
+  }
+
+  // 节流函数
+  function throttle (fn, delay = 200) {
+    let last
+    let timer
+    return args => {
+      let now = Date.now()
+      if (last && now < last + delay) {
+        clearTimeout(timer)
+
+        timer = setTimeout(() => {
+          fn.call(this, args)
+          last = now
+        }, delay)
+      } else {
+        fn.call(this, args)
+        last = now
+      }
+    }
+  }
+  const throttleAjax = throttle(aa, 1000)
+  ipt.addEventListener('input', e => {
+    throttleAjax(e)
+  })
+</script>
+</html>

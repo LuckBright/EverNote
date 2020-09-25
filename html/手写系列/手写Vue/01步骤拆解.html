@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <div id="root">
+    <p>{{name}}</p>
+    <p>{{message}}</p>
+  </div>
+</body>
+<script>
+  let regDbKuohao = /\{\{(.+?)\}\}/g
+
+  /*
+    步骤拆解
+    1、拿到模板
+    2、拿到数据（data）
+    3、将数据与模板结合，得到的是 HTML 元素（ DOM 元素）
+    4、渲染到页面
+  */
+
+  //  1
+  let tempNode = document.querySelector('#root') // 获取到的元素就是 模板
+
+  // 2
+  let data = {
+    name: '一个新的name',
+    message: '一个消息'
+  }
+
+  // 3、将数据放到模板中 
+  // 使用 递归 || （队列（深度优先、广度优先））
+  // 在现在这个例子当中 template 是 DOM 元素，
+  // 在 Vue 源码 中是 字符串 （Vue 中的实现 DOM -> 字符串模板 -> VNode -> 真正的 DOM）
+  function compiler (template, data) {
+    let childNodes = template.childNodes // 取出子元素
+    childNodes.forEach(item => {
+      let type = item.nodeType // 1: 元素 3: 文本节点
+      if (type === 3) {
+        // 文本节点，可以判断里面是否有 {{}} 插值
+        let txt = item.nodeValue // 该属性只有文本节点才有意义
+
+        // 有没有 双花括号 ？？
+        // replace 使用正则匹配一次 函数就会被调用一次
+        // 函数的 第 0 个参数 表示匹配到的内容
+        // 函数的 第 n 个参数 表示正则中的 第 n 组
+        txt =  txt.replace(regDbKuohao, (_, g) => {
+          // 去除首位空格 写在双花括号里面的 内容
+          let key = g.trim()
+          let value = data[key]
+          // 将 {{ xxx }}  用这个值 替换
+          return value
+        })
+        // 注意现在时候 txt 与真正的 DOM 无关
+        item.nodeValue = txt
+      } else if (type === 1) { 
+        // 是元素节点，需要考虑它是否有子元素，是否需要将其子元素进行 判断是否要插值
+        compiler(item, data)
+      }
+    })
+  }
+
+  console.log(tempNode)
+  compiler(tempNode, data)
+  console.log(tempNode)
+</script>
+
+</html>

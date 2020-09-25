@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Page Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+  <script src="main.js"></script>
+</head>
+<body>
+  <div>
+    <a href="">我是A标签</a>
+    <input type="text" id="input1">
+  </div>
+</body>
+<script>
+  let input = document.querySelector('#input1')
+  input.onclick = function () {
+    console.log('点击了')
+  }
+  input.onfocus = (() => {
+    console.log('onfocus')
+  })
+
+  input.onblur = (() => {
+    console.log('onblur')
+  })
+
+  input.onmousedown = (() => {
+    console.log('onmousedown')
+  })
+
+  input.onmouseenter = (() => {
+    console.log('onmouseenter')
+  })
+
+  // 冒泡排序
+  function bubbleSort (arr) {
+    for (let i = 0; i < arr.length; i++) {
+      let flag = true;
+      for (let j = 0; j < arr.length - i - 1; j++) {
+        console.log(arr[j], arr[j + 1])
+        if (arr[j] > arr[j + 1]) {
+          flag = false;
+          let temp = arr[j];
+          arr[j] = arr[j + 1];
+          arr[j + 1] = temp;
+        }
+      }
+      if (flag) break;
+    }
+    return arr;
+  }
+
+  let arr = [{ a: 1 }, { a: 3 }, { a: 2 }, { a: 6 }]
+  console.log(arr.sort((value1, value2) => {
+    console.log(value1, value2, '====')
+    if (value1.a < value2.a) {
+      return -1
+    } else if (value1.a > value2.a) {
+      return 1
+    } else {
+      return 0
+    }
+  }))
+
+  
+</script>
+<style>
+
+a:visited {
+  color: green;
+  text-decoration: none;
+}
+
+a:hover {
+  color: aqua;
+  font-size: 16px;
+  text-decoration: none;
+}
+
+a:active {
+  color: blueviolet;
+  font-size: 1rem;
+}
+</style>
+</html>

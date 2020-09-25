@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Page Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <ul onclick="alert('ul')">
+    <li onclick="alert('li')">
+      <button id="btn" onclick="alert('button')">我是按钮</button>
+    </li>
+  </ul>
+</body>
+<script>
+  // // 事件触发
+  // let myEvent = document.createEvent('CustomEvent')
+  // myEvent.initEvent('myEvent', true, true)
+
+  // let btn = document.querySelector('#btn')
+  // btn.addEventListener('myEvent', function (e) {
+  //   console.log(e)
+  //   console.log(e.detail)
+  // })
+
+  // setTimeout(() => {
+  //   btn.dispatchEvent(myEvent)
+  // }, 2000)
+
+  // // 冒泡
+  // document.addEventListener('click', function (e) {
+  //   alert('document')
+  // })
+  // document.addEventListener('click', function (e) {
+  //   alert('window')
+  // })
+
+  // // 手写new
+  // function bb () {}
+
+  // function myNew (fn, ...args) {
+  //   // 创建一个新对象，使用现有对象来提供新对象的 _proto_
+  //   let instance = Object.create(fn.prototype)
+  //   let result = fn.call(instance, ...args)
+  //   return typeof result === 'object' ? result : instance
+  // }
+  
+  // let aa = myNew(bb)
+  // let cc = new bb()
+  // console.log(aa, '==', cc)
+
+  // 手写 instanceof 简单版 未加参数类型校验
+  // 主要用于检测某个构造函数的原型对象在不在某个对象的原型链上
+  /* 
+    @parmas left 需要验证的对象
+    @parmas right 基础类型
+  */
+
+  function myInstanceof (left, right) {
+    // 获取 指定对象的原型（内部 Prototype）属性的值，如果没有继承属性，则返回Null
+    let proto = Object.getPrototypeOf(left)
+    while (true) {
+      if (proto === null) return false
+      if (proto === right.prototype)  return true
+      proto = Object.getPrototypeOf(proto)
+    }
+  }
+  console.log(myInstanceof({}, Array))
+
+
+</script>
+
+</html>

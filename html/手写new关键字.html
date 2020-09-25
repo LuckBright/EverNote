@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+</body>
+<script>
+
+  // 手写 new 关键字
+
+  // new 是 JS 中的一个关键字，用来将构造函数实例化的一个运算符。例子：
+  // function Animal (name) {
+  //   this.name = name
+  // }
+
+  // Animal.prototype.sayName = function () {
+  //   console.log('Im ' + this.name)
+  // }
+
+  // var cat = new Animal('Tom')
+  // console.log(cat.name) // Tom
+
+  // console.log(cat, Animal.prototype)
+
+  // cat.sayName() // Im Tom
+
+  // new 操作符实例化了一个对象
+  // 这个对象可以访问构造函数的属性
+  // 这个对象可以访问构造函数原型上的属性
+  // 对象的 _proto_ 属性指向了构造函数的原型
+
+  // 首先实现前面 3 点
+  // construct: 构造函数
+  // function mayNew () {
+  //   var res = {} // 创建一个空对象
+  //   var construct = Array.prototype.shift.call(arguments) // 获取arguments 数组中第一个参数，也就是需要 new 的内容
+  //   res.__proto__ = construct.prototype // 复制构造函数
+  //   construct.apply(res, arguments) // 改变构造函数this的指向到新对象上面
+  //   return res
+  // }
+
+  // Animal.prototype.sayName = function () {
+  //   console.log('Im ' + this.name)
+  // }
+
+  // var cat = mayNew(Animal, 'Tom')
+  // console.log(cat.name) // Tom
+
+  // console.log(cat.__proto__ === Animal.prototype) // true
+
+  // cat.sayName() // Im Tom
+
+  // new 关键字还有一个特性，如果构造函数 return 了一个对象，那么 new 操作后返回的是构造函数 return 的对象
+  function Animal (name) {
+    this.name = name
+    return {
+      prop: 'test'
+    }
+  }
+
+  // var cat = new Animal('Tom')
+  // console.log(cat.prop) // test
+  // console.log(cat.name) // undefined
+  // console.log(cat.__proto__ === Object.prototype) // true
+  // console.log(cat.__proto__ === Animal.prototype) // false
+
+    function mayNew () {
+      // var res = Object.create(null)
+      // res.__proto__ = construct.prototype
+      // 上面两行代码的简单写法
+      // 排除第一个构造函数参数
+      var construct = Array.prototype.shift.call(arguments)
+      var res = Object.create(construct.prototype)
+      // 使用 apply 执行构造函数，将构造函数的属性挂载在res 上面
+      var conRes = construct.apply(res, arguments)
+      // 判断返回类型
+      return conRes instanceof Object ? conRes : res
+    }
+
+    var cat = mayNew(Animal, 'Tom')
+    console.log(cat)
+    console.log(cat.prop) // test
+    console.log(cat.name) // undefined
+    console.log(cat.__proto__ === Object.prototype) // true
+    console.log(cat.__proto__ === Animal.prototype) // false
+
+
+    // MDN 文档上面对 new 运算符的定义
+    // new 运算符创建一个用户定义的对象类型的实例或具有构造函数的内置对象的实例。
+    // 实现思路
+    // 创建一个空的简单对象
+    // 链接该对象（即设置该对象的构造函数）到另一对象
+    // 将空的对象作为 this 的上下文
+    // 如果该函数没有返回对象，则返回 this
+</script>
+
+</html>

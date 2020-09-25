@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+</body>
+
+<script>
+  // 针对这种口述实现的问题，可以从以下几个方面回答：
+  // 需要实现的 API 的功能点
+  // 该 API 的参数及返回值
+  // 是否需要挂载在某个原型对象上（例如 Array.prototype），或者就是一个单独的函数（例如实现 new）
+  // 具体的满足条件
+
+  // 根据 MDN 上的要求，下面是一个简易版的实现方式
+  // 需要满足的条件：
+  // 1、 findIndex 方法对数组中的每个数组索引 0..length - 1 (包括) 执行一次 callback 函数，直到找到一个 callback 函数返回真实值(强制为 true ) 的值
+  // 2、如果找到这样的元素，findIndex 会立即返回该元素的索引。
+  // 3、如果回调从不返回真值，或者数组的 lenfth 为 0，则 findIndex 返回 -1。
+  // 4、回调函数调用时有三个参数：元素的值，元素的索引，以及被遍历的数组。
+  // 5、如果一个 thisArg 参数被提供给 findIndex，它将会被当做 this 使用在每次回调函数被调用的时候。如果没有提供，将会使用 undefined
+  // 6、findIndex 不会修改所调用的数组。
+
+  // 代码
+
+  Array.prototype.myFindIndex = function (cb, context = undefined) { // 函数接收两个参数 （回调、需要被指定的this）
+    if (typeof cb !== 'function') { // cb 类型检测，如果不是函数，则抛出错误
+      throw new Error('cb must be a function')
+    }
+    // 返回一个新的浅拷贝数组
+    // this 指向为调用该方法的数组，所以本例子中的this 为 [3, 4, 5]
+    var arr = [].slice.call(this)
+    // 获取 arr 的 length
+    var len = arr.length >>> 0
+    // 计数器
+    let i = 0
+    while (i < len) {
+      // callback 回调 执行传递进来的函数，如果返回 true 就 return 改下标 循环结束
+      if (cb.call(context, arr[i], i, arr)) {
+        return i
+      }
+      // 如果没有找到，计数器+1，开始下一次循环
+      i++
+    }
+    // 如果都没找到，返回 -1
+    return -1
+  }
+
+  console.log([3, 4, 5].myFindIndex(item => item % 2 === 0))
+
+  let nums = 0
+  let dataSource = [
+    { resolveAmount: 1 },
+    { resolveAmount: 2 },
+    { resolveAmount: 3 },
+    { resolveAmount: 1 },
+  ]
+  // dataSource.forEach(key => {
+  //   nums += key.resolveAmount
+  // })
+  let bb = dataSource.reduce((pre, cur) => {
+    if (cur.resolveAmount) return floatTool.add(pre + cur.resolveAmount) 
+    return pre
+  }, 0)
+  console.log(bb) // 7
+</script>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+<script>
+  function stocketConnect (url) {
+    // 客户端与服务器进行连接
+    let ws = new WebSocket(url)
+    // 连接成功回调
+    ws.onopen = e => {
+      console.log('连接成功')
+      ws.send('我发消息给服务器端', e) // 客户端与服务器进行通信
+    }
+
+    ws.onmessage = e => {
+      console.log('服务器端返回', e)
+    }
+
+    return ws
+  }
+
+  stocketConnect('ws://121.40.165.18:8800')
+</script>
+</html>

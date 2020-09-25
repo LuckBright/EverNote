@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+</body>
+
+<script>
+  // 浅拷贝的定义
+  // 创建一个新对象，这个对象有着原始对象属性的一份精准拷贝。如果属性是基本类型，拷贝的基本类型的值，如果属性是引用类型，拷贝的就是内存地址，所以如果其中一个对象变了这个地址，就会影响到另一个对象
+
+
+  // 深拷贝的定义
+  // 将一个对象从内存中完整的拷贝一份出来，从堆内存中开辟一个新的区域存放新对象，切修改新对象不会影响原对象
+
+  // 基本的浅拷贝
+  // 实现思路 => 因为不知道对象有多少层深度，使用递归解决，如果是原始类型，无需继续拷贝，直接返回，如果是引用类型，创建一个新的对象，遍历需要克隆的对象，将需要克隆对象的属性执行深拷贝后一次添加到新对象上
+
+  // function clone (target) {
+  //   if (typeof target === 'object') {
+  //     let cloneTarget = {}
+  //     for (const key in target) {
+  //       cloneTarget[key] = clone(target[key])
+  //     }
+  //     return cloneTarget
+  //   } else {
+  //     return target
+  //   }
+  // }
+
+  // const target = {
+  //   field1: 1,
+  //   field2: undefined,
+  //   field3: 'ConardLi',
+  //   field4: {
+  //     child: 'child',
+  //     child2: {
+  //       child2: 'child2'
+  //     }
+  //   }
+  // }
+
+  // let obj1 = clone(target)
+  // delete obj1.field2
+  // console.log(obj1, target)
+
+  // 考虑到数组
+  // function clone (target) {
+  //   if (target instanceof Object) {
+  //     let cloneTarget = Array.isArray(target) ? [] : {}
+  //     for (const key in target) {
+  //       cloneTarget[key] = clone(target[key])
+  //     }
+  //     return cloneTarget
+  //   } else {
+  //     return target
+  //   }
+  // }
+  // const target = {
+  //   field1: 1,
+  //   field2: undefined,
+  //   field3: 'ConardLi',
+  //   field4: [2, 3, 4, { children: [1] }]
+  // }
+
+  // let obj1 = clone(target)
+  // delete obj1.field2
+  // console.log(obj1, target)
+
+  // 考虑到性能 添加了 map 只判断了基础的 object 和数组
+  // map 还不是很了解需要查阅资料
+  // function clone (target, map = new WeakMap) {
+  //   if (target instanceof Object) {
+  //     // 判断克隆的数据的基本类型
+  //     const isArray = Array.isArray(target)
+  //     const cloneTarget = isArray ? [] : {}
+  //     if (map.get(target)) {
+  //       return map.get(target)
+  //     }
+  //     map.set(target, cloneTarget)
+  //     const keys = isArray ? undefined : Object.keys(target)
+
+  //     forEach(keys || target, (value, key) => {
+  //       if (keys) {
+  //         key = value
+  //       }
+  //       cloneTarget[key] = clone(target[key], map)
+  //     })
+  //     return cloneTarget
+  //   } else {
+  //     return target
+  //   }
+  // }
+
+  // function forEach (array, iteratee) {
+  //   let index = -1
+  //   const len = array.length
+  //   while (++index < len) {
+  //     iteratee(array[index], index)
+  //   }
+  //   return array
+  // }
+
+    const map = new Map()
+    map.set('key', 'value')
+    map.set('ConardLi', 'code秘密花园')
+
+  const target = {
+    field1: 1,
+    field2: undefined,
+    field3: {
+        child: 'child'
+    },
+    field4: [2, 4, 8],
+    map: map
+  }
+
+  // target.target = target
+  // console.time()
+  // const result = clone(target)
+  // console.timeEnd()
+  // console.log(result)
+
+  // 判断是否为引用类型
+  function isObject (target) {
+    const type = typeof target
+    return target !== null && (type === 'object' || type === 'function')
+  }
+
+  // 获取准确的数据类型
+  function getType (target) {
+    return Object.prototype.toString.call(target).slice(8, -1)
+  }
+
+  // 获取引用类型的初始化数据
+  function getInit (target) {
+    const Ctor = target.constructor
+    return new Ctor()
+  }
+
+  // 循环
+  function forEach (array, cb) {
+    let index = -1
+    const len = array.length
+    while (++index < len) {
+      cb(array[index], index)
+    }
+    return array
+  }
+
+  function clone (target, map = new WeakMap) {
+    // 克隆基本类型
+    if (!isObject(target)) return target
+
+    // 初始化
+    const type = getType(target)
+    // 需要深度遍历的数据类型
+    const deepType = ['Array', 'Object', 'Function', 'Map', 'Set']
+    let cloneTarget
+    if (deepType.includes(type)) {
+      cloneTarget = getInit(target)
+    }
+
+    // 防止循环引用
+    if (map.get(target)) return map.get(target)
+    
+    // 往 map 中set 当前值
+    map.set(target, cloneTarget)
+    
+    // 克隆 set
+    if (type === 'Set') {
+      target.forEach(value => {
+        cloneTarget.add(clone(value, map))
+      })
+      return cloneTarget
+    }
+
+    // 克隆 Map
+    if (type === 'Map') {
+      target.forEach((value, key) => {
+        cloneTarget.set(key, clone(value, map))
+      })
+      return cloneTarget
+    }
+    
+    // 克隆对象和数组
+    const keys = type === 'Array' ? undefined : Object.keys(target)
+    forEach(keys || target, (value, key) => {
+      if (keys) key = value
+      cloneTarget[key] = clone(target[key], map)
+    })
+    return cloneTarget
+  }
+
+  console.log(clone(target))
+
+</script>
+
+</html>

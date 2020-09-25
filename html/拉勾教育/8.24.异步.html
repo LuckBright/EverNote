@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+</body>
+
+<script>
+// 递增延迟执行
+// const arr = [1, 2, 3, 4, 5]
+
+// arr.reduce(async (prc, cur, index) => {
+//   const t = await prc
+//   const time = index === 0 ? 0 : 1000 + (index + 1) * 500
+  
+//   console.log(time, '===')
+//   return new Promise((res) => {
+//     setTimeout(() => {
+//       console.log(cur)
+//       res(time)
+//     }, time)
+//   }, time)
+// }, Promise.resolve(0))
+
+// console.log(Promise.resolve(0))
+
+  function foo () {
+    console.log('start')
+    setTimeout(function () {
+      console.log('end')
+    }, 1000)
+  }
+
+  for (let i = 0; i < 30; i++) {
+    foo()
+  }
+
+
+</script>
+
+</html>

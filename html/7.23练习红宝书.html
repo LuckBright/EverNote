@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+</body>
+<script>
+  // 阶乘函数
+  function factorial (num, n = 0) {
+    if (num <= 1) {
+      return 1
+    } else {
+      return num * factorial(num - 1)
+    }
+  }
+  // 无论引用时使用的是什么名字，都可以保证正常完成递归调用
+  function newFactorial (num) {
+    if (num <= 1) {
+      return 1
+    } else {
+      return num * arguments.callee(num - 1)
+    }
+  }
+  console.log(newFactorial(5))
+</script>
+</html>

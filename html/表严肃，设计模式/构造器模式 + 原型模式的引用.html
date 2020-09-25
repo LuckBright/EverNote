@@ -1,0 +1,44 @@
+<table id="roster">
+
+</table>
+
+
+<script>
+  function Student (name, gender, score) {
+    this.name = name
+    this.gender = gender
+    this.score = score
+    this.quakily = 100
+    
+
+    // 初始化对象时候直接插入到页面
+    this.mount()
+  }
+
+  var rootElement = document.querySelector('#roster')
+
+  /*
+  * 总分计算
+  */
+
+  Student.prototype.sumScore = function () {
+    return this.score + this.quakily
+  }
+
+  /**
+  * 将数据转化为 innerHTML 插入到页面中
+  */
+  Student.prototype.mount = function () {
+    var tr = document.createElement('tr')
+    tr.innerHTML = '<td>' + this.name + '</td>' +
+    '<td>' + this.gender + '</td>' +
+    '<td>' + this.score + '</td>' +
+    '<td>' + this.sumScore() + '</td>'
+
+    // 将tr 插入到 table 的 innerHTML
+    rootElement.appendChild(tr)
+  }
+
+  var whh = new Student('王花花', '男', 80)
+
+</script>

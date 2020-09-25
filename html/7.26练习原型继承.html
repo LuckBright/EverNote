@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Page Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+  <script src="main.js"></script>
+</head>
+<body>
+</body>
+<script>
+
+  // 原型链问题
+  // function SuperType () {
+  //   this.property = true
+  // }
+  // console.log(SuperType.prototype, 'prototype')
+  // SuperType.prototype.getSuperValue = function () {
+  //   return this.property
+  // }
+
+  // function SubType () {
+  //   this.Subproperty = false
+  // }
+
+  // console.log(SubType.prototype, SuperType.prototype)
+
+  // // 继承了 SubperType
+  // SubType.prototype = new SuperType()
+
+  // console.log(SubType.prototype, SuperType.prototype, '继承了')
+
+  // SubType.prototype.getSubValue = function () {
+  //   return this.Subproperty
+  // }
+
+  // var instance = new SubType()
+
+
+  // 借用构造函数
+  // 好处 在子类型的构造函数中像超类型构造函数传递参数
+  // function SuperType () {
+  //   this.colors = ['red', 'black', 'yellow']
+  // }
+
+  // function SubType () {
+  //   // 继承了SupertType
+  //   SuperType.call(this)
+  // }
+  // var instance = new SubType()
+  // instance.colors.push('green')
+
+  // var instance2 = new SuperType()
+  // console.log(instance, '====', instance2)
+
+  function SuperType (name) {
+    this.name = name
+  }
+
+  function SubType (name) {
+    // 继承了SupertType
+    SuperType.call(this, name)
+  }
+
+  var instance = new SubType('====')
+  console.log(instance, '===')
+</script>
+
+</html>

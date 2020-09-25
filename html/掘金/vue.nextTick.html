@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <input type="text" id="input_inner">
+</body>
+
+<script>
+  // MutationObserver 简称 MO
+  // 实现 nextTick 的主要利器，来自与 HTML5 新增的属性 (MutationObserver) ，专门用于监听 DOM 修改事件，能够监听节点的属性、文本内容、子节点等的改动。
+  // MO 基本用法
+  var observer = new MutationObserver(function () {
+    // 回调函数
+    console.log('DOM被修改了')
+  })
+
+  var article = document.querySelector('#input_inner')
+  observer.observe(article, { characterData: true })
+  console.log(observer)
+  // article.addEventListener('click', () => {
+  //   article.style.display = 'none'
+  // })
+</script>
+
+</html>
