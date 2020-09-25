@@ -1,3 +1,101 @@
 <script>
-  console.log('333')
+  /**
+  * new Promise((resolve, reject ))
+  * 一个 Promise 有一下几种状态
+  *  pending：初始状态，既不是成功，也不是失败
+  *  fulfilled：操作成功完成
+  *  rehected：操作失败
+  *  重点
+  *  pending 状态的 Promise 对象可能会变成 fulfilled 状态并传递一个值给相应的状态处理方法,
+  *  也可能变为失败状态 （rejected）并传递失败信息。。。。。 后面还有很多，懒得写了 直接看文档吧
+  *  https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise
+  */
+
+  // 用法
+  // const promise = new Promise((resolve, reject) => {
+  //   // 异步成功执行 resolve，否则执行 reject
+  // }).then(res => {
+  //   // resolve 触发第一个回调函数执行
+  //   console.log('333')
+  // }, (err) => {
+  //   // reject 触发第二个回调函数执行
+  // }).then(res => {
+  //   // 需要保证 then 方法返回的依然是 promise
+  //   // 这样才能实现链式调用
+  // }).catch(reason => {
+
+  // })
+  // // 等待所有的 promise 都成功就会执行 then
+  // // 反之只要有一个失败就会执行 catch
+  // Promise.all([promise]).then((res) => {
+  //   console.log(res, '0000')
+  // }).catch((err) => {
+  //   console.log(err, '我失败了')
+  // })
+
+  /*
+  * 初步实现 Promise
+  * 1、实现三种状态
+  * 2、实现 then 方法两种回调函数的处理
+  */
+
+  class ZPromise {
+    // 传一个异步函数进来
+    constructor (excutorCallBack) {
+      // 初始化状态
+      this.status = 'pending'
+      // 返回值
+      this.value = undefined
+      // 存储所有成功状态
+      this.fufillAry = []
+      // 存储所有失败状态
+      this.rejectedAry = []
+      // 执行 Excutor
+      let resolveFn = result => {
+        // 如果不是初始化状态，就代表已经有结果了
+        if (this.status !== 'pending') return
+        let timer = setTimeout(() => {
+          this.status = 'fulfilled'
+          this.value = result
+          // 执行每一个成功状态的回调
+          this.fufillAry.forEach(item => item(this.value))
+        }, 0)
+      }
+      let rejectFn = reason => {
+        // 如果不是初始化状态，就代表已经有结果了
+        if (this.status !== 'pending') return
+        let timer = setTimeout(() => {
+          this.status = 'rehected'
+          this.value = reason
+          // 执行每一个失败状态的回调
+          this.rejectedAry.forEach(item => item(this.value))
+        }, 0)
+      }
+      try {
+        // 执行这个异步函数
+        excutorCallBack(resolveFn, rejectFn)
+      } catch (err) {
+        // 有异常信息按照 rejected 状态处理，并且抛出异常
+        rejectFn(err)
+      }
+    }
+    then (fulfilledCallBack, rejectedCallBack) {
+      // resolve 和 reject 函数做为一个微任务
+      // 因此他们不是立即执行，而是等  then 调用完成后执行
+      this.fufillAry.push(fulfilledCallBack)
+      this.rejectedAry.push(rejectedCallBack)
+      // push 过后他们被执行
+    }
+  }
+
+  let p1 = new ZPromise((resolve, reject) => {
+    setTimeout(() => {
+      Math.random() < 0.5 ? resolve(100) : reject(-100)
+    })
+  }).then(res => {
+    console.log(res, '成功')
+  }, err => {
+    console.log(err, '执行失败')
+  })
+
 </script>
