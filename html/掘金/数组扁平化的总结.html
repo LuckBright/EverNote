@@ -158,23 +158,28 @@
   let arr = [
     {
       name: 'aa',
-      expendItemType: '1'
+      expendItemType: '1',
+      num: 1
     },
     {
       name: 'bb',
-      expendItemType: '2'
+      expendItemType: '2',
+      num: 1
     },
     {
       name: 'bb',
-      expendItemType: '1'
+      expendItemType: '1',
+      num: 1
     },
     {
       name: 'bb',
-      expendItemType: '1'
+      expendItemType: '1',
+      num: 1
     },
     {
       name: 'bb',
-      expendItemType: '2'
+      expendItemType: '2',
+      num: 1
     }
   ]
 
@@ -194,18 +199,27 @@
       return acc
     }, {})
   }
-  console.log(filterObj(arr, 'expendItemType'))
    /*
   * 将对象转化为二维数组
   * @params Obj {Object} 需要转化的 对象
-  * @return Array {Array} 二维数组
+  * @return {Object} 里面包含二维数组和分类的求和
   */
   function conversionAry (Obj) {
+    let summationAry = []
     let ary = []
     Object.keys(Obj).forEach(item => {
       ary.push(Obj[item])
+      summationAry.push({
+        expendItemType: item,
+        summation: Obj[item].reduce((acc, cur) => { return acc + cur.num }, 0)
+      })
     })
-    return ary
+    return {
+      ary,
+      summationAry
+    }
   }
+  const obj = filterObj(arr, 'expendItemType')
+  console.log(conversionAry(obj))
 </script>
 </html>
