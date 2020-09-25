@@ -190,14 +190,26 @@
   * @return Obj {Object} 分类好的对象
   */
   function filterObj (ary, prototype) {
-    return ary.reduce((acc, cur) => {
-      let key = cur[prototype]
-      if (!acc[key]) {
-        acc[key] = []
+    let obj = {}
+    ary.forEach(item => {
+      // 取出每一个分类
+      let key = item[prototype]
+      // 如果没有这个分类存在就创建这个分类的 空数组
+      if (!obj[key]) {
+        obj[key] = []
       }
-      acc[key].push(cur)
-      return acc
-    }, {})
+      // 往这个分类下 添加
+      obj[key].push(item)
+    })
+    return obj
+    // return ary.reduce((acc, cur) => {
+    //   let key = cur[prototype]
+    //   if (!acc[key]) {
+    //     acc[key] = []
+    //   }
+    //   acc[key].push(cur)
+    //   return acc
+    // }, {})
   }
    /*
   * 将对象转化为二维数组
