@@ -39,6 +39,70 @@
   * 2、实现 then 方法两种回调函数的处理
   */
 
+  // class ZPromise {
+  //   // 传一个异步函数进来
+  //   constructor (excutorCallBack) {
+  //     // 初始化状态
+  //     this.status = 'pending'
+  //     // 返回值
+  //     this.value = undefined
+  //     // 存储所有成功状态
+  //     this.fufillAry = []
+  //     // 存储所有失败状态
+  //     this.rejectedAry = []
+  //     // 执行 Excutor
+  //     let resolveFn = result => {
+  //       // 如果不是初始化状态，就代表已经有结果了
+  //       if (this.status !== 'pending') return
+  //       let timer = setTimeout(() => {
+  //         this.status = 'fulfilled'
+  //         this.value = result
+  //         // 执行每一个成功状态的回调
+  //         this.fufillAry.forEach(item => item(this.value))
+  //       }, 0)
+  //     }
+  //     let rejectFn = reason => {
+  //       // 如果不是初始化状态，就代表已经有结果了
+  //       if (this.status !== 'pending') return
+  //       let timer = setTimeout(() => {
+  //         this.status = 'rehected'
+  //         this.value = reason
+  //         // 执行每一个失败状态的回调
+  //         this.rejectedAry.forEach(item => item(this.value))
+  //       }, 0)
+  //     }
+  //     try {
+  //       // 执行这个异步函数
+  //       excutorCallBack(resolveFn, rejectFn)
+  //     } catch (err) {
+  //       // 有异常信息按照 rejected 状态处理，并且抛出异常
+  //       rejectFn(err)
+  //     }
+  //   }
+  //   then (fulfilledCallBack, rejectedCallBack) {
+  //     // resolve 和 reject 函数做为一个微任务
+  //     // 因此他们不是立即执行，而是等  then 调用完成后执行
+  //     this.fufillAry.push(fulfilledCallBack)
+  //     this.rejectedAry.push(rejectedCallBack)
+  //     // push 过后他们被执行
+  //   }
+  // }
+
+  // let p1 = new ZPromise((resolve, reject) => {
+  //   setTimeout(() => {
+  //     Math.random() < 0.5 ? resolve(100) : reject(-100)
+  //   })
+  // }).then(res => {
+  //   console.log(res, '成功')
+  // }, err => {
+  //   console.log(err, '执行失败')
+  // })
+
+  /*
+  * 完成链式调用
+  * 最大的难点在于链式调用的实现，具体来说就是 then 方法的实现
+  * 
+  */
   class ZPromise {
     // 传一个异步函数进来
     constructor (excutorCallBack) {
@@ -79,23 +143,72 @@
         rejectFn(err)
       }
     }
+    /*
+    * 传参还跟之前一样
+    */
     then (fulfilledCallBack, rejectedCallBack) {
-      // resolve 和 reject 函数做为一个微任务
-      // 因此他们不是立即执行，而是等  then 调用完成后执行
-      this.fufillAry.push(fulfilledCallBack)
-      this.rejectedAry.push(rejectedCallBack)
-      // push 过后他们被执行
+      // 保证两者为函数
+      typeof fulfilledCallBack !== 'function'
+      ? fulfilledCallBack = result => result
+      : null
+      typeof rejectedCallBack !== 'function'
+      ? rejectedCallBack = reason => {
+        throw new Error(reason instanceof Error ? reason.message : reason)
+      } : null
+      // 返回新的 Promise 对象, 后面称呼它为 "新 Promise"
+      return new ZPromise((resolve, reject) => {
+        // 注意现在这个 this 指向目前的 Promise 对象，而不是新的 Promise
+        // 很重要！！ 重点
+        // 目前的 Promise (不是 return 的新的 Promise) 的 resolve 和 reject 函数其实一个作为微任务
+        // 因此他们不是立即执行，而是等 then 调用完成后执行
+        this.fufillAry.push(() => {
+          try {
+            // 把 then 里面的方法拿过来执行
+            // 执行的目的已经达到
+            let x = fulfilledCallBack(this.value)
+            // 下面执行之后的下一步，也就是记录执行的状态，决定新 Promise 如何表变
+            // 如果返回值 x 是一个 Promise 对象，就执行 then 操作 （注意，这里是重点）
+            // 如果不是 Promise，直接调用新 Promise 的 resolve 和 reject 函数
+            // 新 Promise 的 fulfillAry 现在为空，在新 Promise 的 then 操作后，新 Promise 的 resolve 执行
+            x instanceof Promise ? x.then(resolve, reject) : resolve(x)
+          } catch (err) {
+            reject(err)
+          }
+        })
+        this.rejectedAry.push(() => {
+          try {
+            // 把 then 里面的方法拿过来执行
+            // 执行的目的已经达到
+            let x = rejectedCallBack(this.value)
+            // 下面执行之后的下一步，也就是记录执行的状态，决定新 Promise 如何表变
+            // 如果返回值 x 是一个 Promise 对象，就执行 then 操作 （注意，这里是重点）
+            // 如果不是 Promise，直接调用新 Promise 的 resolve 和 reject 函数
+            // 新 Promise 的 fulfillAry 现在为空，在新 Promise 的 then 操作后，新 Promise 的 resolve 执行
+            x instanceof Promise ? x.then(resolve, reject) : resolve(x)
+          } catch (err) {
+            reject(err)
+          }
+        })
+      })
     }
   }
 
-  let p1 = new ZPromise((resolve, reject) => {
+  // 测试用例
+  let p1 = new Promise((res, rej) => {
     setTimeout(() => {
-      Math.random() < 0.5 ? resolve(100) : reject(-100)
-    })
-  }).then(res => {
-    console.log(res, '成功')
-  }, err => {
-    console.log(err, '执行失败')
+      Math.random() < 0.5 ? res(100) : rej(-100)
+    }, 1000)
+  })
+
+  let p2 = p1.then(res => {
+    // 执行 then 返回的是一个新的 Promise
+    return res + 100
+  })
+
+  let p3 = p2.then(res => {
+    console.log(res, 'p3')
+  }, reason => {
+    console.log(reason, 'reason')
   })
 
 </script>
