@@ -65,7 +65,7 @@
   //       // 如果不是初始化状态，就代表已经有结果了
   //       if (this.status !== 'pending') return
   //       let timer = setTimeout(() => {
-  //         this.status = 'rehected'
+  //         this.status = 'rejected'
   //         this.value = reason
   //         // 执行每一个失败状态的回调
   //         this.rejectedAry.forEach(item => item(this.value))
@@ -129,7 +129,7 @@
         // 如果不是初始化状态，就代表已经有结果了
         if (this.status !== 'pending') return
         let timer = setTimeout(() => {
-          this.status = 'rehected'
+          this.status = 'rejected'
           this.value = reason
           // 执行每一个失败状态的回调
           this.rejectedAry.forEach(item => item(this.value))
@@ -191,24 +191,70 @@
         })
       })
     }
+    // catch 方法就是调用的 then 方法，走的报错逻辑而已
+    catch (rejectedCallBack) {
+      return this.then(null, rejectedCallBack)
+    }
+    // 为类的静态方法，而不在原型上
+    // static 代表该方法为静态方法，无法在 原型上获取
+    static all (promiseAry = []) {
+      let index = 0,
+      result = []
+      // 返回的是一个 Promise 对象
+      return new ZPromise((resolve, reject) => {
+        // 循环传递进来的 PromiseAry 集合
+        for (let i = 0; i < promiseAry.length; i++) {
+          promiseAry[i].then(val => {
+            index++
+            // 存储每一个 promise 返回的结果
+            result[i] = val
+            // 全部执行完毕之后执行当前 promise 成功方法
+            if (index === promiseAry.length) {
+              resolve(result)
+            }
+          }, reject)
+        }
+      })  
+    }
   }
 
   // 测试用例
-  let p1 = new Promise((res, rej) => {
-    setTimeout(() => {
-      Math.random() < 0.5 ? res(100) : rej(-100)
-    }, 1000)
+  // new ZPromise((res, rej) => {
+  //   setTimeout(() => {
+  //     Math.random() < 0.5 ? res('执行成功') : rej('执行的失败')
+  //   }, 1000)
+  // }).then(res => {
+  //   console.log('到我这里了, 我是 then', res)
+  //   return res + '第一个'
+  // }).then(res => {
+  //   console.log(res + '我是第二个 then', res)
+  // }, rej => {
+  //   console.log(rej, '我是报错信息')
+  // })
+  // new ZPromise((res, rej) => {
+  //   rej('执行失败')
+  // }).catch (err => {
+  //   console.log(err)
+  // })
+
+  // Promise.all 的测试用例
+  let p1 = new ZPromise((res, rej) => {
+    console.log('执行p1')
+    return res('p1成功')
+  })
+  let p2 = new ZPromise((res, rej) => {
+    console.log('执行p2')
+    return res('p2成功')
+  })
+  let p3 = new ZPromise((res, rej) => {
+    console.log('执行p3')
+    return rej('p3失败')
   })
 
-  let p2 = p1.then(res => {
-    // 执行 then 返回的是一个新的 Promise
-    return res + 100
-  })
-
-  let p3 = p2.then(res => {
-    console.log(res, 'p3')
-  }, reason => {
-    console.log(reason, 'reason')
+  ZPromise.all([p1, p2, p3]).then(res => {
+    console.log(res)
+  }).catch(rej => {
+    console.log(rej, '失败')
   })
 
 </script>
