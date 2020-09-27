@@ -197,6 +197,8 @@
     }
     // 为类的静态方法，而不在原型上
     // static 代表该方法为静态方法，无法在 原型上获取
+    // all 方法返回一个新的 promise 对象，传入进去所有的 promise
+    // 成功，才返回成功所有 promise 的返回值，有一个失败就返回失败
     static all (promiseAry = []) {
       let index = 0,
       result = []
@@ -215,6 +217,32 @@
           }, reject)
         }
       })  
+    }
+    // ZPromise.race()
+    // 当参数里的任意一个子 Promise 被成功或者失败后， 父 promise 的成功或者失败详情
+    // 作为参数调用父 Promise 绑定的相应句柄，并返回该 Promise 对象
+    // 
+    /*
+    * 原生里面是使用的迭代器，我在这里就没用了，只是达成了简单的效果
+    * @parmas {Array} promiseAry 
+    * @return Promise 返回一个 promise，一旦迭代器中的某个 promise 成功或失败。返回的promise 就会成功或者失败
+    */
+    static race (promiseAry) {
+      return new ZPromise((resolve, reject) => {
+        if (promiseAry.length === 0) return
+        for (let i = 0; i < promiseAry.length; i++) {
+          promiseAry[i].then(res => {
+            return resolve(res)
+          }, reject)
+        }
+      })
+    }
+    // 返回一个状态由 给定 value 决定的 Promise 对象。
+    // 如果该值是 带有 then 方法的对象，返回的 Promise 对象的最终状态由 then 方法执行决定
+    // 否则的话 返回一个 状态为成功的 Promise 对象，并且将 value 传递给 对应的 then 方法
+    static resolve (value) {
+      if (value instanceof Promise) return value
+      return new ZPromise(resolve => resolve(value))
     }
   }
 
@@ -238,23 +266,41 @@
   // })
 
   // Promise.all 的测试用例
-  let p1 = new ZPromise((res, rej) => {
-    console.log('执行p1')
-    return res('p1成功')
-  })
-  let p2 = new ZPromise((res, rej) => {
-    console.log('执行p2')
-    return res('p2成功')
-  })
-  let p3 = new ZPromise((res, rej) => {
-    console.log('执行p3')
-    return rej('p3失败')
-  })
+  // let p1 = new ZPromise((res, rej) => {
+  //   console.log('执行p1')
+  //   return res('p1成功')
+  // })
+  // let p2 = new ZPromise((res, rej) => {
+  //   console.log('执行p2')
+  //   return res('p2成功')
+  // })
+  // let p3 = new ZPromise((res, rej) => {
+  //   console.log('执行p3')
+  //   return rej('p3失败')
+  // })
 
-  ZPromise.all([p1, p2, p3]).then(res => {
-    console.log(res)
-  }).catch(rej => {
-    console.log(rej, '失败')
-  })
+  // ZPromise.all([p1, p2, p3]).then(res => {
+  //   console.log(res)
+  // }).catch(rej => {
+  //   console.log(rej, '失败')
+  // })
 
+  // Promise.race() 的测试用例
+  // const p1 = new ZPromise((res, rej) => {
+  //   setTimeout(() => {
+  //     rej('one')
+  //   }, 200)
+  // })
+
+  // const p2 = new ZPromise((res, rej) => {
+  //   setTimeout(() => {
+  //     rej('two')
+  //   }, 100)
+  // })
+
+  // ZPromise.race([p1, p2]).then(val => {
+  //   console.log(val, 'race')
+  // }).catch(err => {
+  //   console.log(err)
+  // })
 </script>
