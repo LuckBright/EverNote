@@ -286,21 +286,21 @@
   // })
 
   // Promise.race() 的测试用例
-  // const p1 = new ZPromise((res, rej) => {
-  //   setTimeout(() => {
-  //     rej('one')
-  //   }, 200)
-  // })
+  const p1 = new ZPromise((res, rej) => {
+    setTimeout(() => {
+      rej('one')
+    }, 200)
+  })
 
-  // const p2 = new ZPromise((res, rej) => {
-  //   setTimeout(() => {
-  //     rej('two')
-  //   }, 100)
-  // })
+  const p2 = new ZPromise((res, rej) => {
+    setTimeout(() => {
+      rej('two')
+    }, 100)
+  })
 
-  // ZPromise.race([p1, p2]).then(val => {
-  //   console.log(val, 'race')
-  // }).catch(err => {
-  //   console.log(err)
-  // })
+  ZPromise.race([p1, p2]).then(val => {
+    console.log(val, 'race')
+  }).catch(err => {
+    console.log(err)
+  })
 </script>
