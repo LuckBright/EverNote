@@ -244,6 +244,8 @@
       if (value instanceof Promise) return value
       return new ZPromise(resolve => resolve(value))
     }
+    static reject () {
+    }
   }
 
   // 测试用例
