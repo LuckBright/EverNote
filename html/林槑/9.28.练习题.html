@@ -54,10 +54,90 @@
   * 可以使用 isNaN 来判断一个变量是不是 NaN，他是 js 内置对象 Number 上的静态方法
   */
 
-  // 实现
   const isNaN = (v) => {
+  // 实现
     if (typeof v !== 'number') return false
     return v !== v
   }
   console.log(isNaN(2))
+
+  // 时间格式字符串处理
+  let time = '2019-7-24 12:6:23'
+  /* 
+    变为自己需要呈现的格式，例如：
+    '2019年07月24日 12时06分23秒'
+    '2019年07月24日'
+    '07/24 12:06'
+  */
+  // 方案一： 一路 replace
+  /* time = time.replace('-', '年').replace('-', '月').replace('-', '日 ').replace(':', '时').replace(':', '分') + '秒'
+  console.log(time, 'time') */
+  // 方案二
+  // 不足 2 位补 0 操作
+  let addZero = val => val.length < 2 ? '0' + val : val
+  let ary = time.split(/(?: |-|:)/g)
+  time = ary[0] + '年' + addZero(ary[1]) + '月' + addZero(ary[2]) + '日'
+  console.log(time)
+  // 实现一个方法 queryURLParameter 获取一个 URL地址文号后面传递的参数信息
+  let url = 'http://www.baidu.com.cn/index.html?lx=1&name=suibianxie&teacher=bbb#box'
+  // // 获取文号后面的值
+  // let askIndex = url.indexOf('?')
+  // let wellIndex = url.indexOf('#')
+  // let askText = url.substring(askIndex + 1, wellIndex)
+  // let wellText = url.substring(wellIndex + 1)
+  // // askText = 'lx=1&name=suibianxie&teacher=bbb'
+  // // wellText => 'box'
+  // // 2、文号后面值的详细处理
+  // let strAry = askText.split('&')
+  // let strObj = {}
+  // strAry.forEach(item => {
+  //   let keyAry = item.split('=')
+  //   strObj[keyAry[0]] = keyAry[1]
+  // })
+  // strObj['HASH'] = wellText
+  /* 
+  * queryURLParams: 获取 URL 地址中问号传参的信息和哈希值
+  * @params
+  *     url [String] 要解析的 URL 字符串
+  * @return
+  *     [Object] 包含参数和哈希信息的对象
+  * by zhangsheng on 2020/09/29
+  */
+  function queryURLParams (url) {
+    // 获取 ？和 # 后面的信息
+    let askIn = url.indexOf('?'),
+        wellIn = url.indexOf('#'),
+        askText = '',
+        wellText = ''
+    // # 不存在
+    wellIn === -1 ? wellIn = url.length : null
+    // ? 存在
+    askIn >= 0 ? askText = url.substring(askIn + 1, wellIn) : null
+    wellText = url.substring(wellIn + 1)
+    
+    // 获取每一部分信息
+    let result = {}
+    wellText !== '' ? result['HASH'] = wellText : null
+    if (askText !== '') {
+      let ary = askText.split('&')
+      ary.forEach(item => {
+        let itemAry = item.split('=')
+        result[itemAry[0]] = itemAry[1]
+      })
+    }
+    return result
+  }
+  /* 
+  * 使用正则匹配
+  */
+  function regqueryURLParams (url) {
+    let result = {},
+        reg1 = /([^?=&#]+)=([^?=&#]+)/g,
+        reg2 = /#([^?=&#]+)/g
+    url.replace(reg1, (n, x, y) => result[x] = y)
+    url.replace(reg2, (n, x) => result['HASH'] = x)
+    return result
+  }
+  let paramsObj = regqueryURLParams(url)
+  console.log(paramsObj)    
 </script>
