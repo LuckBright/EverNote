@@ -1,0 +1,63 @@
+<script>
+  // 一、实现mask函数将"123456"转为"##3456",只保留最后四个字符
+  function mask (str, maskChar = '#') {
+    if (!str || str.length <= 4) return str
+    // // 思路一
+    // // 利用字符串 length 操作 + 
+    // let strLen = str.length
+    // let start = strLen - 4
+    // let strStart = ''
+    // // 获取到最后4个字符
+    // let strEnd = str.slice(start)
+    // // 字符串拼接
+    // let ary = []
+    // ary.length = start
+    // // 拼接新字符串被切割的部分
+    // for (let i = 0; i < ary.length; i++) {
+    //   strStart += maskChar
+    // }
+    // return strStart + strEnd
+    // // 思路二
+    // // 先将字符串转化为数组
+    // let strAry = str.split('')
+    // let newStr = ''
+    // // 循环每一项，完成字符串拼接的操作
+    // strAry.forEach((item, index) => {
+    //   if (index < strAry.length - 4) {
+    //     newStr += maskChar
+    //   } else {
+    //     newStr += item
+    //   }
+    // })
+    // return newStr
+    // 思路三
+    // 先截取字符串最后四位，然后只用 ES8 新增方法 padStart 进行填充
+    /*
+    * padStart {Function}
+    * 语法：padStart(targetLength, [padString])
+    * targetLength：必填，当前字符串需要填充到的目标长度。如果这个数值小于当前字符串的长度，则返回当前字符串本身。
+    * padString: 可选，填充字符串。如果字符串太长，使填充后的字符串长度超过了目标长度，则只保留最左侧的部分，其他部分会被截断，此参数的缺省值为" "。
+    */
+    return str.slice(-4).padStart(str.length, maskChar)
+    // 思路四
+    // 正则替换 // 我不会。。
+  }
+  console.log(mask('123456'))
+
+  // 二、介绍一下NaN并实现一个isNaN
+  /*
+  * NaN 属性是表非数字值的特殊值，该属性用于指示某个值不是数字
+  * NAN 是不等于 NAN的，即 NAN === NAN 的结果是 false
+  * 使用 Object.is() 来比较两个 NAN 结果是 true，即 Object.is(NaN, NaN) 的结果是 true
+  * typeof NaN 为 'number'
+  * 方法 parseInt() 和 ParseFloat() 在不能解析指定的字符串时就返回这个值
+  * 可以使用 isNaN 来判断一个变量是不是 NaN，他是 js 内置对象 Number 上的静态方法
+  */
+
+  // 实现
+  const isNaN = (v) => {
+    if (typeof v !== 'number') return false
+    return v !== v
+  }
+  console.log(isNaN(2))
+</script>
