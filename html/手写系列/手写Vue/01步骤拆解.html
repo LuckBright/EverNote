@@ -1,3 +1,9 @@
+<!--
+ * @Author: by zhangsheng@everjiankang.com.cn
+ * @Date: 2020-09-23 21:30:19
+ * @LastEditTime: 2020-10-19 22:15:27
+ * @LastEditors: by zhangsheng@everjiankang.com.cn
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,9 +70,20 @@
     })
   }
 
+  let generateNode = tempNode.cloneNode(true)
   console.log(tempNode)
-  compiler(tempNode, data)
-  console.log(tempNode)
+  compiler(generateNode, data)  
+  console.log(generateNode)
+
+  // 我们此时没有生成新的 template，所以这里看到的是直接在页面中就更新的数据，因为 DOM 是引用类型
+
+  // 4 、更新到页面
+  root.parentNode.replaceChild(generateNode, root)
+
+  // 上面的思路有很大问题
+  // 1、Vue 使用的是 虚拟 DOM
+  // 2、只考虑到了单属性，{{ name }}, 而 Vue 当中使用了大量的层级 {{child.name.firstName}}
+  // 3、代码没有整合
 </script>
 
 </html>

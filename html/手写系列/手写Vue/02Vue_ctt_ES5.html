@@ -1,0 +1,101 @@
+<!--
+ * @Author: by zhangsheng@everjiankang.com.cn
+ * @Date: 2020-10-19 22:26:33
+ * @LastEditTime: 2020-10-19 22:52:57
+ * @LastEditors: by zhangsheng@everjiankang.com.cn
+-->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>手写 Vue</title>
+</head>
+<body>
+  <div id="root">
+    <p>{{name}}</p>
+    <p>{{message}}</p>
+    <p>{{name}}</p>
+    <p>{{message}}</p>
+  </div>
+</body>
+<script>
+  let regDbKuohao = /\{\{(.+?)\}\}/g
+
+  function compiler (template, data) {
+    let childNodes = template.childNodes // 取出子元素
+    childNodes.forEach(item => {
+      let type = item.nodeType // 1: 元素 3: 文本节点
+      if (type === 3) {
+        // 文本节点，可以判断里面是否有 {{}} 插值
+        let txt = item.nodeValue // 该属性只有文本节点才有意义
+
+        // 有没有 双花括号 ？？
+        // replace 使用正则匹配一次 函数就会被调用一次
+        // 函数的 第 0 个参数 表示匹配到的内容
+        // 函数的 第 n 个参数 表示正则中的 第 n 组
+        txt =  txt.replace(regDbKuohao, (_, g) => {
+          // 去除首位空格 写在双花括号里面的 内容
+          let key = g.trim()
+          let value = data[key]
+          // 将 {{ xxx }}  用这个值 替换
+          return value
+        })
+        // 注意现在时候 txt 与真正的 DOM 无关
+        item.nodeValue = txt
+      } else if (type === 1) { 
+        // 是元素节点，需要考虑它是否有子元素，是否需要将其子元素进行 判断是否要插值
+        compiler(item, data)
+      }
+    })
+  }
+  
+  function ZSVue (options) {
+    // 规范：内部数据使用 下划线 开头，只读数据使用 $ 开头
+    this._data = options.data
+    this._el = options.el
+
+    // 准备工作（准备模板）
+    this.$el = this._templateDOM = document.querySelector(this._el)
+    this._parent = this._templateDOM.parentNode
+
+    // 渲染工作
+    this.render()
+  }
+
+  /**
+   * @description: 将模板 和 数据 得到，HTML 放到页面中去
+   */
+  ZSVue.prototype.render = function () {
+    this.compiler()
+  }
+
+  /**
+  * @description: 编译 将模板 与 数据 结合，得到真正的 DOM 元素
+  * @param {tmpNode}
+  */
+  ZSVue.prototype.compiler = function () {
+    let realHTMLDOM = this._templateDOM.cloneNode(true) // 拷贝一个模板的准 DOM
+    compiler(realHTMLDOM, this._data)
+    this.update(realHTMLDOM)
+  }
+
+  /**
+  * @description: 渲染 将 DOM 元素 放到页面中
+  * @param {type} 
+  * @return {type} 
+  */
+  ZSVue.prototype.update = function (real) {
+    this._parent.replaceChild(real, document.querySelector(this._el))
+  }
+
+
+  // 想想怎么用
+  let app = new ZSVue({
+    el: '#root',
+    data: {
+      name: '张晟',
+      message: '手写 Vue'
+    }
+  })
+</script>
+</html>
