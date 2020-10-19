@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>小时钟</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    #clockBox {
+      position: absolute;
+      right: 0;
+      top: 0;
+      padding: 0 15px;
+      line-height: 50px;
+      font-size: 24px;
+      color: darkred;
+      /* 设置背景渐变色 */
+      background: lightblue;
+      /* top, left, lightblue, lightcoral, lightcyan */
+      background: -webkit-linear-gradient(top, left, lightblue, lightcoral, lightcyan);
+    }
+  </style>
+</head>
+<body>
+  <div id="clockBox">
+    2020年10月15日 星期四 10:24:40
+  </div>
+</body>
+<script>
+  let box = document.querySelector('#clockBox')
+  queryDate()
+  function queryDate () {
+    let time = new Date(),
+        year = time.getFullYear(),
+        month = time.getMonth() + 1,
+        day = time.getDate(),
+        week = time.getDay(),
+        hours = time.getHours(),
+        minutes = time.getMinutes(),
+        seconds = time.getSeconds()
+    // 拼出想要的字符串
+    let result = year + '年' + month + '月'
+  }
+</script>
+</html>

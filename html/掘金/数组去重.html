@@ -1,0 +1,19 @@
+<!--
+ * @Author: by zhangsheng@everjiankang.com.cn
+ * @Date: 2020-10-19 15:33:52
+ * @LastEditTime: 2020-10-19 18:41:23
+ * @LastEditors: by zhangsheng@everjiankang.com.cn
+-->
+<script>
+  const arr = [1, 1, '1', 17, true, true, false, false, 'true', 'a', {}, {}]
+  // => [1, '1', 17, true, false, 'true', 'a', {}, {}]
+
+  /*
+    方案一：利用 Set
+    因为 Set 中的值总是唯一的，所以需要判断两个值是否相等
+    重点！！
+    NaN 和 undefined 都可以被存储在 Set 中，NaN 之间被视为相同的值（NaN 被认为是相同的，尽管 NaN !== NaN）
+  */
+  // const res = [...new Set(arr)]
+  // console.log(res) // [1, '1', 17, true, false, 'true', 'a', {}, {}]
+</script>
