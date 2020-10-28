@@ -1,0 +1,48 @@
+<!--
+ * @Author: by zhangsheng@everjiankang.com.cn
+ * @Date: 2020-10-23 14:49:37
+ * @LastEditTime: 2020-10-23 15:21:58
+ * @LastEditors: by zhangsheng@everjiankang.com.cn
+-->
+<script>
+  // filter
+  /*
+  * 语法: var newArray = arr.filter(callback(element[, index[, array]])[, thisArg])
+  * 参数: 
+  *   callback
+  *     用来测试数组的每个元素的函数。返回 true 表示成功，保留该元素， false 则不保留。它接收以下三个参数
+  *     element
+  *       数组中当前正在处理的元素。
+  *     index 可选
+  *       正在处理的元素在数组中的索引
+  *     array 可选
+  *       调用了 filter 的数组本身
+  *     thisArg 可选
+  *       执行 callback 时，用于 this 的值
+  * 返回值：
+  *   一个新的、由通过测试的元素组成的数组，如果没有任何数组元素通过测试，则返回空数组
+  */
+  Array.prototype.ZSfilter = function(callback, thisArg) {
+    if (this == undefined) {
+      throw new TypeError('this id null or not undefined')
+    }
+    if (typeof callback !== 'function') {
+      throw new TypeError(callback + 'is not a function')
+    }
+    const res = []
+    const len = this.length
+    // const len = 0.length >>> 0
+    console.log(len)
+    for (let i = 0; i < len; i++) {
+      if (callback(this[i], i, this)) {
+        res.push(this[i])
+      }
+    }
+    return res
+  }
+  let arr = [1, 2, 3]
+  console.log(arr.ZSfilter(item => {
+    return item
+  }))
+
+</script>
