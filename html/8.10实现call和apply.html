@@ -127,7 +127,7 @@
     if (hasOriginalVal) {
       context[_fn] = originalVal
     }
-    // return result
+    return result
   }
 
   var value = 2
@@ -136,14 +136,18 @@
     value: 1
   }
 
-  function bar (name, age) {
-    console.log(this.value)
-    return {
-      value: this.value,
-      name,
-      age
-    }
-  }
-  console.log(bar.apply2(obj))
+  // function bar (name, age) {
+  //   console.log(this.value)
+  //   return {
+  //     value: this.value,
+  //     name,
+  //     age
+  //   }
+  // }
+function sum (x = 1, y = 2, z = 3) {
+  return x + y + z
+}
+console.log(sum.apply2(undefined, [3, 4, 5]))
+  // console.log(bar.apply2(obj))
 </script>
 </html>
