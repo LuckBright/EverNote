@@ -1,7 +1,7 @@
 /*
  * @Author: by zhangsheng@everjiankang.com.cn
  * @Date: 2020-10-29 06:41:45
- * @LastEditTime: 2020-10-30 07:29:49
+ * @LastEditTime: 2020-10-30 07:36:28
  * @LastEditors: by zhangsheng@everjiankang.com.cn
  */
 /**
@@ -127,9 +127,14 @@ let params = [3, 4, 5]
 // [x, y] = [y, x]
 // console.log(x, y)
 
-let x = 1
-let y = 2
+/**
+ * 
+ * 划 重点 （数组解构换值前声明的变量一定要加分号！！！！！！！！！）
+ */
+let x = 1;
+let y = 2;
 [x, y] = [y, x]
+console.log(x, y)
 
 // 以上代码和下面代码是一样的
 
