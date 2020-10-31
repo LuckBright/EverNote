@@ -1,7 +1,7 @@
 /*
  * @Author: by zhangsheng@everjiankang.com.cn
  * @Date: 2020-10-29 06:41:45
- * @LastEditTime: 2020-10-30 07:36:28
+ * @LastEditTime: 2020-11-01 06:33:19
  * @LastEditors: by zhangsheng@everjiankang.com.cn
  */
 /**
@@ -171,3 +171,37 @@ class Book {
 }
 
 // 只需要使用 class 关键字，声明一个有 constructor 函数 和诸如 printTitle 等其他函数的类。ES6 的类是基于原型语法的语法糖
+
+/**
+ * 继承
+ */
+
+ class ITBook extends Book { // 使用 extends 继承 Book 类
+   constructor (title, pages, isbn, tecnology) {
+    super(title, pages, isbn) // 使用 super 引用父类的构造函数
+    this.tecnology = tecnology
+   }
+   printTecnology () {
+     console.log(this.tecnology)
+   }
+ }
+
+//  let itBook = new ITBook('数据类型与算法', 32, '否', '继承')
+
+/**
+ * 属性存取器
+ */
+
+
+/**
+ * 模块化
+ * 导入 类 的时候，不需要将 类 名包裹在 {}。只有模块有多个成员的时候才使用 {}
+ */
+
+//  import { squareArea, cirleArea } from './util/demo.js'
+
+//  console.log(squareArea(2), cirleArea(3))
+
+/**
+ * typescript (暂时跳过)
+ */
