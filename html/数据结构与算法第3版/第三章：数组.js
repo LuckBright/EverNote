@@ -1,7 +1,7 @@
 /*
  * @Author: by zhangsheng@everjiankang.com.cn
  * @Date: 2020-11-01 06:33:38
- * @LastEditTime: 2020-11-03 06:29:56
+ * @LastEditTime: 2020-11-04 06:07:37
  * @LastEditors: by zhangsheng@everjiankang.com.cn
  */
 /**
@@ -71,9 +71,17 @@ Array.prototype.ZsPop = function () {
  * console.table(Array) 打印一个表单样式的数组，更好的理解数组的每一项
  */
 
- let twoAry = [
-   [1, 2, 3],
-   [4, 5, 6]
- ]
- console.table(twoAry)
+//  let twoAry = [
+//    [1, 2, 3],
+//    [4, 5, 6]
+//  ]
+//  console.table(twoAry)
+
+/**
+ * @@iterator 迭代对象 只能通过 symbol.iterator 访问
+ */
+
+ let ary = [1, 2, 3]
+ let iterator = ary[Symbol.iterator]()
+ console.log(iterator.next())
 
