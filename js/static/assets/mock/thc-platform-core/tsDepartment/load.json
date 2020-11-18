@@ -1,0 +1,18 @@
+{
+  "msg": "eiusmod",
+  "head": {
+    "errCode": 0,
+    "errMsg": "ad mollit sunt"
+  },
+  "code": 0,
+  "data": {
+    "id": "1",
+    "parentDeptCode": "",
+    "deptCode": "123",
+    "deptName": "321",
+    "deptNameEnglish": "123",
+    "infoText": "<p>421123</p>",
+    "photo": "http://www.dev4.everjiankang.com.cn/file/5,01c4bc6daa45",
+    "orgId": "1"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "msg": "nisi veniam reprehenderit",
+  "head": {
+    "errCode": 0,
+    "errMsg": "eiusmod ea ipsum"
+  },
+  "code": 0,
+  "data": {
+    "pageList": [
+      {
+        "id": "1",
+        "code": "code1",
+        "name": "尚医智信总部",
+        "parentCode": "0"
+      },
+      {
+        "id": "2",
+        "code": "code2",
+        "name": "深圳大区",
+        "parentCode": "code1"
+      },
+      {
+        "id": "3",
+        "code": "code3",
+        "name": "深圳壹方城医疗中心",
+        "parentCode": "code2"
+      },
+      {
+        "id": "4",
+        "code": "code4",
+        "name": "深圳蛇口医疗中心",
+        "parentCode": "code2"
+      },
+      {
+        "id": "5",
+        "code": "code5",
+        "name": "河北卓正医疗机构",
+        "parentCode": "code1"
+      }
+    ],
+    "offset": "fugiat Ut sunt",
+    "pagesize": "consectetur",
+    "totalCount": "eiusmod deserunt"
+  }
+}

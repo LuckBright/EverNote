@@ -1,0 +1,57 @@
+{
+  "head": {
+    "errCode": 0,
+    "errMsg": "成功,Success",
+    "errShowType": "success"
+  },
+  "data": [
+    {
+      "id": "1",
+      "templetName": "模板的模板",
+      "templetModule": "预约挂号",
+      "exchange": "platform.import_data.exchange",
+      "routingKey": "platform.import_data.arrange.routingkey",
+      "templetSequence": null,
+      "templetUrl": "http://u-cloud/adfaf/test.xlsx",
+      "templetImportDate": null,
+      "templetState": "1",
+      "templetDataState": null,
+      "templetDataUrl": null,
+      "importUrl": "/import/test",
+      "verifiUrl": "/msg/template/list/",
+      "recallUrl": null,
+      "clearUrl": "/msg/template/list/",
+      "methodWay": null,
+      "creater": null,
+      "createTime": null,
+      "updater": null,
+      "updateTime": null,
+      "orgId": null,
+      "tenantId": null
+    },
+    {
+      "id": "2",
+      "templetName": "班次模板",
+      "templetModule": "预约挂号",
+      "exchange": "platform.import_data.exchange",
+      "routingKey": "platform.import_data.rcm.routingkey",
+      "templetSequence": "2",
+      "templetUrl": null,
+      "templetImportDate": null,
+      "templetState": "-1",
+      "templetDataState": "-1",
+      "templetDataUrl": null,
+      "importUrl": "/import/test",
+      "verifiUrl": "/msg/template/list/",
+      "recallUrl": null,
+      "clearUrl": "/msg/template/list/",
+      "methodWay": null,
+      "creater": null,
+      "createTime": null,
+      "updater": null,
+      "updateTime": null,
+      "orgId": null,
+      "tenantId": null
+    }
+  ]
+}

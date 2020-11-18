@@ -1,0 +1,78 @@
+{
+  "head": {
+    "errCode": 0
+  },
+  "data": [
+    {
+      "id": "点击进入fixedheadertable.vue1",
+      "name": "周小童名字很长作为测试",
+      "gender": 1,
+      "prop1": "字段1",
+      "prop2": "字段2",
+      "prop3": "字段3",
+      "prop4": "字段4",
+      "price": "4,400.00"
+    },
+    {
+      "id": "点击进入fixedheadertable.vue2",
+      "name": "周小童",
+      "gender": 1,
+      "prop1": "字段1",
+      "prop2": "字段2",
+      "prop3": "字段3",
+      "prop4": "字段4",
+      "price": "4,400.00"
+    },
+    {
+      "id": "点击进入fixedheadertable.vue3",
+      "name": "周小童",
+      "gender": 1,
+      "prop1": "字段1",
+      "prop2": "字段2",
+      "prop3": "字段3",
+      "prop4": "字段4",
+      "price": "4,400.00"
+    },
+    {
+      "id": "点击进入fixedheadertable.vue4",
+      "name": "周小童",
+      "gender": 1,
+      "prop1": "字段1",
+      "prop2": "字段2",
+      "prop3": "字段3",
+      "prop4": "字段4",
+      "price": "4,400.00"
+    },
+    {
+      "id": "点击进入fixedheadertable.vue5",
+      "name": "周小童",
+      "gender": 1,
+      "prop1": "字段1",
+      "prop2": "字段2",
+      "prop3": "字段3",
+      "prop4": "字段4",
+      "price": "4,400.00"
+    },
+    {
+      "id": "点击进入fixedheadertable.vue6",
+      "name": "周小童",
+      "gender": 1,
+      "prop1": "字段1",
+      "prop2": "字段2",
+      "prop3": "字段3",
+      "prop4": "字段4",
+      "price": "4,400.00"
+    },
+    {
+      "id": "点击进入fixedheadertable.vue7",
+      "name": "周小童",
+      "gender": 1,
+      "prop1": "字段1",
+      "prop2": "字段2",
+      "prop3": "字段3",
+      "prop4": "字段4",
+      "price": "4,400.00"
+    }
+  ],
+  "totalCount": 200
+}

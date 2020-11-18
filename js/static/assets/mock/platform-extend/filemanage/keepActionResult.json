@@ -1,0 +1,37 @@
+{
+  "head": {
+    "errCode": 0,
+    "errMsg": "成功,Success",
+    "errShowType": "success"
+  },
+  "data": [
+    {
+      "id": "0aa4e131-5438-4909-b999-69cc31eec064",
+      "actionType": "1",
+      "actionState": "1",
+      "templetName": "模板的模板",
+      "templetModule": "预约挂号",
+      "fileUrl": "http://u-cloud/adfaf/test.xlsx",
+      "creater": null,
+      "createTime": null,
+      "updater": null,
+      "updateTime": null,
+      "orgId": null,
+      "tenantId": null
+    },
+    {
+      "id": "53526c7a-eed2-4269-9c3b-1fc703aaaa02",
+      "actionType": "1",
+      "actionState": "1",
+      "templetName": "模板的模板",
+      "templetModule": "预约挂号",
+      "fileUrl": "http://u-cloud/adfaf/test.xlsx",
+      "creater": null,
+      "createTime": null,
+      "updater": null,
+      "updateTime": null,
+      "orgId": null,
+      "tenantId": null
+    }
+  ]
+}

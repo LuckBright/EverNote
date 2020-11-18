@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+
+<body>
+  <div id="message" style="font-size: 16px;text-align: center;line-height: 50px;color: #000">加载中...</div>
+  <script>
+    // 写cookie
+    function setCookie(name, value) {
+      let argv = arguments
+      let argc = arguments.length
+      let expiresDay = (argc > 2) ? argv[2] : null
+      let path = (argc > 3) ? argv[3] : '/'
+      let domain = (argc > 4) ? argv[4] : null
+      let secure = (argc > 5) ? argv[5] : false
+      let expires = ''
+      if (expiresDay) {
+        let exp = new Date()
+        exp.setTime(exp.getTime() + expiresDay * 24 * 60 * 60 * 1000)
+        let theDate = new Date(exp)
+        let expiresTime = new Date(theDate.toLocaleDateString())
+        expires = '; expires=' + expiresTime
+      }
+      document.cookie = name + '=' + escape(value) + expires +
+        ((path === null) ? '' : ('; path=' + path)) +
+        ((domain === null) ? '' : ('; domain=' + domain)) +
+        ((secure === true) ? '; secure' : '')
+    }
+    // 获取cookie
+    function getCookie(name) {
+      let arr = document.cookie.match(new RegExp('(^| )' + name + '=([^;]*)(;|$)'))
+      if (arr !== null) return unescape(arr[2])
+      return null
+    }
+    // 获取url参数
+    function GetQueryString(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+      var r = window.location.search.substr(1).match(reg);
+      if (r != null) return unescape(r[2]); return null;
+    }
+
+    window.onload = function () {
+      // 传参数里有patientId 和 token 再走逻辑
+      // http://www.testgxkf.everjiankang.com.cn/hospital/index.html#/historyinfo?patientId=JZThhuhsKPMneXZMEBV
+      if (GetQueryString('patientId') && GetQueryString('token')) {
+        if (!getCookie('token')) {
+          setCookie('TOKEN', GetQueryString('token'))
+        }
+        window.location.href = window.location.origin + '/crm/index.html#/crm/memberinfo/diagnosis/' + GetQueryString('patientId')
+      } else {
+        document.getElementById('message').innerHTML = '参数有误，请联系尚医技术人员检查参数配置'
+      }
+    }
+  </script>
+</body>
+
+</html>

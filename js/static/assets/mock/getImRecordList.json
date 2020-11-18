@@ -1,0 +1,123 @@
+{
+  "head": {
+    "errCode": 0,
+    "errMsg": "成功"
+  },
+  "data": {
+    "totalCount": 10,
+    "resultList": [
+      {
+        "msg": "{\"MsgSeq\": 1, \"MsgBody\": [{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":1,\\\"type\\\":\\\"TW_QUESTION\\\",\\\"content\\\":{\\\"id\\\":\\\"1002G1226773009675653121\\\",\\\"info\\\":{\\\"images\\\":\\\"z4gGRDe0U3ouKOrh8Os\\\",\\\"question\\\":\\\"测试\\\",\\\"patientInfo\\\":{\\\"birthday\\\":\\\"1990-02-11\\\",\\\"temporary\\\":false,\\\"sex\\\":\\\"1\\\",\\\"mobile\\\":\\\"18612256103\\\",\\\"name\\\":\\\"刘阳\\\",\\\"idNo\\\":\\\"110107199002110331\\\",\\\"age\\\":29}}}}\", \"Desc\": \"\", \"Sound\": \"\"}}], \"MsgRandom\": 28634535, \"IsPlaceMsg\": 0, \"MsgPriority\": 2, \"From_Account\": \"4NBkLAkkklSVU8m2DJN\", \"MsgTimeStamp\": 1581320462}",
+        "msgTimeStamp": "2020-02-10 15:41:02",
+        "groupId": "1002G1226773009675653121",
+        "fromAccount": "4NBkLAkkklSVU8m2DJN",
+        "businessId": 1,
+        "msgSeq": 1,
+        "msgCount": 10,
+        "id": "1226810566308352002",
+        "msgBody": "[{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":1,\\\"type\\\":\\\"TW_QUESTION\\\",\\\"content\\\":{\\\"id\\\":\\\"1002G1226773009675653121\\\",\\\"info\\\":{\\\"images\\\":\\\"z4gGRDe0U3ouKOrh8Os\\\",\\\"question\\\":\\\"测试\\\",\\\"patientInfo\\\":{\\\"birthday\\\":\\\"1990-02-11\\\",\\\"temporary\\\":false,\\\"sex\\\":\\\"1\\\",\\\"mobile\\\":\\\"18612256103\\\",\\\"name\\\":\\\"刘阳\\\",\\\"idNo\\\":\\\"110107199002110331\\\",\\\"age\\\":29}}}}\", \"Desc\": \"\", \"Sound\": \"\"}}]"
+      },
+      {
+        "msg": "{\"MsgSeq\": 2, \"MsgBody\": [{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":0,\\\"type\\\":\\\"TW_QUESTION_ACCEPT\\\",\\\"content\\\":{\\\"id\\\":\\\"\\\",\\\"type\\\":\\\"\\\",\\\"status\\\":-1}}\", \"Desc\": \"\", \"Sound\": \"\"}}], \"MsgRandom\": 22230630, \"IsPlaceMsg\": 0, \"MsgPriority\": 2, \"From_Account\": \"admin\", \"MsgTimeStamp\": 1581320538}",
+        "msgTimeStamp": "2020-02-10 15:42:18",
+        "groupId": "1002G1226773009675653121",
+        "fromAccount": "admin",
+        "businessId": 1,
+        "msgSeq": 2,
+        "msgCount": 10,
+        "id": "1226810566308352001",
+        "msgBody": "[{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":0,\\\"type\\\":\\\"TW_QUESTION_ACCEPT\\\",\\\"content\\\":{\\\"id\\\":\\\"\\\",\\\"type\\\":\\\"\\\",\\\"status\\\":-1}}\", \"Desc\": \"\", \"Sound\": \"\"}}]"
+      },
+      {
+        "msg": "{\"MsgSeq\": 3, \"MsgBody\": [{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":1,\\\"type\\\":\\\"TW_RPLIST\\\",\\\"content\\\":{\\\"recipeIds\\\":[\\\"41647662-d6c1-43af-b32f-116fa0383cea\\\"],\\\"recipeOrderId\\\":\\\"4f0291e023c28186294fba5a97fad7a5\\\",\\\"visitNumber\\\":\\\"BhIH2020021000000220\\\",\\\"count\\\":1,\\\"orderIds\\\":[\\\"c84c8947-9c0e-4ea9-9fb2-4b27c45b7664\\\"],\\\"text\\\":\\\"检查\\\",\\\"payStatus\\\":0}}\", \"Desc\": \"\", \"Sound\": \"\"}}], \"MsgRandom\": 92443108, \"IsPlaceMsg\": 0, \"MsgPriority\": 2, \"From_Account\": \"A29DDB95DCE1415FB6C9E8A65AF983E7\", \"MsgTimeStamp\": 1581320884}",
+        "msgTimeStamp": "2020-02-10 15:48:04",
+        "groupId": "1002G1226773009675653121",
+        "fromAccount": "A29DDB95DCE1415FB6C9E8A65AF983E7",
+        "businessId": 1,
+        "msgSeq": 3,
+        "msgCount": 10,
+        "id": "1226810566304157700",
+        "msgBody": "[{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":1,\\\"type\\\":\\\"TW_RPLIST\\\",\\\"content\\\":{\\\"recipeIds\\\":[\\\"41647662-d6c1-43af-b32f-116fa0383cea\\\"],\\\"recipeOrderId\\\":\\\"4f0291e023c28186294fba5a97fad7a5\\\",\\\"visitNumber\\\":\\\"BhIH2020021000000220\\\",\\\"count\\\":1,\\\"orderIds\\\":[\\\"c84c8947-9c0e-4ea9-9fb2-4b27c45b7664\\\"],\\\"text\\\":\\\"检查\\\",\\\"payStatus\\\":0}}\", \"Desc\": \"\", \"Sound\": \"\"}}]"
+      },
+      {
+        "msg": "{\"MsgSeq\": 4, \"MsgBody\": [{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":1,\\\"type\\\":\\\"TW_RPLIST\\\",\\\"content\\\":{\\\"recipeIds\\\":[\\\"3de059f0-547b-4fea-876f-ff1e60caa23b\\\"],\\\"recipeOrderId\\\":\\\"68daf39cae63951909371b1ac66627d4\\\",\\\"visitNumber\\\":\\\"BhIH2020021000000220\\\",\\\"count\\\":1,\\\"orderIds\\\":[\\\"ff6da468-2477-4f57-9eb3-6738c0fd0ce7\\\"],\\\"text\\\":\\\"西药\\\",\\\"payStatus\\\":0}}\", \"Desc\": \"\", \"Sound\": \"\"}}], \"MsgRandom\": 12114963, \"IsPlaceMsg\": 0, \"MsgPriority\": 2, \"From_Account\": \"A29DDB95DCE1415FB6C9E8A65AF983E7\", \"MsgTimeStamp\": 1581321006}",
+        "msgTimeStamp": "2020-02-10 15:50:06",
+        "groupId": "1002G1226773009675653121",
+        "fromAccount": "A29DDB95DCE1415FB6C9E8A65AF983E7",
+        "businessId": 1,
+        "msgSeq": 4,
+        "msgCount": 10,
+        "id": "1226810566304157699",
+        "msgBody": "[{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":1,\\\"type\\\":\\\"TW_RPLIST\\\",\\\"content\\\":{\\\"recipeIds\\\":[\\\"3de059f0-547b-4fea-876f-ff1e60caa23b\\\"],\\\"recipeOrderId\\\":\\\"68daf39cae63951909371b1ac66627d4\\\",\\\"visitNumber\\\":\\\"BhIH2020021000000220\\\",\\\"count\\\":1,\\\"orderIds\\\":[\\\"ff6da468-2477-4f57-9eb3-6738c0fd0ce7\\\"],\\\"text\\\":\\\"西药\\\",\\\"payStatus\\\":0}}\", \"Desc\": \"\", \"Sound\": \"\"}}]"
+      },
+      {
+        "msg": "{\"MsgSeq\": 5, \"MsgBody\": [{\"MsgType\": \"TIMSoundElem\", \"MsgContent\": {\"Url\": \"w5t4Zr5QWPda26EhYOf\", \"Size\": 12096, \"UUID\": \"https://imsdk-1253488539.cosgz.myqcloud.com/0.9114264401298997.mp3\", \"Second\": 2, \"Download_Flag\": 0}}], \"MsgRandom\": 4073509462, \"IsPlaceMsg\": 0, \"MsgPriority\": 2, \"From_Account\": \"4NBkLAkkklSVU8m2DJN\", \"MsgTimeStamp\": 1581327967}",
+        "msgTimeStamp": "2020-02-10 17:46:07",
+        "groupId": "1002G1226773009675653121",
+        "fromAccount": "4NBkLAkkklSVU8m2DJN",
+        "businessId": 1,
+        "msgSeq": 5,
+        "msgCount": 10,
+        "id": "1226810566304157698",
+        "msgBody": "[{\"MsgType\": \"TIMSoundElem\", \"MsgContent\": {\"Url\": \"w5t4Zr5QWPda26EhYOf\", \"Size\": 12096, \"UUID\": \"https://imsdk-1253488539.cosgz.myqcloud.com/0.9114264401298997.mp3\", \"Second\": 2, \"Download_Flag\": 0}}]"
+      },
+      {
+        "msg": "{\"MsgSeq\": 6, \"MsgBody\": [{\"MsgType\": \"TIMSoundElem\", \"MsgContent\": {\"Url\": \"XosBpbSbXd6iLXtUXQa\", \"Size\": 28204, \"UUID\": \"1400148364_A29DDB95DCE1415FB6C9E8A65AF983E7_a0f22cc9390b7e321e9d28841aee0840\", \"Second\": 1, \"Download_Flag\": 2}}], \"MsgRandom\": 1830797914, \"IsPlaceMsg\": 0, \"MsgPriority\": 2, \"From_Account\": \"A29DDB95DCE1415FB6C9E8A65AF983E7\", \"MsgTimeStamp\": 1581328003}",
+        "msgTimeStamp": "2020-02-10 17:46:43",
+        "groupId": "1002G1226773009675653121",
+        "fromAccount": "A29DDB95DCE1415FB6C9E8A65AF983E7",
+        "businessId": 1,
+        "msgSeq": 6,
+        "msgCount": 10,
+        "id": "1226810565222027266",
+        "msgBody": "[{\"MsgType\": \"TIMSoundElem\", \"MsgContent\": {\"Url\": \"XosBpbSbXd6iLXtUXQa\", \"Size\": 28204, \"UUID\": \"1400148364_A29DDB95DCE1415FB6C9E8A65AF983E7_a0f22cc9390b7e321e9d28841aee0840\", \"Second\": 1, \"Download_Flag\": 2}}]"
+      },
+      {
+        "msg": "{\"MsgSeq\": 7, \"MsgBody\": [{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":1,\\\"type\\\":\\\"TW_RPLIST\\\",\\\"content\\\":{\\\"recipeIds\\\":[\\\"b1d1c5bb-edfd-4b01-9af7-f8b21685fae8\\\"],\\\"recipeOrderId\\\":\\\"453bf65fb746eb44957d80dbd9719a9d\\\",\\\"visitNumber\\\":\\\"BhIH2020021000000220\\\",\\\"count\\\":1,\\\"orderIds\\\":[\\\"eec37f25-0089-4d3d-8ceb-a15e8268202e\\\"],\\\"text\\\":\\\"西药\\\",\\\"payStatus\\\":0}}\", \"Desc\": \"\", \"Sound\": \"\"}}], \"MsgRandom\": 21241907, \"IsPlaceMsg\": 0, \"MsgPriority\": 2, \"From_Account\": \"A29DDB95DCE1415FB6C9E8A65AF983E7\", \"MsgTimeStamp\": 1581329320}",
+        "msgTimeStamp": "2020-02-10 18:08:40",
+        "groupId": "1002G1226773009675653121",
+        "fromAccount": "A29DDB95DCE1415FB6C9E8A65AF983E7",
+        "businessId": 1,
+        "msgSeq": 7,
+        "msgCount": 10,
+        "id": "1226810558628581380",
+        "msgBody": "[{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":1,\\\"type\\\":\\\"TW_RPLIST\\\",\\\"content\\\":{\\\"recipeIds\\\":[\\\"b1d1c5bb-edfd-4b01-9af7-f8b21685fae8\\\"],\\\"recipeOrderId\\\":\\\"453bf65fb746eb44957d80dbd9719a9d\\\",\\\"visitNumber\\\":\\\"BhIH2020021000000220\\\",\\\"count\\\":1,\\\"orderIds\\\":[\\\"eec37f25-0089-4d3d-8ceb-a15e8268202e\\\"],\\\"text\\\":\\\"西药\\\",\\\"payStatus\\\":0}}\", \"Desc\": \"\", \"Sound\": \"\"}}]"
+      },
+      {
+        "msg": "{\"MsgSeq\": 8, \"MsgBody\": [{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":1,\\\"type\\\":\\\"TW_RPLIST\\\",\\\"content\\\":{\\\"recipeIds\\\":[\\\"bed713d9-8e90-436a-9af9-3d938c4ad455\\\"],\\\"recipeOrderId\\\":\\\"f71aac246e7f9463c7542edea2a7a393\\\",\\\"visitNumber\\\":\\\"BhIH2020021000000220\\\",\\\"count\\\":1,\\\"orderIds\\\":[\\\"868c2b86-3672-47db-98c2-6df27ddf3982\\\"],\\\"text\\\":\\\"检查\\\",\\\"payStatus\\\":0}}\", \"Desc\": \"\", \"Sound\": \"\"}}], \"MsgRandom\": 13906980, \"IsPlaceMsg\": 0, \"MsgPriority\": 2, \"From_Account\": \"A29DDB95DCE1415FB6C9E8A65AF983E7\", \"MsgTimeStamp\": 1581329321}",
+        "msgTimeStamp": "2020-02-10 18:08:41",
+        "groupId": "1002G1226773009675653121",
+        "fromAccount": "A29DDB95DCE1415FB6C9E8A65AF983E7",
+        "businessId": 1,
+        "msgSeq": 8,
+        "msgCount": 10,
+        "id": "1226810558628581379",
+        "msgBody": "[{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":1,\\\"type\\\":\\\"TW_RPLIST\\\",\\\"content\\\":{\\\"recipeIds\\\":[\\\"bed713d9-8e90-436a-9af9-3d938c4ad455\\\"],\\\"recipeOrderId\\\":\\\"f71aac246e7f9463c7542edea2a7a393\\\",\\\"visitNumber\\\":\\\"BhIH2020021000000220\\\",\\\"count\\\":1,\\\"orderIds\\\":[\\\"868c2b86-3672-47db-98c2-6df27ddf3982\\\"],\\\"text\\\":\\\"检查\\\",\\\"payStatus\\\":0}}\", \"Desc\": \"\", \"Sound\": \"\"}}]"
+      },
+      {
+        "msg": "{\"MsgSeq\": 9, \"MsgBody\": [{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":1,\\\"type\\\":\\\"TW_WAIT_FOR_FINISH\\\",\\\"content\\\":{\\\"id\\\":\\\"1002G1226773009675653121\\\",\\\"type\\\":\\\"\\\",\\\"status\\\":-1,\\\"info\\\":{\\\"doctor\\\":\\\"等待患者确认结诊\\\",\\\"user\\\":\\\"1002G1226773009675653121\\\"}}}\", \"Desc\": \"\", \"Sound\": \"\"}}], \"MsgRandom\": 1358293, \"IsPlaceMsg\": 0, \"MsgPriority\": 2, \"From_Account\": \"A29DDB95DCE1415FB6C9E8A65AF983E7\", \"MsgTimeStamp\": 1581329371}",
+        "msgTimeStamp": "2020-02-10 18:09:31",
+        "groupId": "1002G1226773009675653121",
+        "fromAccount": "A29DDB95DCE1415FB6C9E8A65AF983E7",
+        "businessId": 1,
+        "msgSeq": 9,
+        "msgCount": 10,
+        "id": "1226810558628581378",
+        "msgBody": "[{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":1,\\\"type\\\":\\\"TW_WAIT_FOR_FINISH\\\",\\\"content\\\":{\\\"id\\\":\\\"1002G1226773009675653121\\\",\\\"type\\\":\\\"\\\",\\\"status\\\":-1,\\\"info\\\":{\\\"doctor\\\":\\\"等待患者确认结诊\\\",\\\"user\\\":\\\"1002G1226773009675653121\\\"}}}\", \"Desc\": \"\", \"Sound\": \"\"}}]"
+      },
+      {
+        "msg": "{\"MsgSeq\": 10, \"MsgBody\": [{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":1,\\\"type\\\":\\\"TW_STATUS_CHANGED\\\",\\\"content\\\":{\\\"id\\\":\\\"\\\",\\\"type\\\":\\\"\\\",\\\"status\\\":5,\\\"info\\\":{\\\"doctor\\\":\\\"本次看诊已结束\\\",\\\"user\\\":\\\"本次看诊已结束\\\"}}}\", \"Desc\": \"\", \"Sound\": \"\"}}], \"MsgRandom\": 7740707, \"IsPlaceMsg\": 0, \"MsgPriority\": 2, \"From_Account\": \"admin\", \"MsgTimeStamp\": 1581329404}",
+        "msgTimeStamp": "2020-02-10 18:10:04",
+        "groupId": "1002G1226773009675653121",
+        "fromAccount": "admin",
+        "businessId": 1,
+        "msgSeq": 10,
+        "msgCount": 10,
+        "id": "1226810558628581377",
+        "msgBody": "[{\"MsgType\": \"TIMCustomElem\", \"MsgContent\": {\"Ext\": \"\", \"Data\": \"{\\\"show\\\":1,\\\"type\\\":\\\"TW_STATUS_CHANGED\\\",\\\"content\\\":{\\\"id\\\":\\\"\\\",\\\"type\\\":\\\"\\\",\\\"status\\\":5,\\\"info\\\":{\\\"doctor\\\":\\\"本次看诊已结束\\\",\\\"user\\\":\\\"本次看诊已结束\\\"}}}\", \"Desc\": \"\", \"Sound\": \"\"}}]"
+      }
+    ]
+  },
+  "errCode": 0,
+  "errMsg": "成功"
+}

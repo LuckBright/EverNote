@@ -1,0 +1,74 @@
+@charset "utf-8";
+
+body {font-size: 1.4rem; background: #fcfcfc; color: #333333;}
+#app {position: absolute; left: 0; bottom: 0; top: 0; right: 0;}
+#app .page1,
+#app .buttons {padding: 0 3rem;}
+#app .info {background: #fff; padding: 3rem; margin-bottom: 3rem;}
+#app .info > * {display: block;}
+#app .info > span {font-size: 1.4rem; color: #999; margin-bottom: 2rem;}
+#app .info > strong {font-size: 1.6rem; line-height: 3.2rem;}
+#app .info > p {color: #999; font-size: 1.4rem; margin-top: 1rem;}
+#app h3 {font-size: 1.8rem; text-align: center;padding: 1rem 0 2rem 0; color: #333333;}
+#app p {line-height: 2; font-size: 1.2rem; margin-bottom: 1.5rem;}
+#app .v_input {position: relative; height: 3rem; margin-bottom: 4.5rem;}
+#app .v_input input {width: 100%; height: 3rem; position: absolute; left: 0; right: 0; bottom: 0; top: 0; opacity: 0; z-index: 999;}
+#app .v_input ul {display: flex;}
+#app .v_input ul li {flex: 1; height: 3rem; line-height: 3rem; text-align: center; margin-right: 1.5rem; background: #FFFFFF; box-shadow: 0 2px 10px 0 rgba(0,0,0,0.15); position: relative;}
+#app .v_input ul li:last-child {margin-right: 0;}
+#app .v_button {width: 100%; height: 4rem; line-height: 4rem; text-align: center; background: #1C7BEF; border-radius: 4px; margin: 0 auto; display: block; color: #fff;}
+#app .disabled {background: #eee; color: #bbb;} 
+
+#app .cursor-blink {
+  display: none;
+  width: 2rem;
+  height: 1px;
+  animation: blink 1s infinite steps(1, start);
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  margin-left: -1rem;
+}
+#app .cursor-point {
+  display: none;
+  width: 0.8rem;
+  height: 0.8rem;
+  position: absolute;
+  border-radius: 50%;
+  background: #333333;
+  left: 50%;
+  top: 50%;
+  margin-left: -0.4rem;
+  margin-top: -0.4rem;
+}
+#app li.focus .cursor-blink{display: block;}
+#app li.point .cursor-point{display: block;}
+
+.error_msg {
+  display: none; 
+  width: 50%; 
+  height: 4rem; 
+  line-height: 4rem; 
+  background: rgba(0,0,0,0.6); 
+  border-radius: 4px; 
+  position: absolute; 
+  top: 50%; 
+  left: 50%;
+  margin-left: -25%;
+  margin-top: -2rem; 
+  text-align: center; 
+  color: #fff;
+  z-index: 1000;
+}
+
+/*这里设置动画blink*/
+@keyframes blink {
+  0%, 100% {
+      background-color: #000;
+      color: #aaa;
+  }
+  50% {
+      background-color: #bbb; /* not #aaa because it's seem there is Google Chrome bug */
+      color: #000;
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "msg": "success",
+  "head": {
+    "errCode": 0,
+    "errMsg": "success"
+  },
+  "code": 0,
+  "data": {
+    "password": "96e79218965eb72c92a549dd5a330112",
+    "tenantName": "海南现代妇女儿童医院",
+    "tenantId": 5000,
+    "userId": "ef65a3ac-ee80-4efc-95d8-582669ac27ce",
+    "organizationId": 5000001,
+    "organizationName": "海南现代妇女儿童医院",
+    "displayName": "测试-张伟东",
+    "loginTime": "1558609412388",
+    "type": null,
+    "roles": "[{\"isValid\":0,\"name\":\"申领耗材采购主管\",\"remark\":\"申领耗材采购主管\",\"roleCode\":\"943767608413388800\",\"roleId\":\"2\",\"roleName\":\"申领耗材采购主管\",\"type\":1},{\"isValid\":0,\"name\":\"总经理\",\"remark\":\"总经理\",\"roleCode\":\"928201808159965184\",\"roleId\":\"12\",\"roleName\":\"总经理\",\"type\":1},{\"isValid\":0,\"name\":\"药师\",\"remark\":\"药师\",\"roleCode\":\"928549052079931392\",\"roleId\":\"15\",\"roleName\":\"药师\",\"type\":1},{\"isValid\":0,\"name\":\"医疗部助理\",\"remark\":\"医疗部助理\",\"roleCode\":\"928549446952681472\",\"roleId\":\"18\",\"roleName\":\"医疗部助理\",\"type\":1}]"
+  }
+}

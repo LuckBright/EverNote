@@ -1,0 +1,25 @@
+{
+  "msg": "eiusmod",
+  "head": {
+    "errCode": 0,
+    "errMsg": "ad mollit sunt"
+  },
+  "code": 0,
+  "data": {
+    "id": "1",
+    "orgId": "2",
+    "photo": "",
+    "infoText": "<p>3322</p>",
+    "type1Code": "01",
+    "type1Name": "临床",
+    "type2Code": "01.02",
+    "type2Name": "门诊",
+    "parentOrgSubjectCode": "1233",
+    "orgSubjectCode": "code8",
+    "orgSubjectName": "皮肤",
+    "tenantSubjectCode": "code3",
+    "tenantSubjectName": "皮肤科",
+    "nationSubjectCode": "A01",
+    "nationSubjectName": "预防保健科"
+  }
+}

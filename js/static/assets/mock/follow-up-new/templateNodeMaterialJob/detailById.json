@@ -1,0 +1,37 @@
+{
+  "head": {
+    "errCode": 0,
+    "errMsg": "success"
+  },
+  "data": {
+    "id": "22222222222222222222",
+    "tenantId": "5000",
+    "orgId": "2",
+    "templateJobId": "3",
+    "templateNodeJobId": "4",
+    "templateId": "5",
+    "templateNodeId": "6",
+    "materialId": "22222222222222222222",
+    "materialCategoryId": 8,
+    "typeId": 9,
+    "executeTypeId": 1,
+    "sortNo": 0,
+    "name": "aaaaaa",
+    "content": "执行保存111哦执行保存111哦执行保存111哦执行保存111哦执行保存111哦执行保存111哦执行保存111哦执行保存111哦执行保存111哦执行保存111哦执行保存111哦执行保存111哦执行保存111哦",
+    "executeTime": "2019-05-21 00:39:09",
+    "executeResultId": 1,
+    "executeRecord": "[{\"executeContent\":\"执行保存哦\",\"executeName\":\"杨飞飞\",\"executeTime\":1558945429182},{\"executeContent\":\"执行保存111哦\",\"executeName\":\"杨飞飞\",\"executeTime\":1558945454938}]",
+    "sendTypeId": "1",
+    "sendResultMark": "1",
+    "sendTime": "2019-05-21 00:39:01",
+    "sendResult": "1",
+    "status": 1,
+    "isDelete": 0,
+    "creatorId": "1",
+    "creatorName": "1",
+    "createTime": "2019-05-21 00:39:25",
+    "modifyUserId": "1",
+    "modifyUserName": "1",
+    "modifyTime": "2019-05-21 00:39:30"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "msg": "success",
+  "head": {
+    "errCode": 0,
+    "errMsg": "success"
+  },
+  "code": 0,
+  "data": {
+    "clinicName": "海南现代",
+    "displayName": "测试-张伟东",
+    "mobile": "13260357718",
+    "rID": [],
+    "userId": "ef65a3ac-ee80-4efc-95d8-582669ac27ce"
+  }
+}

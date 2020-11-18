@@ -1,0 +1,25 @@
+{
+  "msg": "eiusmod",
+  "head": {
+    "errCode": 0,
+    "errMsg": "ad mollit sunt"
+  },
+  "code": 0,
+  "data": {
+    "id": "1",
+    "orgId": 5000,
+    "photo": "http://www.dev4.everjiankang.com.cn/file/2,01f5217dbae9",
+    "infoText": "<p>1222</p>",
+    "type1Code": "01",
+    "type1Name": "临床",
+    "type2Code": "01.02",
+    "type2Name": "门诊",
+    "parentOrgSubjectCode": "0",
+    "tenantSubjectCode": "1233",
+    "tenantSubjectName": "整形门诊科",
+    "orgSubjectCode": "1233",
+    "orgSubjectName": "整形门诊科",
+    "nationSubjectCode": "A01",
+    "nationSubjectName": "预防保健科"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "msg": "voluptate tempor magna qui veniam",
+  "head": {
+    "errCode": 0,
+    "errMsg": "ullamco eiusmod"
+  },
+  "code": 0,
+  "data": {
+    "pageList": [
+      {
+        "id": "amet magna ut ea",
+        "deptId": "eu enim nulla Duis",
+        "jobNumber": "quis velit",
+        "name": "culpa deserunt sed ad",
+        "skillsTitle1Code": "tempor in ut consequat enim",
+        "skillsTitle1Name": "aute sint quis in Ut",
+        "skillsTitle2Code": "incididunt",
+        "skillsTitle2Name": "minim aute sint reprehenderit",
+        "genderCode": "nisi dolore laboris sunt",
+        "genderName": "dolor voluptate",
+        "mobile": "deserunt in incididunt",
+        "typeCode": "nostrud",
+        "typeName": "nisi proident reprehenderit",
+        "statusCode": "reprehenderit minim pariatur est",
+        "statusName": "cupidatat",
+        "orgId": "anim cupidatat consequa",
+        "namePinyin": "aute adipisicing consequat nulla commodo",
+        "nameEnglish": "id et anim",
+        "cardCode": "veniam deserunt consequat",
+        "cardName": "aute et reprehenderit",
+        "cardNumber": "do Duis amet Ut cillum",
+        "position": "anim deserunt",
+        "email": "ut consectetur tempor irure",
+        "birthday": "ipsum proident commodo",
+        "photo": "irure deserunt eu dolore",
+        "servicesLanguageCode": "officia consequat",
+        "servicesLanguageName": "voluptate fugiat officia",
+        "ageMaxPatient": "ullamco",
+        "ageMinPatient": "in Duis consectetur non",
+        "appointmentNote": "sunt do culpa sed",
+        "appointmentRemind": "cupidatat",
+        "infoPhoto": "qui enim",
+        "infoText": "nisi nulla"
+      }
+    ],
+    "totalCount": 200,
+    "offset": "amet fugiat",
+    "pagesize": "dolore"
+  }
+}

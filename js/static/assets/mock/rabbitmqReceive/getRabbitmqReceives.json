@@ -1,0 +1,35 @@
+{
+  "msg": "success",
+  "head": {
+    "errCode": 0,
+    "errMsg": "success"
+  },
+  "code": 0,
+  "data": [
+    {
+      "id": "1",
+      "code": "order",
+      "name": "queue.thc-platform-core.order",
+      "sendBizCode": "thc-sob",
+      "sendBizName": "sob",
+      "sendBizDomainCode": "cpoe",
+      "sendBizDomainName": "医嘱管理",
+      "receiveBizCode": "thc-platform-core",
+      "receiveBizName": "平台核心",
+      "receiveBizDomainCode": "platform",
+      "receiveBizDomainName": "平台",
+      "queueName": "queue.thc-platform-core.order",
+      "bz": "备注",
+      "isDelete": 0,
+      "creatorId": "admin",
+      "creatorName": "admin",
+      "createTime": 1560589537000,
+      "modifyUserId": "admin",
+      "modifyUserName": "admin",
+      "modifyTime": 1560589537000,
+      "offset": null,
+      "pagesize": null
+    }
+  ],
+  "totalCount": 1
+}

@@ -1,0 +1,144 @@
+{
+  "head": {
+    "errCode": 0,
+    "errMsg": "成功,Success",
+    "errShowType": "success"
+  },
+  "data": [
+    {
+      "templetRecords": [
+        {
+          "id": "3",
+          "templetName": "号表模板",
+          "templetModule": "仓库管理",
+          "exchange": "platform.import_data.exchange",
+          "routingKey": "platform.import_data.passport.routingkey",
+          "templetSequence": "3",
+          "templetUrl": null,
+          "templetImportDate": null,
+          "templetState": "-1",
+          "templetDataState": "-1",
+          "templetDataUrl": null,
+          "importUrl": null,
+          "verifiUrl": null,
+          "recallUrl": null,
+          "clearUrl": null,
+          "methodWay": null,
+          "creater": null,
+          "createTime": null,
+          "updater": null,
+          "updateTime": null,
+          "orgId": null,
+          "tenantId": null
+        }
+      ],
+      "templetModule": "仓库管理"
+    },
+    {
+      "templetRecords": [
+        {
+          "id": "4",
+          "templetName": "排班模板",
+          "templetModule": "患者服务",
+          "exchange": "platform.import_data.exchange",
+          "routingKey": "platform.import_data.warahouse.routingkey",
+          "templetSequence": "4",
+          "templetUrl": null,
+          "templetImportDate": null,
+          "templetState": "-1",
+          "templetDataState": "-1",
+          "templetDataUrl": null,
+          "importUrl": null,
+          "verifiUrl": null,
+          "recallUrl": null,
+          "clearUrl": null,
+          "methodWay": null,
+          "creater": null,
+          "createTime": null,
+          "updater": null,
+          "updateTime": null,
+          "orgId": null,
+          "tenantId": null
+        }
+      ],
+      "templetModule": "患者服务"
+    },
+    {
+      "templetRecords": [
+        {
+          "id": "1",
+          "templetName": "模板的模板",
+          "templetModule": "预约挂号",
+          "exchange": "platform.import_data.exchange",
+          "routingKey": "platform.import_data.arrange.routingkey",
+          "templetSequence": null,
+          "templetUrl": "http://u-cloud/adfaf/test.xlsx",
+          "templetImportDate": null,
+          "templetState": "1",
+          "templetDataState": null,
+          "templetDataUrl": null,
+          "importUrl": null,
+          "verifiUrl": null,
+          "recallUrl": null,
+          "clearUrl": null,
+          "methodWay": null,
+          "creater": null,
+          "createTime": null,
+          "updater": null,
+          "updateTime": null,
+          "orgId": null,
+          "tenantId": null
+        },
+        {
+          "id": "2",
+          "templetName": "班次模板",
+          "templetModule": "预约挂号",
+          "exchange": "platform.import_data.exchange",
+          "routingKey": "platform.import_data.rcm.routingkey",
+          "templetSequence": "2",
+          "templetUrl": null,
+          "templetImportDate": null,
+          "templetState": "-1",
+          "templetDataState": "-1",
+          "templetDataUrl": null,
+          "importUrl": "/import/test",
+          "verifiUrl": null,
+          "recallUrl": null,
+          "clearUrl": null,
+          "methodWay": null,
+          "creater": null,
+          "createTime": null,
+          "updater": null,
+          "updateTime": null,
+          "orgId": null,
+          "tenantId": null
+        },
+        {
+          "id": "5",
+          "templetName": "预约模板",
+          "templetModule": "预约挂号",
+          "exchange": "platform.import_data.exchange",
+          "routingKey": "platform.import_data.cpoe.routingkey",
+          "templetSequence": "5",
+          "templetUrl": null,
+          "templetImportDate": null,
+          "templetState": "-1",
+          "templetDataState": "-1",
+          "templetDataUrl": null,
+          "importUrl": null,
+          "verifiUrl": null,
+          "recallUrl": null,
+          "clearUrl": null,
+          "methodWay": null,
+          "creater": null,
+          "createTime": null,
+          "updater": null,
+          "updateTime": null,
+          "orgId": null,
+          "tenantId": null
+        }
+      ],
+      "templetModule": "预约挂号"
+    }
+  ]
+}

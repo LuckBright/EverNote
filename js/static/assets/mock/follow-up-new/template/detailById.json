@@ -1,0 +1,46 @@
+{
+  "head": {
+    "errCode": 0,
+    "errMsg": "success"
+  },
+  "data": {
+    "baseInfo": {
+      "ageMax": 100,
+      "ageMin": 14,
+      "categoryId": "string",
+      "deptId": "string",
+      "deptIds": "string",
+      "deptIsAll": true,
+      "deptName": "string",
+      "description": "string",
+      "diagnosisIds": "string",
+      "doctorAdviceIds": "string",
+      "doctorId": "string",
+      "doctorName": "string",
+      "genderId": 0,
+      "jobCreateTypeId": 0,
+      "name": "string",
+      "status": 0
+    },
+    "id": "string",
+    "nodeInfoList": [
+      {
+        "followUpTime": 0,
+        "id": "string",
+        "remindTime": 0,
+        "sysnodeId": "string",
+        "templateNodeMaterialList": [
+          {
+            "content": "string",
+            "id": "string",
+            "jobTypeId": 1,
+            "materialCategoryId": 5,
+            "name": "string",
+            "sortNo": 1,
+            "templateNodeId": "string"
+          }
+        ]
+      }
+    ]
+  }
+}

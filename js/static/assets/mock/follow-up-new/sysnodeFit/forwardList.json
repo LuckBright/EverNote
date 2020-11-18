@@ -1,0 +1,44 @@
+{
+  "head": {
+    "errCode": 0,
+    "errMsg": "success"
+  },
+  "data": [
+    {
+      "id": "0c1be4bb-0aca-4e4b-8520-74baa3b6029d",
+      "mark": "a-yywc",
+      "name": "预约完成",
+      "type": 0
+    },
+    {
+      "id": "d5df797d-38cf-44c1-8727-1a7956ae43bb",
+      "mark": "c-ghwc",
+      "name": "挂号完成",
+      "type": 0
+    },
+    {
+      "id": "876d087b-2507-46df-815b-a94b83fb7302",
+      "mark": "e-mzjswc",
+      "name": "门诊结诊完成",
+      "type": 0
+    },
+    {
+      "id": "20320db8-4320-4369-9f23-651b4207ff18",
+      "mark": "f-mzsswc",
+      "name": "门诊手术完成",
+      "type": 0
+    },
+    {
+      "id": "57b61d8e-5c76-4666-af44-8cac8c6e050b",
+      "mark": "g-zysswc",
+      "name": "住院手术完成",
+      "type": 0
+    },
+    {
+      "id": "028f7714-b956-4e01-8f0c-ab6955c6eeff",
+      "mark": "h-cywc",
+      "name": "出院完成",
+      "type": 0
+    }
+  ]
+}

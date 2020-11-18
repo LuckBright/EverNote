@@ -1,0 +1,53 @@
+{
+  "msg": "success",
+  "head": {
+    "errCode": 0,
+    "errMsg": "success"
+  },
+  "code": 0,
+  "data": [
+    {
+      "id": "1",
+      "code": "key-order",
+      "name": "订单信息",
+      "sendBizCode": "thc-sob",
+      "sendBizName": "sob",
+      "sendBizDomainCode": "cpoe",
+      "sendBizDomainName": "医嘱管理",
+      "exchangeName": "exchange.thc-sob.order",
+      "routingKey": "routingkey.thc-cpoe.order",
+      "bz": "订单信息备注",
+      "isDelete": 0,
+      "creatorId": "admin",
+      "creatorName": "admin",
+      "createTime": 1560584681000,
+      "modifyUserId": "admin",
+      "modifyUserName": "admin",
+      "modifyTime": 1560584691000,
+      "offset": null,
+      "pagesize": null
+    },
+    {
+      "id": "2",
+      "code": "key-bill",
+      "name": "账单信息",
+      "sendBizCode": "thc-rcm",
+      "sendBizName": "rcm",
+      "sendBizDomainCode": "rcm",
+      "sendBizDomainName": "财务管理",
+      "exchangeName": "exchange.thc-rcm.bill",
+      "routingKey": "routingkey.thc-rcm.bill",
+      "bz": "账单信息",
+      "isDelete": 0,
+      "creatorId": "admin",
+      "creatorName": "admin",
+      "createTime": 1560584864000,
+      "modifyUserId": "admin",
+      "modifyUserName": "admin",
+      "modifyTime": 1560584873000,
+      "offset": null,
+      "pagesize": null
+    }
+  ],
+  "totalCount": 2
+}

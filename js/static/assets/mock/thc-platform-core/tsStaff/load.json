@@ -1,0 +1,124 @@
+{
+  "msg": "eiusmod",
+  "head": {
+    "errCode": 0,
+    "errMsg": "ad mollit sunt"
+  },
+  "code": 0,
+  "data": {
+    "jobNumber": "1234",
+    "name": "张大炮",
+    "mobile": "13533332223",
+    "namePinyin": "zhangdapao",
+    "nameEnglish": "Zhang DaPao",
+    "position": "没用的职位",
+    "photo": "http://www.dev4.everjiankang.com.cn/file/1,0185befebeac",
+    "infoText": "<p>这是个人简介</p>",
+    "birthday": "1972-02-01",
+    "cardNumber": "239922233222",
+    "email": "233223@qq.com",
+    "typeCode": "DOCTOR",
+    "typeName": "医生",
+    "genderCode": "1",
+    "genderName": "男性",
+    "statusCode": "1",
+    "statusName": "离职",
+    "cardCode": "01",
+    "cardName": "居民身份证",
+    "servicesLanguageCode": "01",
+    "servicesLanguageName": "中文",
+    "deptId": "5",
+    "orgId": "2",
+    "skillsTitle1Code": "06",
+    "skillsTitle1Name": "医师",
+    "skillsTitle2Code": "06_05",
+    "skillsTitle2Name": "主任医师",
+    "tsStaffPermissionDTOList": [
+      {
+        "type1Code": "01",
+        "type1Name": "毒麻精放药品",
+        "type2Code": "01.01",
+        "type2Name": "一类精神药品"
+      },
+      {
+        "type1Code": "01",
+        "type1Name": "毒麻精放药品",
+        "type2Code": "01.02",
+        "type2Name": "二类精神药品"
+      },
+      {
+        "type1Code": "01",
+        "type1Name": "毒麻精放药品",
+        "type2Code": "01.03",
+        "type2Name": "麻醉药品"
+      },
+      {
+        "type1Code": "01",
+        "type1Name": "毒麻精放药品",
+        "type2Code": "01.04",
+        "type2Name": "戒毒药品"
+      },
+      {
+        "type1Code": "01",
+        "type1Name": "毒麻精放药品",
+        "type2Code": "01.05",
+        "type2Name": "医疗用毒性药品"
+      },
+      {
+        "type1Code": "01",
+        "type1Name": "毒麻精放药品",
+        "type2Code": "01.06",
+        "type2Name": "放射性药品"
+      },
+      {
+        "type1Code": "02",
+        "type1Name": "抗菌药物",
+        "type2Code": "02.01",
+        "type2Name": "特殊使用级抗菌药物"
+      },
+      {
+        "type1Code": "02",
+        "type1Name": "抗菌药物",
+        "type2Code": "02.02",
+        "type2Name": "限制使用级抗菌药物"
+      },
+      {
+        "type1Code": "02",
+        "type1Name": "抗菌药物",
+        "type2Code": "02.03",
+        "type2Name": "非限制使用级药物"
+      }
+    ],
+    "tsStaffOrganizationDTOList": [
+      {
+        "orgId": "3",
+        "orgCode": "code3",
+        "orgName": "name3"
+      },
+      {
+        "orgId": "5",
+        "orgCode": "code5",
+        "orgName": "name5"
+      }
+    ],
+    "tsStaffSubjectDTOList": [
+      {
+        "tenantSubjectId": "3",
+        "tenantSubjectCode": "code3",
+        "tenantSubjectName": "name3"
+      },
+      {
+        "tenantSubjectId": "4",
+        "tenantSubjectCode": "code4",
+        "tenantSubjectName": "name4"
+      },
+      {
+        "tenantSubjectId": "5",
+        "tenantSubjectCode": "code5",
+        "tenantSubjectName": "name5"
+      }
+    ],
+    "ageMinPatient": 12,
+    "ageMaxPatient": 34
+  }
+}

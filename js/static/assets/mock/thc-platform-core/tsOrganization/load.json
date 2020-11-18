@@ -1,0 +1,62 @@
+{
+  "msg": "eiusmod",
+  "head": {
+    "errCode": 0,
+    "errMsg": "ad mollit sunt"
+  },
+  "code": 0,
+  "data": {
+    "id": "3",
+    "parentCode": "code3",
+    "parentName": "name3",
+    "code": "123",
+    "name": "深圳大区",
+    "nameEnglish": "123",
+    "shortName": "123",
+    "shortNameEnglish": "123",
+    "addressJson": "{\"province\":\"130000\",\"city\":\"130300\",\"county\":\"130304\",\"addressDetail\":\"123\"}",
+    "creditCode": "123",
+    "medicalInstitutionCode": "123",
+    "medicalInstitutionPreparationLicence": "123",
+    "medicalInstitutionPracticeLicence": "123",
+    "businessLicence": "123",
+    "necip": "123",
+    "openAccountLicence": "123",
+    "orgPriority": "123",
+    "businessStatus": {
+      "id": "01",
+      "name": "筹备中",
+      "code": "01"
+    },
+    "registeAddress": "123",
+    "longitude": "123",
+    "latitude": "123",
+    "services": "123",
+    "servicesEnglish": "123",
+    "businessTime": "123",
+    "businessTimeEnglish": "123",
+    "servicesLanguage": {
+      "id": "04",
+      "name": "韩语",
+      "code": "04"
+    },
+    "emergencyPhone": "123",
+    "consultationPhone": "123",
+    "consultationPhoneEnglish": "123",
+    "busLine": "123",
+    "busLineEnglish": "123",
+    "note": "123",
+    "provinceCode": "130000",
+    "provinceName": "河北省",
+    "provinceEnglishName": "",
+    "cityCode": "130300",
+    "cityName": "秦皇岛市",
+    "cityEnglishName": "",
+    "countyCode": "130304",
+    "countyName": "北戴河区",
+    "countyEnglishName": "",
+    "addressInfo": "123",
+    "businessStatusCode": "01",
+    "servicesLanguageCode": "04"
+  }
+}

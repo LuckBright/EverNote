@@ -1,0 +1,45 @@
+{
+  "msg": "nisi veniam reprehenderit",
+  "head": {
+    "errCode": 0,
+    "errMsg": "eiusmod ea ipsum"
+  },
+  "code": 0,
+  "data": {
+    "pageList": [
+      {
+        "id": "1",
+        "deptCode": "code1",
+        "deptName": "整形部",
+        "parentDeptCode": "0"
+      },
+      {
+        "id": "2",
+        "deptCode": "code2",
+        "deptName": "整形部",
+        "parentDeptCode": "code1"
+      },
+      {
+        "id": "3",
+        "deptCode": "code3",
+        "deptName": "整形部",
+        "parentDeptCode": "code2"
+      },
+      {
+        "id": "4",
+        "deptCode": "code4",
+        "deptName": "整形部",
+        "parentDeptCode": "code3"
+      },
+      {
+        "id": "5",
+        "deptCode": "code5",
+        "deptName": "整形部",
+        "parentDeptCode": "code3"
+      }
+    ],
+    "offset": "fugiat Ut sunt",
+    "pagesize": "consectetur",
+    "totalCount": "eiusmod deserunt"
+  }
+}

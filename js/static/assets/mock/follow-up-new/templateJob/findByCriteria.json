@@ -1,0 +1,59 @@
+{
+    "head": {
+      "errCode": 0,
+      "errMsg": "success"
+    },
+    "data": {
+      "resultList": [
+        {
+          "id": "1",
+          "tenantId": "5000",
+          "orgId": "3",
+          "templateId": "4",
+          "name": "任务1",
+          "patientId": "Z199274799384",
+          "patientName": "欧阳先生",
+          "patientGenderId": 8,
+          "patientAge": 9,
+          "patientDeptIds": "1",
+          "patientSicknessIds": "2",
+          "diagnosisTime": "2019-05-21 00:42:44",
+          "doctorId": "3",
+          "deptId": "4",
+          "status": 6,
+          "isDelete": 0,
+          "creatorId": "1",
+          "creatorName": "1",
+          "createTime": "2019-05-21 00:42:56",
+          "modifyUserId": "ae8ad9bc-1ce7-430c-a4a6-a394ca00a68d",
+          "modifyUserName": "杨飞飞",
+          "modifyTime": "2019-05-21 17:32:22"
+        },
+        {
+          "id": "2",
+          "tenantId": "5000",
+          "orgId": "3",
+          "templateId": "4",
+          "name": "任务2",
+          "patientId": "Z199274799385",
+          "patientName": "欧阳先生",
+          "patientGenderId": 8,
+          "patientAge": 9,
+          "patientDeptIds": "1",
+          "patientSicknessIds": "2",
+          "diagnosisTime": "2019-05-21 00:42:44",
+          "doctorId": "3",
+          "deptId": "4",
+          "status": 6,
+          "isDelete": 0,
+          "creatorId": "1",
+          "creatorName": "1",
+          "createTime": "2019-05-21 00:42:56",
+          "modifyUserId": "ae8ad9bc-1ce7-430c-a4a6-a394ca00a68d",
+          "modifyUserName": "杨飞飞",
+          "modifyTime": "2019-05-21 17:32:22"
+        }
+      ],
+      "totalCount": 2
+    }
+  }

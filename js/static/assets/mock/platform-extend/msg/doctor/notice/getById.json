@@ -1,0 +1,29 @@
+{
+  "code": 0,
+  "head": {
+    "errCode": 0
+  },
+  "data": {
+    "id": "72b5a360-f706-4ea0-b1a8-3b1259234bd9",
+    "title": "随访患者[刘菜花]挂号提醒\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+    "origId": 5000,
+    "category": 35,
+    "receiverType": 2,
+    "receiverId": "2ae47fdf59414028865e996435740648",
+    "content": "随访患者[刘菜花]挂号提醒",
+    "url": null,
+    "status": 1,
+    "concurrent": null,
+    "groupId": null,
+    "createTime": "2019-12-14 18:04:40",
+    "updateTime": "2020-03-23 15:38:39",
+    "extend1": "/web/follow/index.html#/follow/task/detail/51807fbe714944bc979d7e1c021d481e",
+    "extend2": null,
+    "extend3": null,
+    "extend4": null,
+    "extend5": null,
+    "pushMqStatus": 0,
+    "pushRecallMqStatus": null,
+    "notes": null
+  }
+}

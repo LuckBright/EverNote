@@ -1,0 +1,84 @@
+{
+  "msg": "success",
+  "head": {
+    "errCode": 0,
+    "errMsg": "success"
+  },
+  "code": 0,
+  "data": [
+    {
+      "id": "1",
+      "opById": "90010",
+      "opByName": "bpm",
+      "loginName": "bpm",
+      "opType": 100,
+      "opTime": 1560151793000,
+      "opModuleOne": "客户中心",
+      "opModuleTwo": "基础信息",
+      "patientId": null,
+      "patientName": null,
+      "visitNumber": null,
+      "patientMobile": null,
+      "patientSex": null,
+      "patientAge": null,
+      "remark": null,
+      "content": "[ { \"field\":\"性别\", \"before\":\"男\", \"after\":\"女\" }, { \"field\":\"姓名\", \"before\":\"牛东\", \"after\":\"牛冬\" } ]",
+      "attr1": null,
+      "attr2": null,
+      "attr3": null,
+      "attr4": null,
+      "attr5": null,
+      "createTime": 1560151793000,
+      "modifyTime": 1560153936000,
+      "creator": "90010",
+      "modifyUser": "90010",
+      "isDelete": 0,
+      "contentDtos": [
+        {
+          "field": "性别",
+          "before": "男",
+          "after": "女"
+        },
+        {
+          "field": "姓名",
+          "before": "牛东",
+          "after": "牛冬"
+        }
+      ],
+      "offset": null,
+      "pagesize": null
+    },
+    {
+      "id": "2",
+      "opById": "90010",
+      "opByName": "bpm",
+      "loginName": "bpm",
+      "opType": 200,
+      "opTime": 1560151859000,
+      "opModuleOne": "系统首页",
+      "opModuleTwo": null,
+      "patientId": null,
+      "patientName": null,
+      "visitNumber": null,
+      "patientMobile": null,
+      "patientSex": null,
+      "patientAge": null,
+      "remark": null,
+      "content": null,
+      "attr1": null,
+      "attr2": null,
+      "attr3": null,
+      "attr4": null,
+      "attr5": null,
+      "createTime": 1560151859000,
+      "modifyTime": 1560151859000,
+      "creator": null,
+      "modifyUser": null,
+      "isDelete": 0,
+      "contentDtos": null,
+      "offset": null,
+      "pagesize": null
+    }
+  ],
+  "totalCount": 2
+}

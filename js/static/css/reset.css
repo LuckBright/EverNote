@@ -1,0 +1,71 @@
+@charset "utf-8";
+
+* {
+  -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+  -webkit-text-size-adjust: 100%;
+  font-family: -apple-system, "PingFang SC","Helvetica Neue", Helvetica, STHeiTi, sans-serif;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  font-size: 62.5%;
+  background: transparent;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input, textarea, p, blockquote, th, td, hr, button, article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section, sumary {
+  margin: 0;
+  padding: 0;
+}
+
+input, select,textarea {
+  border: 0;
+  -webkit-appearance: none;
+  appearance:none;
+}
+
+ol, ul {
+  list-style: none;
+}
+
+*:not(input, select, textArea) {
+  -webkit-user-select: none;
+}
+
+img,a{
+  -webkit-touch-callout:none;
+}
+
+a,a:active,a:hover {
+  text-decoration: none;
+}
+
+a,button,input,textarea{ 
+  -webkit-tap-highlight-color:rgba(0,0,0,0);
+}
+
+@media screen and (min-width:100px){ /*  iPhone 4,5 */
+  html{ font-size: 10px;}
+}
+@media screen and (min-width:320px){ /*  iPhone 4,5 */
+  html{ font-size: 10px;}
+}
+@media screen and (min-width:375px){ /*  iPhone 6 */
+  html{ font-size: 12px;}
+}
+ @media screen and (min-width:414px){  /*  iPhone 6 plus */
+  html{ font-size: 12px;}
+}
+@media screen and (min-width:600px){
+  html{ font-size:14px;}
+}

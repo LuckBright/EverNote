@@ -1,0 +1,18 @@
+{
+  "msg": "ea",
+  "head": {
+    "errCode": 0,
+    "errMsg": "consectetur velit eiusmod est dolor"
+  },
+  "code": 0,
+  "data": {
+    "pageList": [
+      {
+        "id": "adipisicing sunt",
+        "orgId": "4",
+        "orgManageTenantSubjectPermission": "1",
+        "orgUseTenantSubjectPermission": "1"
+      }
+    ]
+  }
+}

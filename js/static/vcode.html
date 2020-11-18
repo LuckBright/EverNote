@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0,user-scalable=no, minimal-ui">
+  <meta http-equiv="Expires" content="0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Cache-control" content="no-cache">
+  <meta http-equiv="Cache" content="no-cache">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="shortcut icon" type="image/x-icon" href="static/assets/favicon.ico" />
+  <link rel="stylesheet" href="./css/reset.css">
+  <link rel="stylesheet" href="./css/vcode.css?t=sp.8">
+  <script src="./js/jquery-3.2.1.min.js"></script>
+  <title>收货验证</title>
+</head>
+
+<body>
+  <div id="app">
+    <div class="page1">
+      <h3>请输入收货验证码</h3>
+      <p>请向收货方索要物流信息中的验证码，确认无误后再将药品交给对方。</p>
+      <div class="v_input">
+        <ul>
+          <li>
+            <span class="cursor-blink"></span>
+            <span class="cursor-text"></span>
+          </li>
+          <li>
+            <span class="cursor-blink"></span>
+            <span class="cursor-text"></span>
+          </li>
+          <li>
+            <span class="cursor-blink"></span>
+            <span class="cursor-text"></span>
+          </li>
+          <li>
+            <span class="cursor-blink"></span>
+            <span class="cursor-text"></span>
+          </li>
+          <li>
+            <span class="cursor-blink"></span>
+            <span class="cursor-text"></span>
+          </li>
+          <li>
+            <span class="cursor-blink"></span>
+            <span class="cursor-text"></span>
+          </li>
+        </ul>
+        <input type="tel" name="vcode" id="vcode" maxlength="6" value=""></input>
+      </div>
+      <a href="javascript:void(0)" class="v_button disabled" id="v_button_1">验证</a>
+    </div>
+    <div class="page2" style="display: none;">
+      <div class="info">
+        <span>确认收货信息</span>
+        <strong class="name">梁德轩</strong>
+        <strong class="mobile">13720054668</strong>
+        <p class="address">北京顺义区空港融慧园324难道不应该给个折行的样式么901室</p>
+      </div>
+      <div class="buttons">
+        <a href="javascript:void(0)" class="v_button" id="v_button_2">确认收货</a>
+      </div>
+    </div>
+    <span class="error_msg">验证失败，请重新输入</span>
+  </div>
+  <script>
+    $(function() {
+      window.alert = function (name) { // 重写alert方法去掉ios下alert带的url
+        var iframe = document.createElement("IFRAME");
+        iframe.style.display = "none";
+        iframe.setAttribute("src", 'data:text/plain,');
+        document.documentElement.appendChild(iframe);
+        window.frames[0].window.alert(name);
+        iframe.parentNode.removeChild(iframe);
+      }
+    // 解决confirm弹窗携带链接
+      window.confirm = function (message) {
+        var iframe = document.createElement("IFRAME");
+        iframe.style.display = "none";
+        iframe.setAttribute("src", 'data:text/plain,');
+        document.documentElement.appendChild(iframe);
+        var alertFrame = window.frames[0];
+        var result = alertFrame.window.confirm(message);
+        iframe.parentNode.removeChild(iframe);
+        return result;
+      }
+      var baseUrl = window.location.host.indexOf(':8080') > -1 ? 'dev3b.everjiankang.com.cn' : window.location.host
+      var tenantId = '',
+          vShow = $('.v_input'), 
+          vCode = $('#vcode'), 
+          vButton = $('#v_button_1'), 
+          cButton = $('#v_button_2'),
+          page1 = $('.page1'),
+          page2 = $('.page2'),
+          inputUl = $('.v_input ul')
+      $.get('http://' + baseUrl + '/api/global-api/global-platform/internal/tenant/getWebConfig/', {domainName: baseUrl}, function (rs) {
+        tenantId = rs.data.tenantId
+      })
+      vShow.on('click', function(e) {
+        vCode.focus()
+      })
+      vCode.on('focus', function(e) {
+        var codeVal = vCode.val()
+        if (codeVal === '') {
+          $('.v_input ul li').first().addClass('focus')
+        } else {
+          $('.v_input ul li').eq(codeVal.length).siblings().removeClass('focus')
+          $('.v_input ul li').eq(codeVal.length).addClass('focus')
+        }
+        $('.error_msg').hide()
+      })
+      vCode.on('input', function(e) {
+        var codeVal = vCode.val()
+        if (codeVal.length > 0 ) {
+          var codeArr = codeVal.split('')
+          inputUl.find('li:gt('+(codeVal.length - 1)+') > span.cursor-text').html('')
+          for (var i = 0;i < codeArr.length; i++) {
+            inputUl.find('li:eq(' + i + ') > span.cursor-text').html(codeArr[i])
+            inputUl.find('li:eq(' + i + ')').removeClass('focus')
+          }
+          inputUl.find('li:gt('+codeVal.length +')').removeClass('focus')
+          inputUl.find('li:eq('+ codeVal.length +')').addClass('focus')
+        } else {
+          inputUl.find('li > span.cursor-text').html('')
+          inputUl.find('li').removeClass('focus').first().addClass('focus')
+        }
+        if (codeVal.length === 6) {
+          vButton.removeClass('disabled')
+        } else {
+          vButton.addClass('disabled')
+        }
+      })
+      vCode.on('blur', function(e) {
+        inputUl.find('li').removeClass('focus')
+      })
+      vButton.on('click', function(e) {
+        var code = vCode.val()
+        var requestUrl = 'https://' + baseUrl + '/api-ih/titan-cms/recipeDeliver/v1.1/verificationCode'
+        if (code.length > 0) {
+          $.ajax({
+            url:requestUrl,
+            type:'get',
+            dateType:'json',
+            data: {"verificationCode": code},
+            headers:{'x-tenant-id': tenantId},
+            success:function(rs){
+              if (rs.errCode) {
+                $('.error_msg').html('验证失败，请重新输入').fadeIn(500).delay(3000).fadeOut(500)
+                vCode.val('')
+                inputUl.find('li > span.cursor-text').html('')
+                inputUl.find('li').removeClass('focus').first().addClass('focus')
+                return false
+              }
+              $('.name').html(rs.data.name)
+              $('.mobile').html(rs.data.mobile)
+              $('.address').html(rs.data.province + ' ' + rs.data.city + ' ' + rs.data.county + ' ' + rs.data.addressDetail)
+              page1.hide()
+              page2.show()
+            },
+            error:function(rs){
+              console.log(rs)
+              return false
+            }
+          })
+        }
+      })
+      cButton.on('click', function (e) {
+        if(window.confirm('是否确认收货')){
+          var code = vCode.val()
+          var requestUrl = 'https://' + baseUrl + '/api-ih/titan-cms/recipeDeliver/v1.1/confirmDeliver?verificationCode=' + code
+          $.ajax({
+            url:requestUrl,
+            type:'post',
+            dateType:'json',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({verificationCode: parseInt(code)}),
+            headers:{'x-tenant-id': tenantId},
+            success:function(rs){
+              if (rs.errCode) {
+                $('.error_msg').html(rs.errMsg).fadeIn(500).delay(3000).fadeOut(500)
+                return false
+              }
+              $('.error_msg').html('货物已签收').fadeIn(500).delay(1000).fadeOut(500, function () {
+                vCode.val('')
+                inputUl.find('li > span.cursor-text').html('')
+                inputUl.find('li').removeClass('focus').first().addClass('focus')
+                page2.hide()
+                page1.show()
+              })
+            },
+            error:function(rs){
+              console.log(rs)
+              return false
+            }
+          })
+        } else{
+          return false
+        }
+      })
+    })
+  </script>
+</body>
+</html>

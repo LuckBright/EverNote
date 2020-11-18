@@ -1,0 +1,36 @@
+{
+  "msg": "success",
+  "head": {
+    "errCode": 0,
+    "errMsg": "success"
+  },
+  "code": 0,
+  "data1": null,
+  "data": {
+    "userInfo": {
+      "displayName": "测试-张伟东",
+      "loginName": "13260357718",
+      "telephoneNumber": "13260357718",
+      "isValid": 0,
+      "type": 2,
+      "nickname": "13260357718",
+      "userId": "ef65a3ac-ee80-4efc-95d8-582669ac27ce",
+      "username": "13260357718",
+      "fullname": "测试-张伟东",
+      "salt": null,
+      "email": null,
+      "mobile": "13260357718",
+      "status": 0,
+      "roleIdList": null,
+      "createTime": 1547261580000,
+      "deptId": null,
+      "deptName": null
+    },
+    "roleIds": [
+      "2",
+      "12",
+      "15",
+      "18"
+    ]
+  }
+}
