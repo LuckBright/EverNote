@@ -1,0 +1,172 @@
+<template>
+  <div id="">
+    <ever-bread-crumb name="详情" showTitle="true" path="/warehouse/manufacturers" :pathTo="true"></ever-bread-crumb>
+    <div class="layout_inner">
+      <div class="panel-body pos_re">
+        <h2 class="alg_c">{{titleName}}</h2>
+        <el-tabs class="tabs" v-model="activeName" @tab-click="handleClick">
+          <el-tab-pane label="基础信息" name="info">
+            <ever-form2 :schema="schema" v-model="obj" ref="form" :span="12" labelWidth="200px">
+              <template slot="photoUrl">
+                <div class="pos_ab photo_img">
+                  <!-- <a :href="photoUrl" target="_blank">
+                    <img class="img_src" :src="photoUrl">
+                  </a> -->
+                </div>
+              </template>
+              <template slot="dateOfBirth">
+                <div>
+                  <span v-if="obj.dateOfBirth">{{obj.dateOfBirth}}</span>
+                  <span v-else>无</span>
+                </div>
+              </template>
+              <template slot="placeholder">
+                <div style="height: 38px;">
+                </div>
+              </template>
+              <div slot="default"></div>
+            </ever-form2>
+          </el-tab-pane>
+          <el-tab-pane label="资质信息" name="aptitude">
+            <!-- <div class="default alg_c f16">
+              <span>该厂商未录入资质信息</span>
+            </div> -->
+            <el-row class="basics_content">
+              <el-col :span="12" class="info_con">
+                <a href="http://img.taopic.com/uploads/allimg/120727/201995-120HG1030762.jpg" target="_blank">
+                  <img src="http://img.taopic.com/uploads/allimg/120727/201995-120HG1030762.jpg">
+                </a>
+                <div class="card">
+                  <span class="card_text">药品经营许可证</span>
+                  <span class="card_text">生效日期：2016-05-18</span>
+                  <span class="card_text">有效期至：2016-05-18</span>
+                </div>
+              </el-col>
+            </el-row>
+          </el-tab-pane>
+        </el-tabs>
+      </div>
+      <div class="panel-footer table-btn-ml_180">
+        <el-button type="primary" @click="handleEdit">编辑</el-button>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+import api from '@/warehouse/store/manufacturerapi'
+let schema = [
+  {
+    name: 'name',
+    label: '中文名:',
+    comp: 'readonlyitem'
+  },
+  {
+    name: 'photoUrl',
+    label: '证件预览:',
+    comp: 'custom'
+  },
+  {
+    name: 'creditCode',
+    label: '社会统一信用代码:',
+    comp: 'readonlyitem'
+  },
+  {
+    name: 'placeholder',
+    label: '',
+    comp: 'custom'
+  },
+  {
+    name: 'residence',
+    label: '住所:',
+    comp: 'readonlyitem'
+  },
+  {
+    name: 'placeholder',
+    label: '',
+    comp: 'custom'
+  },
+  {
+    name: 'contact',
+    label: '法定代表人:',
+    comp: 'readonlyitem'
+  },
+  {
+    name: 'placeholder',
+    label: '',
+    comp: 'custom'
+  },
+  {
+    name: 'registerCapital',
+    label: '注册资本:',
+    comp: 'readonlyitem'
+  },
+  {
+    name: 'placeholder',
+    label: '',
+    comp: 'custom'
+  },
+  {
+    name: '',
+    label: '成立日期:',
+    comp: 'custom'
+  },
+  {
+    name: 'placeholder',
+    label: '',
+    comp: 'custom'
+  },
+  {
+    name: '',
+    label: '营业期限:',
+    comp: 'custom'
+  },
+  {
+    name: 'description',
+    label: '经营范围:',
+    comp: 'readonlyitem',
+    span: 20
+  }
+]
+export default {
+  data () {
+    let obj = this.$ever.createObjFromSchema(schema)
+    return {
+      api,
+      schema,
+      obj,
+      titleName: '',
+      activeName: 'info',
+      photoUrl: '',
+      objId: this.$route.params.id
+    }
+  },
+  created () {
+    this.getDetail()
+  },
+  methods: {
+    async getDetail () {
+      let dataDetail = await this.api.getById(this.objId).then()
+      if (dataDetail && dataDetail.name) {
+        this.titleName = dataDetail.name
+      }
+    },
+    handleClick (tab, e) {},
+    handleEdit () {
+      this.$router.push('/warehouse/manufacturer/' + this.objId)
+    }
+  },
+  watch: {
+  }
+}
+</script>
+<style lang="scss" scoped>
+.photo_img {width: 130px; height: 130px; text-align: center; top: -20px; left: -58px;}
+.img_src {max-width: 100%;max-height: 100%;width: auto;height: auto;}
+.default {width: 100%; height: 200px; line-height: 200px;}
+.basics_content {padding: 20px 0 0 0; font-size: 14px; color: #48576a;}
+.info_con {margin: 20px 0 0 0;}
+.info_con img{width: 200px;height: 160px; float: left; margin: 0 0 0 100px;}
+.card {line-height: 20px; height: 180px; float:left;}
+.card_text:first-child {margin-top: 10px;}
+.card_text {display: block; margin: 0 40px 40px;}
+</style>

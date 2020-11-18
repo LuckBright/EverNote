@@ -1,0 +1,1 @@
+export const DEPTICON = ['euQby4pajU3SoEFW7B9', '7BBbHedYNzyWeGWoUIK', 'Z4wi1HHzJ6XsJZ1oxBb', '91eQGlrSIGsIiJEatIS', 'ScFXeMrGVSmHDHSNhwc', 'J0CZtflmpGdVVNJktsv', 'qQh4T8K88xsa0XwirSI', 'f7BqcZVhWPeM5UlOUPB', 'tsuVNlthmHE9e8kdMws', 'OrNUztw2YBZE74VFloH', '8dOaWreLtC0U1l8bua7', 'H22YY4KbqyzuonnsRPT', 'hMvjg4Kvzq3tvO7E1PU', 'Mkxzsh9AkMVw0s2caud']

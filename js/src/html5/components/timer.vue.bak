@@ -1,0 +1,59 @@
+<template>
+  <div class="timeCon">
+    <div class="timers" v-if="this.mark > 0">{{countdowm}}S</div>
+  </div>
+</template>
+<script>
+export default {
+  data () {
+    return {
+      timer: '',
+      countdowm: this.delay
+    }
+  },
+  props: ['mark', 'delay'],
+  watch: {
+    mark () {
+      if (this.mark) {
+        // 有操作，清除计时器，重新开始倒计时
+        clearInterval(this.timer)
+        this.countdowm = this.delay
+        this.timer = setInterval(() => {
+          this.countdowm--
+        }, 1000)
+      } else {
+        // 退出时，清除计时器
+        clearInterval(this.timer)
+        this.countdowm = this.delay
+      }
+    },
+    countdowm () {
+      // 倒计时结束，清除计时器，退出用户
+      if (!this.countdowm) {
+        clearInterval(this.timer)
+        this.countdowm = this.delay
+        this.$emit('time-out')
+      }
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.timeCon {
+  .timers {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+    text-align: center;
+    border: 2px solid #EE4433;
+    background: rgba(238,68,51,0.10);
+    color: #EE4433;
+    border-radius: 50%;
+    font-size: 36px;
+  }
+}
+</style>
+

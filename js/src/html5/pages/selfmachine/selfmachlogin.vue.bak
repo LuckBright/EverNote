@@ -1,0 +1,193 @@
+<template>
+  <div class="loginCon">
+    <h1 class="welcomeCon">欢迎使用自助机！</h1>
+    <div class="setOrigin" v-if="!showMachineSet">
+      <div class="originCon">
+        <div
+          class="originItem"
+          v-for="(item, index) in originList"
+          :key="index"
+          :class="{active: curOriginIndex === index}"
+          @click="selectOrigin(item, index)"
+        >{{item.name}}</div>
+      </div>
+      <div class="operate">
+        <sl-button message="下一步" type="large" @click="saveOrigin"></sl-button>
+      </div>
+    </div>
+    <div class="setSelfMach" v-else>
+      <!-- <h1 class="location">当前所在机构：{{currentOrigin.clinicName}}</h1> -->
+      <div class="selfMachCon">
+        <div
+          class="selfMachItem"
+          v-for="(item, index) in selfMachineList"
+          :key="index"
+          :class="{active: curIndex === index}"
+          @click="selectSelfMach(item, index)"
+        >{{item.name}}</div>
+      </div>
+      <div class="operate">
+        <sl-button message="取消" type="large" @click="cancel"></sl-button>
+        <sl-button message="保存" type="large" @click="saveChoose"></sl-button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import api from '../../store/selfmachapi.js'
+import slButton from '../../components/button'
+export default {
+  data () {
+    return {
+      selfMachineList: [],
+      originList: [],
+      curIndex: -1,
+      curOriginIndex: -1,
+      currentSelfMach: window.localStorage.getItem('currentinfo') ? JSON.parse(window.localStorage.getItem('currentinfo')) : '',
+      currentOrigin: window.localStorage.getItem('currentOrigin') ? JSON.parse(window.localStorage.getItem('currentOrigin')) : '',
+      showMachineSet: false
+    }
+  },
+  created () {
+    this.getOriginList()
+  },
+  methods: {
+    getOriginList () {
+      api.getOriginList().then(res => {
+        if (res.head.errCode === 0 && res.data) {
+          this.originList = res.data.resultList
+          let _originInfo = window.localStorage.getItem('currentOrigin')
+          if (_originInfo && JSON.parse(_originInfo).id) {
+            this.originList.forEach((item, index) => {
+              if (item.id === JSON.parse(_originInfo).id) {
+                this.curOriginIndex = index
+              }
+            })
+          }
+        }
+      })
+    },
+    selectOrigin (item, index) {
+      this.curOriginIndex = index
+      this.currentOrigin = item
+    },
+    saveOrigin () {
+      if (this.curOriginIndex < 0) {
+        this.$messageTips(this, 'warning', '请先选择机构医院！', '提示')
+      } else {
+        window.localStorage.setItem('currentOrigin', JSON.stringify(this.originList[this.curOriginIndex]))
+        this.showMachineSet = true
+        this.getSelfMach()
+      }
+    },
+    getSelfMach () {
+      api.getSelfMach({ orgId: this.currentOrigin.id }).then(res => {
+        if (res.head.errCode === 0 && res.data) {
+          this.selfMachineList = res.data.resultList
+          let _machInfo = window.localStorage.getItem('currentinfo')
+          if (_machInfo && JSON.parse(_machInfo).id) {
+            this.selfMachineList.forEach((item, index) => {
+              if (item.id === JSON.parse(_machInfo).id) {
+                this.curIndex = index
+              }
+            })
+          }
+        }
+      })
+    },
+    selectSelfMach (item, index) {
+      this.curIndex = index
+      this.currentSelfMach = item
+    },
+    cancel () {
+      this.curIndex = -1
+      this.showMachineSet = false
+    },
+    saveChoose () {
+      if (this.curIndex < 0) {
+        this.$messageTips(this, 'warning', '请先选择自助机！', '提示')
+      } else {
+        window.sessionStorage.removeItem('patientCardNo')
+        window.localStorage.setItem('currentinfo', JSON.stringify(this.selfMachineList[this.curIndex]))
+        this.$messageTips(this, 'success', '保存成功', '提示')
+        setTimeout(() => {
+          this.$router.push('/html5/selfmachindex')
+        }, 1000)
+      }
+    }
+  },
+  components: {
+    slButton
+  }
+}
+</script>
+<style lang="scss" scoped>
+.loginCon {
+  padding: 20px;
+  text-align: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  font-family: PingFangSC-Semibold;
+  background: url("../../../../static/assets/html5/img/selfmachbg.png")
+    no-repeat;
+  background-size: cover;
+  .welcomeCon {
+    font-size: 90px;
+    margin: 144px 0 0;
+    background: linear-gradient(-180deg, #70adf8 1%, #4a96f2 22%, #126fe0 100%);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+  .originItem {
+    width: 515px;
+    height: 120px;
+    line-height: 120px;
+    border: 1px solid #ccc;
+    margin: 20px;
+    border-radius: 10px;
+    font-size: 50px;
+    color: #1c7bef;
+    cursor: pointer;
+    font-weight: bold;
+    float: left;
+  }
+  .selfMachCon,
+  .originCon {
+    width: 1206px;
+    margin: 65px auto;
+    overflow: hidden;
+  }
+  .location {
+    margin: 30px 0;
+    color: #000;
+  }
+  .selfMachItem {
+    width: 360px;
+    height: 120px;
+    line-height: 120px;
+    border: 1px solid #ccc;
+    margin: 20px;
+    border-radius: 10px;
+    font-size: 50px;
+    color: #1c7bef;
+    cursor: pointer;
+    font-weight: bold;
+    float: left;
+  }
+  .active {
+    background-image: linear-gradient(
+      -180deg,
+      #70adf8 1%,
+      #4a96f2 22%,
+      #126fe0 100%
+    );
+    color: #fff;
+  }
+  .buttonCon {
+    margin: 30px 20px;
+  }
+}
+</style>

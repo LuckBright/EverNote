@@ -1,0 +1,74 @@
+<template>
+  <el-dialog :title="title" :visible.sync="dialogVisible" class="ui_dialog_02">
+    <el-table
+      :data="longdata.title"
+      height="250"
+      border
+      style="width: 100%">
+      <el-table-column
+        prop="drugName"
+        label="药物名称"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="type"
+        label="类型"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="entrust"
+        label="嘱托">
+      </el-table-column>
+      <el-table-column
+        prop="startTime"
+        label="开嘱时间"
+        width="160">
+      </el-table-column>
+      <el-table-column
+        prop="endTime"
+        label="停止时间"
+        width="160">
+      </el-table-column>
+      <el-table-column
+        prop="remarks"
+        show-overflow-tooltip
+        label="备注">
+      </el-table-column>
+    </el-table>
+    <div>
+      <h3>药物医嘱执行列表</h3>
+      <el-row class="textcenter">
+        <el-col :span="4">
+          <div >预执行时间</div>
+          <p v-for="(item, index) in longdata.details" :key="index">{{item.planTime}}</p>
+        </el-col>
+        <el-col :span="4">
+          <div>执行完成时间</div>
+          <p v-for="(item, index) in longdata.details" :key="index">{{item.actualTime}}</p>
+        </el-col>
+      </el-row>
+    </div>
+  </el-dialog>
+</template>
+<script>
+export default {
+  props: ['longdata', 'visible', 'title'],
+  data () {
+    return {
+      dialogVisible: false
+    }
+  },
+  watch: {
+    visible (val) {
+      this.dialogVisible = val
+    },
+    dialogVisible (val) {
+      this.$emit('update', val)
+    }
+  }
+}
+</script>
+<style scoped>
+.textcenter{text-align:center;}
+</style>
+

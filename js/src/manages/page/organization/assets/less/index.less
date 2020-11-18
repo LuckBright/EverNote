@@ -1,0 +1,430 @@
+/*  common  */
+@col_btn_01: #409eff;
+@col_btn_02: #ecf5ff;
+@col_btn_03: #b3d8ff;
+@col_b_01: #fff;
+
+.w {
+  width: 100%;
+}
+.w .el-cascader {
+  width: 100%;
+}
+.wi {
+  width: 100% !important;
+}
+.df {
+  display: flex;
+}
+.f1 {
+  flex: 1;
+}
+.w60 {
+  width: 60px;
+}
+.tar {
+  text-align: right;
+}
+.tac {
+  text-align: center;
+}
+.tali {
+  text-align: left!important;
+}
+.oa {
+  overflow: auto;
+}
+.tree-table-wrap {
+  border: 1px solid #ddd;
+  border-bottom: none;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-top: 10px;
+  font-size: 14px;
+
+  &::after {
+    content: '';
+    display: block;
+    height: 0;
+    width: 100%;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .tree-table-header {
+    display: table;
+    width: 100%;
+
+    .tree-table-header-item {
+      display: table-cell;
+      padding: 3px 10px;
+      border-bottom: 1px solid #ccc;
+      line-height: 23px;
+      background-color: #eee;
+      font-weight: bold;
+      font-size: 14px;
+      &.last.has-scroll {
+        padding-right: 25px;
+      }
+    }
+  }
+
+  .el-tree.tree-table {
+    flex: 1;
+    overflow: auto;
+    .el-tree-node {
+      position: relative;
+    }
+    .el-tree-node.is-drop-inner > .el-tree-node__content > .node-content {
+      background-color: #deeeff;
+    }
+
+    .el-tree-node__content {
+      height: 30px;
+      border-bottom: 1px solid #ccc;
+      .node-content {
+        flex: 1;
+        display: flex;
+        [class *="content-col"] {
+          position: absolute;
+          padding-left: 10px;
+          box-sizing: border-box; // 元素的宽度 为 border 内的宽度
+        }
+      }
+      .el-button {
+        transition: all .1s;
+        font-weight: 400;
+        // 表格内的按钮样式：
+        border-radius: 2px;
+        font-size: 14px;
+        padding: 2px 5px;
+
+        &.el-button--primary {
+          color: @col_btn_01;
+          background: @col_btn_02;
+          border-color: @col_btn_03;
+
+          &:hover {
+            color: @col_b_01;
+            background: @col_btn_01;
+            border-color: @col_btn_01;
+          }
+        }
+      }
+    }
+  }
+}
+.el-cascader__search-input {
+  margin-left: 10px;
+}
+.flex-row.el-row {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  .el-col {
+    display: flex;
+  }
+}
+.danger {
+  color: #fa5555;
+}
+// ----------------------------------------------------------------------
+// 业务样式
+// ----------------------------------------------------------------------
+// 默认页面 操作按钮列
+.node-content {
+  .content-col-code {
+    width: 200px;
+    right: 600px;
+  }
+  .content-col-op {
+    width: 560px;
+    right: 20px;
+  }
+}
+// 科室管理页面
+.org-subject-content.node-content {
+  .content-col-tenant {
+    width: 300px;
+    right: 760px;
+  }
+  .content-col-code {
+    width: 200px;
+    right: 540px;
+  }
+  .content-col-type {
+    width: 80px;
+    right: 440px;
+  }
+  .content-col-cat {
+    width: 80px;
+    right: 340px;
+  }
+  .content-col-op {
+    width: 300px;
+    right: 20px;
+  }
+}
+// 科室管理页面科室列表样式
+.subject-auth-content.node-content {
+  .content-col-type {
+    width: 100px;
+    right: 240px;
+  }
+  .content-col-cat {
+    width: 100px;
+    right: 120px;
+  }
+  .content-col-op {
+    width: 80px;
+    right: 20px;
+  }
+}
+// 科室管理页面机构列表样式
+.subject-org-content.node-content{
+  .content-col-manage {
+    width: 80px;
+    right: 120px;
+    text-align: center;
+  }
+  .content-col-use {
+    width: 80px;
+    right: 20px;
+    text-align: center;
+  }
+}
+// 人员权限 机构列表页面
+.staff-org-content.node-content{
+  .content-col-manage {
+    width: 80px;
+    right: 240px;
+    text-align: center;
+  }
+  .content-col-use {
+    width: 80px;
+    right: 140px;
+    text-align: center;
+  }
+  .content-col-auth {
+    width: 100px;
+    right: 20px;
+  }
+}
+// 机构批量管理科室页面
+.org-subject-auth-content.node-content{
+  .content-col-code {
+    width: 300px;
+    right: 460px;
+  }
+  .content-col-manage {
+    width: 200px;
+    right: 240px;
+    padding-left: 40px!important;
+  }
+  .content-col-use {
+    width: 200px;
+    right: 20px;
+    padding-left: 40px!important;
+  }
+}
+// 在treeTable中传入  content-class="xxx"
+// .xxx.node-content { ... } 可以操作特殊的列宽
+
+.detail-title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.tip-age-wrap {
+  width: 30px;
+  text-align: right;
+  .tip-age {
+    font-size: 20px;
+    margin-top: 6px;
+  }
+}
+.staff-age-range {
+  height: 33px;
+  width: 100%!important;
+  .age-picker {
+    width: auto!important;
+    border: none!important;
+  }
+}
+.staff-age-range .el-input--small .el-input__inner {
+  height: 30px;
+  line-height: 30px;
+}
+
+.form-item-title {
+  font-size: 16px;
+  font-weight: bold;
+}
+.el-form .el-form-item {
+  .el-upload {
+    .el-icon-circle-close, .el-icon-zoom-in {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      font-size: 20px;
+      background: #fff;
+      display: block;
+      border-radius: 100%;
+      border: 1px solid transparent;
+    }
+    .el-icon-zoom-in {
+      top: 40px;
+    }
+    .el-icon-upload-success {
+      top: 5px;
+    }
+  }
+}
+.org-avatar-uploader {
+  text-align: center;
+  //margin-bottom: 20px;
+
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 148px;
+    height: 148px;
+    line-height: 148px;
+    text-align: center;
+  }
+
+  .avatar {
+    width: 148px;
+    height: 148px;
+    display: block;
+  }
+  .el-upload {
+    .el-icon-circle-close, .el-icon-zoom-in {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      font-size: 20px;
+      background: #fff;
+      display: block;
+      border-radius: 100%;
+      border: 1px solid transparent;
+    }
+    .el-icon-zoom-in {
+      top: 40px;
+    }
+    .el-icon-close-tip {
+      display: none!important;
+    }
+    .el-icon-upload-success {
+      top: 5px;
+    }
+  }
+}
+.org-avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.org-avatar-uploader .el-upload:hover {
+  border-color: #409EFF;
+}
+
+.dialog-subject-tree {
+  height: 300px;
+  overflow: auto;
+  .el-tree-node__label {
+    margin-left: 10px;
+  }
+}
+.org-staff-auth.el-table {
+  margin-bottom: 0;
+}
+.account-title {
+  padding-left: 150px;
+  line-height: 40px;
+  font-weight: bold;
+}
+.account-open {
+  padding-left: 150px;
+  line-height: 40px;
+}
+.w .el-input__inner, .w .el-date-editor {
+  width: 100%;
+}
+.upload-form .el-upload-list__item .el-icon-close {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+.file-list-box {
+  padding: 30px;
+  border: 1px solid #ccc;
+  &.work-list-box {
+    .el-form {
+      //border: 1px solid #ddd;
+      //padding: 5px;
+      //margin-bottom: 5px;
+    }
+  }
+}
+.id-card-list {
+  .ever-upload {
+    float: left;
+  }
+  .ever-upload + .ever-upload {
+    margin-left: 20px;
+  }
+}
+.common-multiple {
+  .el-form-item__content {
+    width: 400px;
+  }
+}
+.common-short-select {
+  .el-form-item__content {
+    width: 80px;
+  }
+}
+.file-list-box {
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+.el-upload-list__item .el-icon-close {
+  position: absolute !important;
+  top: 5px !important;
+}
+.el-upload-list.el-upload-list--text {
+  .el-upload-list__item .el-icon-close-tip {
+    display: none !important;
+  }
+}
+.hide-btn {
+  .el-upload-list.el-upload-list--text {
+    position: relative;
+    top: -38px;
+  }
+}
+.tenantSubject-cascader {
+  .is-disabled + .el-cascader-node__label {
+    color: #ff0000;
+  }
+}
+.subject-name-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 40%;
+  //display: inline-block;
+}
+.subject-qr {}
+.webh-user-error-log {
+  line-height: 30px;
+}
+.w_30 {width: 30%;}
+.supervise-form-btn {
+  margin-left: 300px;
+}

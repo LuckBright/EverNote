@@ -1,0 +1,23 @@
+<template>
+  <div class="ever_bg_01 login_bg">
+    <div class="ever_box">
+      <pwd-form :type="type"></pwd-form>
+    </div>
+  </div>
+</template>
+<script>
+import session from '@/util/session'
+import pwdForm from '@/login/page/password/form'
+
+export default {
+  data () {
+    return {
+      type: 2
+    }
+  },
+  mixins: [session],
+  components: {
+    pwdForm
+  }
+}
+</script>

@@ -1,0 +1,165 @@
+<template>
+  <el-dialog :title="title" :visible.sync="dialogVisible" class="ui_dialog_02">
+    <div class="opea">
+        <el-row>
+          <el-col :span="4">
+            <span >手术编号:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.surgeryNumber}}</el-col>
+          <el-col :span="4">
+            <span>手术名称: </span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.applianceDoctorName}}</el-col>
+          <el-col :span="4">
+            <span>手术来源:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.surgerySource}}</el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="4">
+            <span >申请医生:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.surgeryNumber}}</el-col>
+          <el-col :span="4">
+            <span >手术医生:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.operatorDoctorName}}</el-col>
+          <el-col :span="4">
+            <span >助理医生:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.assistantDoctorName}}</el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="4">
+            <span >麻醉医生:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.anaesthesiaDoctorName}}</el-col>
+          <el-col :span="4">
+            <span >助理麻醉医师:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.anaesthesiaAssistantName}}</el-col>
+          <el-col :span="4">
+            <span >麻醉要求:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.anaesthesiaRequire}}</el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="4">
+            <span >麻醉方式:</span>
+          </el-col>
+          <el-col :span="4" :pull="1" v-if="opeadata.anaesthesiaType === 1">全身麻醉</el-col>
+          <el-col :span="4" :pull="1" v-else-if="opeadata.anaesthesiaType === 2">局部麻醉</el-col>
+          <el-col :span="4" :pull="1" v-else-if="opeadata.anaesthesiaType === 3">复合麻醉</el-col>
+          <el-col :span="4">
+            <span >器械护士:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.apparatusNurseName}}</el-col>
+          <el-col :span="4">
+            <span >巡回护士:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.tourNurseName}}</el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="4">
+            <span >上台护士:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.stageNurseName}}</el-col>
+          <el-col :span="4">
+            <span >手术室:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.surgeryRoom}}</el-col>
+          <el-col :span="4">
+            <span >手术台次:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.surgeryStage}}</el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="4">
+            <span>切口等级:</span>
+          </el-col>
+          <el-col :span="4" :pull="1" v-if="opeadata.incisionLevel === 1">Ⅰ类</el-col>
+          <el-col :span="4" :pull="1" v-else-if="opeadata.incisionLevel === 2">Ⅱ类</el-col>
+          <el-col :span="4" :pull="1" v-else-if="opeadata.incisionLevel === 3">Ⅲ类</el-col>
+          <el-col :span="4">
+            <span >手术等级:</span>
+          </el-col>
+          <el-col :span="4" :pull="1" v-if="opeadata.surgeryLevel === 1">一级手术</el-col>
+          <el-col :span="4" :pull="1" v-else-if="opeadata.surgeryLevel === 2">二级手术</el-col>
+          <el-col :span="4" :pull="1" v-else-if="opeadata.surgeryLevel === 3">三级手术</el-col>
+          <el-col :span="4" :pull="1" v-else-if="opeadata.surgeryLevel === 4">四级手术</el-col>
+          <el-col :span="4">
+            <span >是否传染:</span>
+          </el-col>
+          <el-col :span="4" :pull="1" v-if="opeadata.contagionTag === 1">传染</el-col>
+          <el-col :span="4" :pull="1" v-else>非传染</el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="4">
+            <span >手术部位:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.position}}</el-col>
+          <el-col :span="4">
+            <span>术前诊断:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.preoperativeDiagnosis}}</el-col>
+          <el-col :span="4">
+            <span>嘱托:</span>
+          </el-col>
+          <el-col :span="4" :pull="1" >{{opeadata.entrustment}}</el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="4">
+            <span>预约手术日期:</span>
+          </el-col>
+          <el-col :span="4" :pull="1">{{opeadata.estimatedSurgeryTime}}</el-col>
+          <el-col :span="4">
+            <span>紧急级别:</span>
+          </el-col>
+          <el-col :span="4" :pull="1" v-if="opeadata.surgeryType === 1"> 择期手术</el-col>
+          <el-col :span="4" :pull="1" v-else>急诊手术</el-col>
+          <el-col :span="4">
+            <span>申请科室:</span>
+          </el-col>
+          <el-col :span="4" :pull="1" >{{opeadata.surgeryNumber}}</el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="4">
+            <span>手术开始时间:</span>
+          </el-col>
+          <el-col :span="4" :pull="1" >{{opeadata.surgStartTime}}</el-col>
+          <el-col :span="4">
+            <span>手术结束时间:</span>
+          </el-col>
+          <el-col :span="4" :pull="1" >{{opeadata.surgEndTime}}</el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="4">
+            <span>备注事项:</span>
+          </el-col>
+          <el-col :span="4" :pull="1" >{{opeadata.remarks}}</el-col>
+        </el-row>
+    </div>
+  </el-dialog>
+</template>
+<script>
+export default {
+  props: ['opeadata', 'visible', 'title'],
+  data () {
+    return {
+      dialogVisible: false
+    }
+  },
+  watch: {
+    visible (val) {
+      this.dialogVisible = val
+    },
+    dialogVisible (val) {
+      this.$emit('update', val)
+    }
+  }
+}
+</script>
+<style scoped>
+  .opeacontent{border: 1px solid #999999;}
+  .opea span{color: #000;}
+</style>

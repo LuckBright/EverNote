@@ -1,0 +1,196 @@
+<template>
+  <div class='certificateManage' v-loading="cardloading">
+    <ever-bread-crumb :showTitle='true' name='收入明细' path='/income/certificateManage' :class="{'c_pointer': true}"></ever-bread-crumb>
+    <div class='layout_inner'>
+      <div class='main-head'>
+        <ever-form2 ref="form" :schema="schema" v-model="obj" label-position="left" :is-query="false" class='form'>
+          <!-- <template slot="mechanism">
+                        <el-form-item prop="mechanism" label="汇总单号">
+                            <el-input disabled v-model="obj.mechanism"></el-input>
+                        </el-form-item>
+                    </template> -->
+          <template slot="memo">
+            <el-form-item prop="memo" label="汇总单摘要">
+              <el-input disabled v-model="obj.memo"></el-input>
+            </el-form-item>
+          </template>
+          <template slot="tradeType">
+            <el-form-item prop="tradeType" label="汇总单类别">
+              <ever-select v-model="obj.tradeType " :options="periodArr" style="width: 100px" :disabled="true">
+              </ever-select>
+            </el-form-item>
+          </template>
+          <template slot="startDate">
+            <el-form-item prop="startDate" label="结算日期从">
+              <el-input disabled v-model="obj.startDate"></el-input>
+            </el-form-item>
+          </template>
+          <template slot="endDate">
+            <el-form-item prop="endDate" label="结算日期至">
+              <el-input disabled v-model="obj.endDate"></el-input>
+            </el-form-item>
+          </template>
+          <template slot="default">
+          </template>
+        </ever-form2>
+      </div>
+      <div>
+        <el-table :data="contentData" border style="width: 100%" min-height="450" :row-class-name="tableRowClassName">
+          <el-table-column fixed type="index" label="序号" width="80">
+          </el-table-column>
+          <el-table-column fixed prop="sourceCode" label="来源单据号" width="150px">
+          </el-table-column>
+          <el-table-column fixed prop="单据日期" label="单据日期" width="150px">
+          </el-table-column>
+          <el-table-column :label="item" min-width="150" v-for="(item,index) in cerData" :key="item">
+            <template slot-scope="scope">
+              <span v-if="index==0||index==1||index==2||index==3||index==4||index==5">
+                {{scope.row[item] }}
+              </span>
+              <span v-else>
+                {{scope.row[item] | formatToFinacial}}
+              </span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <!-- <ever-pagination :page-sizes="pageSizes" @size-change="handleSizeChange" @current-change="handleCurrentChange" :totalCount="totalCount">
+            </ever-pagination> -->
+    </div>
+  </div>
+</template>
+<script>
+// import list from '@/util/list'
+import {
+  getTradeTypeEnum,
+  gettest
+} from '../../../store/income/account/summary.js'
+let schema = [
+  {
+    name: 'memo',
+    comp: 'custom',
+    noWrap: true
+  },
+  {
+    name: 'tradeType',
+    comp: 'custom',
+    noWrap: true,
+    props: {
+      clearable: true
+    }
+  },
+  {
+    name: 'startDate',
+    comp: 'custom',
+    noWrap: true
+  },
+  {
+    name: 'endDate',
+    comp: 'custom',
+    noWrap: true
+  }
+]
+export default {
+  // mixins: [list],
+  data () {
+    let obj = this.$ever.createObjFromSchema(schema)
+    obj.startTime = ''
+    obj.endTime = ''
+    return {
+      obj: obj,
+      schema: schema,
+      periodArr: [],
+      cerData: [],
+      contentData: [],
+      cardloading: false
+    }
+  },
+  created () {
+    this.getList().then(() => {
+      this.getTableData()
+    })
+  },
+  methods: {
+    async getTableData () {
+      this.cardloading = true
+      let params = {
+        // offset: this.offset,
+        // pagesize: this.pagesize,
+        id: this.$route.query.id
+      }
+      try {
+        let data = await gettest(params)
+        if (data && data.data) {
+          Object.assign(this.obj, data.data)
+          this.obj.tradeType = this.obj.tradeType + ''
+        }
+        if (data && data.sum) {
+          this.cerData = data.titles.slice(1)
+          data.data.details.forEach(item => {
+            item.row.sourceCode = item.sourceCode
+            this.contentData.push(item.row)
+          })
+          data.sum.sourceCode = '合计'
+          this.contentData.push(data.sum)
+        }
+
+        this.tableData = data.data
+        this.totalCount = data.totalCount
+        this.cardloading = false
+      } catch (err) {
+        this.cardloading = false
+      }
+    },
+    async getList () {
+      try {
+        let data = await getTradeTypeEnum()
+        if (data && data.data) {
+          data.data.map(item => {
+            for (let key in item) {
+              this.periodArr.push({ name: item[key], id: key })
+            }
+          })
+        }
+      } catch (err) {}
+    },
+    handleSelectionChange () {},
+    tableRowClassName (row, index) {
+      if (index === this.contentData.length - 1) {
+        return 'info-row'
+      }
+      return ''
+    }
+  }
+}
+</script>
+<style scoped>
+.certificateManage /deep/ .el-form-item {
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: top;
+}
+.certificateManage /deep/ .el-form-item__label {
+  text-align: left;
+  vertical-align: middle;
+  float: left;
+  font-size: 14px;
+  color: #48576a;
+  line-height: 1;
+  padding: 11px 12px 11px 0;
+  box-sizing: border-box;
+  width: auto !important;
+}
+.certificateManage /deep/ .el-form-item__content {
+  margin-left: 0 !important;
+  display: inline-block;
+  vertical-align: top;
+}
+.certificateManage /deep/ .form {
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+.el-table /deep/ .info-row {
+  background: #eef1f6;
+}
+</style>

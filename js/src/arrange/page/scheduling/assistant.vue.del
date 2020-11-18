@@ -1,0 +1,214 @@
+<template>
+  <div id="assistant">
+    <div class="flex_column_1_hidden layout_inner">
+      <el-row id="search-head" class="mb20">
+        <el-col :span="20">
+          <el-form :model="params" :inline="true" label-width="10" label-position="right">
+            <el-form-item>
+              <el-select v-model="params.resource" placeholder="请选择资源类型">
+                <el-option value="-1" label="全部"></el-option>
+                <el-option v-for="(item, i) in allList" :key="i" :value="item.staffId" :label="item.staffName"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item>
+              <el-button @click="getPrevWeeks">前七天</el-button>
+              <el-button @click="getNowWeeks">最近七天</el-button>
+              <el-button @click="getNextWeeks">后七天</el-button>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="getArrangeList">查询</el-button>
+            </el-form-item>
+          </el-form>
+        </el-col>
+        <el-col :span="4" align="right">
+        </el-col>
+      </el-row>
+      <div class="flex_col_1_auto">
+        <el-row id="main" type="flex">
+          <el-col class="left">
+            <table cellpadding="0" cellspacing="0" width="100%" class="lefter">
+              <tr class="first">
+                <td>助理</td>
+              </tr>
+              <tr v-for="(item, i) in tableList" :key="i">
+                <td :style="{height: (itemsHeight[i] - 1 ) + 'px'}">{{item.staffName}}</td>
+              </tr>
+            </table>
+          </el-col>
+          <el-col class="right">
+            <table cellpadding="0" cellspacing="0" class="header">
+              <tr>
+                <td v-for="(item, i) in weeksList" :key="i">{{item.week}}</td>
+              </tr>
+              <tr>
+                <td v-for="(item, i) in weeksList" :key="i">{{item.date}}</td>
+              </tr>
+            </table>
+            <table cellpadding="0" cellspacing="0" class="bodyer" ref="maintable">
+              <tr v-for="(item, i) in tableList" :key="i">
+                <td v-for="(data, j) in item.searchByAssistantDateResponseList" :key="j" @click="editAssistantArrange(data, {resourceId: item.staffId, resourceName: item.staffName})">
+                  <el-button type="primary" size="small" class="ellipsis" v-for=" (info, k) in data.arrangeList" :key="k"> <a href="javascipt:void(0)" style="color:#fff" :title="info.organName + '/' + info.resourceName + '/' + getArrangeUseText(info.arrangeUse)">{{info.organName}} / {{info.resourceName}} / {{getArrangeUseText(info.arrangeUse)}}</a></el-button>
+                </td>
+              </tr>
+            </table>
+          </el-col>
+        </el-row>
+        <dialog-assistant
+          @success="getArrangeList"
+          :show.sync="showDialog"
+          :arrange="currentArrange.arrangeList"
+          :date="currentArrange.date"
+          :resource="currentResource">
+        </dialog-assistant>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  import api from '@/arrange/store/schedulingapi'
+  import { getWeekDates } from '@/util/common'
+  import dialogAssistant from '@/arrange/page/scheduling/dialog-assistant'
+  export default {
+    data () {
+      return {
+        api,
+        params: {
+          resource: '-1'
+        },
+        currentWeek: '',
+        selectDate: '',
+        showDialog: false,
+        currentArrange: '',
+        currentResource: '',
+        itemsHeight: [],
+        weeksList: [],
+        orgItemList: [],
+        tableList: [],
+        allList: []
+      }
+    },
+    watch: {
+      selectDate (val) {
+        this.weeksList = this.getWeekList()
+        this.getArrangeList()
+      },
+      'params.resource' (val) {
+        if (val === '-1') {
+          this.tableList = JSON.parse(JSON.stringify(this.allList))
+        } else {
+          this.tableList = this.allList.filter(item => {
+            return item.staffId === val
+          })
+        }
+        this.$nextTick(() => {
+          this.itemsHeight = this.getItemsHeight()
+        })
+      }
+    },
+    created () {
+      this.currentWeek = this.getCurrentWeek()
+      this.selectDate = [this.currentWeek.first, this.currentWeek.last]
+    },
+    methods: {
+      getCurrentWeek (time) {
+        let current = time ? this.$moment(time).format('YYYY-MM-DD') : this.$moment().format('YYYY-MM-DD')
+        let first = time ? this.$moment(time).startOf('isoWeek').format('YYYY-MM-DD') : this.$moment().startOf('isoWeek').format('YYYY-MM-DD')
+        let last = time ? this.$moment(time).endOf('isoWeek').format('YYYY-MM-DD') : this.$moment().endOf('isoWeek').format('YYYY-MM-DD')
+        return { first, current, last }
+      },
+      getPrevWeeks () {
+        let date = new Date(this.currentWeek.first)
+        date.setDate(date.getDate() - 7)
+        this.arrangeWeek = getWeekDates(date)
+        this.currentWeek = this.getCurrentWeek(date)
+        this.selectDate = [this.currentWeek.first, this.currentWeek.last]
+      },
+      getNextWeeks () {
+        let date = new Date(this.currentWeek.first)
+        date.setDate(date.getDate() + 7)
+        this.arrangeWeek = getWeekDates(date)
+        this.currentWeek = this.getCurrentWeek(date)
+        this.selectDate = [this.currentWeek.first, this.currentWeek.last]
+      },
+      getNowWeeks () {
+        this.currentWeek = this.getCurrentWeek()
+        let date = new Date(this.currentWeek.first)
+        date.setDate(date.getDate())
+        this.arrangeWeek = getWeekDates(date)
+        this.selectDate = [this.currentWeek.first, this.currentWeek.last]
+      },
+      getWeekList () {
+        const weeksName = ['一', '二', '三', '四', '五', '六', '日']
+        let arr = []
+        for (let i = 0; i < 7; i++) {
+          let d = this.$moment(this.selectDate[0]).add(i, 'd')
+          arr.push({
+            date: d.format('MM/DD'),
+            week: '星期' + weeksName[d.weekday()]
+          })
+        }
+        return arr
+      },
+      getArrangeList () {
+        this.api.getAssistantArrangeList({
+          startDate: this.selectDate[0],
+          endDate: this.selectDate[1]
+        }).then(rs => {
+          if (rs.data && rs.data.searchByAssistantAssistantResponseList) {
+            this.tableList = rs.data.searchByAssistantAssistantResponseList
+            this.allList = JSON.parse(JSON.stringify(this.tableList))
+            this.$nextTick(() => {
+              this.itemsHeight = this.getItemsHeight()
+            })
+          }
+        })
+      },
+      getArrangeUseText (key) {
+        let keys = {
+          1: '出诊',
+          2: '休息',
+          3: '陪诊',
+          4: '其它'
+        }
+        return keys[key]
+      },
+      getItemsHeight () {
+        let items = Array.from(this.$refs.maintable.querySelectorAll('tr'))
+        let arr = []
+        items.map(item => {
+          arr.push(item.clientHeight)
+        })
+        return arr
+      },
+      editAssistantArrange (item, resource) {
+        this.currentArrange = item
+        this.currentResource = resource
+        this.showDialog = true
+      }
+    },
+    components: {
+      dialogAssistant
+    }
+  }
+</script>
+<style scoped>
+#assistant {
+  background: #fff;
+  font-size: 14px;
+}
+#search-head {
+  border-bottom: 1px solid #ddd;
+}
+#main .left{width: 200px;}
+#main .right{margin-left: -1px;}
+#main .right table{border-left: 1px solid #ddd;}
+#main .right table tr td {border-top: 1px solid #ddd; border-right: 1px solid #ddd; padding: 0 10px; text-align: left; width: 220px; vertical-align: top;}
+#main .right table.bodyer{border-bottom: 1px solid #ddd;}
+#main .right table.bodyer .el-button{ width: 180px; margin: 5px 0;  text-align: left;}
+#main .right table.header tr td{background: #ccc; text-align: center; padding: 0 10px;  height: 30px; line-height: 30px;}
+#main .right table.bodyer tr td{height: 50px;}
+#main .left table{border-left: 1px solid #ddd;border-bottom: 1px solid #ddd;}
+#main .left table tr td{border-top: 1px solid #ddd; padding: 0 10px; text-align: center;}
+#main .left table tr.first td{height: 61px; vertical-align: middle; background: #ccc;}
+</style>

@@ -1,0 +1,205 @@
+<template>
+  <div id="numbersource">
+    <div class="header" v-if="!hideTitle">
+      <strong class="title">号源信息</strong>
+    </div>
+    <div class="search">
+      <el-input v-model="name" placeholder="快速查询" @keyup.enter.native="execSearch" size="small"></el-input>
+      <el-button type="primary" class="ml10" @click="execSearch" size="small">查询</el-button>
+      <el-button class="ml10" @click="resetSearch" size="small">重置</el-button>
+    </div>
+    <div class="body">
+      <ul class="clearfix">
+        <template v-if="!hiddenDept">
+          <li v-for="(item, i) in sourceData.deptServiceArrangeList" :key="i" @click="selectDeptEvent(item)" :class="{on: selectDept && item.deptId === selectDept.deptId && item.serviceId === selectDept.serviceId && selectDept.serviceId === item.serviceId, disabled: !item.serviceTimesliceDto}">
+            <el-row type="flex" class="first">
+              <el-col class="left ellipsis"><label>{{item.deptName}}</label></el-col>
+              <el-col class="right ellipsis">
+                <i class="iconfont icon-chakan" @click="forDeptSearch(item, $event)"></i>
+              </el-col>
+            </el-row>
+            <el-row type="flex" class="last">
+              <el-col class="left ellipsis">
+                <label v-if="item.serviceTimesliceDto">{{item.serviceName}}</label>
+                <label v-else>无号</label>
+              </el-col>
+            </el-row>
+          </li>
+        </template>
+        <template v-if="isSearch">
+          <li v-for="(item, i) in sourceData.resourceServiceArrangeList" :key="i" @click="selectNumberEvent(item)" class="back" :class="{on: item.resourceId === selectNumber.resourceId && item.deptId === selectNumber.deptId && selectNumber.serviceId === item.serviceId, disabled: !item.serviceTimesliceDto}">
+            <el-row type="flex" class="first">
+              <el-col class="left ellipsis"><label>{{item.resourceName}} ({{item.serviceName}})</label></el-col>
+              <el-col class="right ellipsis">
+                <label>{{item.deptName}}</label>
+              </el-col>
+            </el-row>
+            <el-row type="flex" class="last">
+              <el-col class="left">
+                <select-time v-if="item.serviceTimesliceDto" :arrange="item.serviceTimesliceDto" :channel="2" :resource-id="item.serviceTimesliceDto.resourceId" :dept-id="item.serviceTimesliceDto.deptId" :service-id="item.serviceTimesliceDto.serviceId" :reset="1" @select="setSelectTime"></select-time>
+                <label v-else>无号</label>
+              </el-col>
+              <el-col class="right">候诊 <em>{{item.waitPatientAmount || 0}}</em></el-col>
+            </el-row>
+          </li>
+        </template>
+      </ul>
+    </div>
+  </div>
+</template>
+<script>
+
+import appointapi from '@/arrange/store/appointapi'
+import selectTime from '@/arrange/page/register/selecttime.vue'
+import addAppoint from '@/arrange/page/register/addappoint.vue'
+export default {
+  props: ['value', 'appoint', 'hideTitle', 'patient', 'initDept', 'reset'],
+  data () {
+    return {
+      appointapi,
+      isSearch: false,
+      hiddenDept: false,
+      name: '',
+      deptId: '',
+      serviceId: '',
+      selectDept: '',
+      selectNumber: '',
+      sourceData: '',
+      showAddAppoint: false
+    }
+  },
+  watch: {
+    value (val) {
+      this.selectNumber = val
+    },
+    selectNumber (val) {
+      this.$emit('input', val)
+    },
+    selectDept (val) {
+      this.$emit('input', val)
+    },
+    patient (val) {
+      this.selectNumber = ''
+      this.selectDept = ''
+    },
+    initDept (val) {
+      if (this.sourceData) {
+        let initDept = this.sourceData.deptServiceArrangeList.filter(item => {
+          return item.deptId === val.deptId
+        })
+        return !val.isSource && this.selectDeptEvent(initDept[0])
+      }
+    },
+    reset (val) {
+      this.getNumberSourceList()
+      this.selectNumber = ''
+      this.selectDept = ''
+    },
+    appoint (val) {
+      if (val && val.useAppoint && this.sourceData) {
+        let initDept = this.sourceData.deptServiceArrangeList.filter(item => {
+          return item.deptId === val.deptId && item.serviceId === val.serviceid
+        })
+        initDept[0].isAppoint = true
+        this.selectDeptEvent(initDept[0])
+      }
+    }
+  },
+  created () {
+    this.getNumberSourceList()
+  },
+  methods: {
+    selectNumberEvent (val) {
+      this.selectDept = ''
+      this.selectNumber = val
+    },
+    selectDeptEvent (val) {
+      this.selectNumber = ''
+      this.selectDept = val
+    },
+    getNumberSourceList (callback) {
+      let params = {
+        timeTrunkType: 1,
+        channelId: 2,
+        name: this.name,
+        deptId: this.deptId,
+        date: this.$moment().format('YYYY-MM-DD')
+      }
+      if (this.serviceId) {
+        params.serviceId = this.serviceId
+      }
+      this.appointapi.getNumberSource(params).then(rs => {
+        if (rs.head.errCode) {
+          return false
+        }
+        this.selectDept = ''
+        this.selectNumber = ''
+        this.sourceData = rs.data
+        return callback && callback(rs.data)
+      })
+    },
+    execSearch () {
+      if (!this.name) {
+        this.resetSearch()
+        return false
+      }
+      this.getNumberSourceList(_ => {
+        this.hiddenDept = false
+        this.isSearch = true
+      })
+    },
+    forDeptSearch (item, e) {
+      e.stopPropagation()
+      this.deptId = item.deptId
+      this.serviceId = item.serviceId
+      this.getNumberSourceList(_ => {
+        this.hiddenDept = true
+        this.isSearch = true
+      })
+    },
+    resetSearch () {
+      this.name = ''
+      this.deptId = ''
+      this.serviceId = ''
+      this.getNumberSourceList(_ => {
+        this.hiddenDept = false
+        this.isSearch = false
+      })
+    },
+    setSelectTime (val) {
+      this.selectNumber = Object.assign({}, this.selectNumber, {
+        serviceTimesliceDto: val
+      })
+    }
+  },
+  components: {
+    selectTime,
+    addAppoint
+  }
+}
+</script>
+
+<style scoped>
+  #numbersource{background: #fff; border-radius: 3px; margin-bottom: 10px;}
+  .header{padding: 7px 0;}
+  .header strong.title{padding-left: 6px; border-left: 3px solid #1C7BEF; font-size: 16px; color: #000; line-height: 36px;}
+  .search{margin-bottom: 10px;}
+  .search .el-input{width: 320px;}
+  .body{font-size: 14px; display: block; height: 311px; overflow: auto;}
+  .body ul{padding: 0; margin: 0; list-style: none; margin-left: -10px;}
+  .body ul li{width: 162px; padding: 10px; border: 1px solid #ddd; float: left; margin-left: 10px; margin-bottom: 10px; min-height: 48px; cursor: pointer;}
+  .body ul li.on{background: #EAF2FC; border-color: #1C7BEF;}
+/*  .body ul li.back{background: rgba(0,0,0,0.1);}*/
+  .body ul li .first{margin-bottom: 10px;}
+  .body ul li .first .left{font-size:14px; position: relative; font-weight: bold; color: #1C7BEF; width: 7em;}
+  .body ul li .first .right{width: 5em; text-align: right;}
+  .body ul li .first .right .iconfont{color: #1C7BEF;}
+  .body ul li .first .right label{font-size: 12px;}
+  .body ul li .last .right{text-align: right; font-size: 14px; width: 96px;}
+  .body ul li .last .right em{color: #ff5500; font-style: normal;}
+  .body ul li.disabled{background: #f1f1f1;}
+  .body ul li.disabled .first .left{color: #666;}
+  .body ul li.disabled .first .right .iconfont{color: #bbb;}
+  #numbersource .el-form-item{margin-bottom: 14px;}
+  #numbersource /deep/ .el-form-item__content {line-height: 32px;}
+</style>

@@ -1,0 +1,9 @@
+@import '../../../assets/base.scss';
+
+@mixin shadow_radius {
+  border-radius: 3px;
+  box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+.red {
+  color: $red_color
+}

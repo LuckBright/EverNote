@@ -1,0 +1,74 @@
+<template>
+  <div id="list">
+    <templatesearh @query="query"></templatesearh>
+    <el-table :data="tableData" border style="width: 100%" max-height="700">
+      <el-table-column prop="name" label="模版名称" width="300"></el-table-column>
+      <el-table-column align="center" prop="dptName" label="适用机构">
+        <template slot-scope="scope">
+          <span v-for="(item, i) in scope.row.templetOrgList" :key="i">
+            {{item.organName}}
+            <em v-if="i < scope.row.templetOrgList.length - 1">、</em>
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column width="160" align="center" label="操作">
+        <template slot-scope="scope">
+          <el-button type="primary" size="small" @click="editTemplate(scope.$index)">编辑</el-button>
+          <el-button type="danger" size="small" @click="delById(scope.row.id)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <ever-pagination
+      :page-sizes="pageSizes"
+      :current="current"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :totalCount="totalCount"
+    ></ever-pagination>
+  </div>
+</template>
+
+<script>
+import templatesearh from '@/arrange/page/template/search.vue'
+import api from '@/arrange/store/templateapi'
+import list from '@/util/list'
+export default {
+  mixins: [list],
+  props: ['value', 'isUpdate'],
+  data () {
+    return {
+      api,
+      tableData: [],
+      flag: 1
+    }
+  },
+  watch: {
+    isUpdate (val) {
+      if (val) {
+        let a = this.list()
+        Promise.all([a]).then(_ => {
+          this.$emit('reback', false)
+        })
+      }
+    }
+  },
+  methods: {
+    editTemplate (i) {
+      this.flag++
+      this.$emit('edit', this.tableData[i], this.flag)
+    }
+  },
+  components: {
+    templatesearh
+  }
+}
+</script>
+
+<style scoped>
+#list {
+  padding: 10px;
+  background: #fff;
+  height: 85vh;
+  overflow: auto;
+}
+</style>

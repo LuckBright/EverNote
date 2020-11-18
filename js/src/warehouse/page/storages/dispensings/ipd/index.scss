@@ -1,0 +1,70 @@
+@import '../../../assets/base.scss';
+@import '../../../assets/class.scss';
+
+@mixin shadow_radius {
+  border-radius: 3px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+}
+
+@mixin bg_green {
+  background: $green1_color
+}
+// .hospital-layout{
+//   position: relative;
+// }
+.patient_title {
+  line-height: 30px;
+  // padding-bottom: 10px;
+  color: #000;
+}
+.pr-l{
+  @include shadow_radius;
+  width: 312px;
+  background-color: $white_color;
+  position: relative;
+  z-index: 5;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  transition: width 0.3s;
+  .i-zhankai {
+    transform: rotate(180deg);
+  }
+  .pos_ab {
+    right: 10px;
+    top: -3px;
+    z-index: 5;
+    i {
+      font-size: 12px;
+    }
+    .i-zhankai {
+      transform: rotate(180deg);
+    }
+  }
+}
+.pr-l-w {
+  width: 600px;
+  z-index: 105;
+  .i-zhankai {
+    transform: rotate(-180deg);
+  }
+}
+.pr-l-w2 {
+  z-index: 105;
+  width: 473px;
+  .i-zhankai {
+    transform: rotate(-180deg);
+  }
+}
+.pr-r {
+  width: calc(100vw - 342px);
+  height: calc(100vh - 155px);
+  overflow: hidden;
+  position: absolute;
+  left: 312px;
+  top: 0;
+  z-index: 104;
+}
+.patient_btn_width{
+  width: 140px;
+}

@@ -1,0 +1,130 @@
+<template>
+  <div id="appointlist">
+    <div class="header">
+      <strong class="title">预约信息</strong>
+    </div>
+    <el-radio-group v-model="appointId" class="body" @change="changeAppoint">
+      <div v-if="appointList && appointList[0]">
+        <el-row class="appoint-row" type="flex" v-for="(item, i) in appointList" :key="i" @click.native="changeAppoint(item.id)">
+          <el-col class="left">
+            <el-radio :label="item.id"></el-radio>
+          </el-col>
+          <el-col class="right">
+            <el-row class="appoint-table">
+              <el-col :span="8">{{item.deptName}}</el-col>
+              <el-col :span="4">{{item.patientName}}</el-col>
+              <el-col :span="12">{{$moment(item.appointmentDate).format('YYYY/MM/DD')}} {{item.appointmentStarttime}} - {{item.appointmentEndtime}}</el-col>
+              <el-col :span="24">{{item.symptom}}</el-col>
+            </el-row>
+          </el-col>
+        </el-row>
+        <el-row class="appoint-row" type="flex" @click.native="changeAppoint(0)">
+          <el-col class="left">
+            <el-radio :label="0"></el-radio>
+          </el-col>
+          <el-col :span="8">
+            <div style="padding: 20px 0">不使用预约</div>
+          </el-col>
+        </el-row>
+      </div>
+      <ever-no-data tipTxt="暂无记录" v-else></ever-no-data>
+    </el-radio-group>
+  </div>
+</template>
+<script>
+import appointapi from '@/arrange/store/appointapi'
+export default {
+  props: ['patient'],
+  data () {
+    return {
+      appointapi,
+      appoint: {},
+      appointId: '',
+      appointList: [],
+      tempTime: ''
+    }
+  },
+  watch: {
+    patient: {
+      handler (val) {
+        if (!val) {
+          this.appointList = []
+          return false
+        }
+        this.queryAppointList()
+      },
+      deep: true
+    },
+    appointId (val) {
+      if (val) {
+        this.appoint = {useAppoint: true, patient: this.patient, appointmentType: 1}
+        this.getLatestTimeslice()
+      }
+    }
+  },
+  methods: {
+    changeAppoint (val) {
+      if (!val) {
+        this.appoint = {useAppoint: false, patient: this.patient, appointmentType: 1}
+        this.$emit('appoint', this.appoint)
+      }
+      this.appointId = val
+    },
+    queryAppointList () {
+      this.appointapi.queryAppointList({
+        appointmentType: 1,
+        canRegister: true,
+        patientId: this.patient.id,
+        appointmentDate: this.$moment().format('YYYY-MM-DD')
+      }).then(rs => {
+        if (rs.head.errCode || !rs.data[0]) {
+          this.appointList = []
+          this.appointId = ''
+          this.appoint = {useAppoint: false, patient: this.patient, appointmentType: 1}
+          this.$emit('appoint', this.appoint)
+        } else {
+          this.appointList = rs.data
+          this.appointId = rs.data[0].id
+        }
+      })
+    },
+    getLatestTimeslice () {
+      this.appointapi.getLatestTimeslice({
+        id: this.appointId
+      }).then(rs => {
+        let item = this.appointList.filter(item => {
+          return item.id === this.appointId
+        })[0]
+        item.patient = this.patient
+        if (rs.data) {
+          item.serviceTimesliceDto = rs.data
+        } else {
+          item.serviceTimesliceDto = {
+            arrangeId: item.appointmentArrangeid,
+            startTimeStr: item.appointmentStarttime,
+            endTimeStr: item.appointmentEndtime,
+            deptId: item.deptId,
+            deptName: item.deptName,
+            date: item.appointmentDate
+          }
+        }
+        Object.assign(this.appoint, item)
+        this.$emit('appoint', this.appoint)
+      })
+    }
+  }
+}
+</script>
+
+<style scoped>
+  #appointlist{padding-bottom: 15px; border-bottom: 1px solid #ddd;}
+  .header{padding: 7px 0;}
+  .header strong.title{padding-left: 6px; border-left: 3px solid #1C7BEF; font-size: 16px; color: #000; line-height: 36px;}
+  .body{font-size: 14px; line-height: 1.5; display: block; height: 300px; overflow: auto;}
+  .left{width: 40px;position: relative; text-align: center;}
+  .left .el-radio{position: absolute;left: 50%; top:50%; margin-left: -7px; margin-top: -7px;}
+  .left .el-radio /deep/ .el-radio__label{display: none;}
+  .appoint-table{line-height: 1.5; padding: 9px 0;}
+  .appoint-row:nth-child(even){background:#eeeeee;}
+  .appoint-row:hover{background: #EAF2FC; cursor: pointer;}
+</style>

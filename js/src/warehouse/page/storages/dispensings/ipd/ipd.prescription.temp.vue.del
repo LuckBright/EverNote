@@ -1,0 +1,438 @@
+ <template>
+  <div class="hospital-container">
+    <!-- 搜索框 -->
+    <div class="hospital-search">
+      <el-row :gutter="20">
+        <el-col :span="24">
+          <dispen-search
+            placeholder="药包编号／患者姓名／备药单号"
+            router="/storages/dispensingipd/ipdsearch"
+            storageKey="HOSPITAL_QUERY"
+          ></dispen-search>
+        </el-col>
+      </el-row>
+    </div>
+    <!-- 患者信息 -->
+    <el-container class="hospital-layout">
+      <el-aside width="280px" class="inner high">
+        <div class="date_picker_box">
+          <el-row :gutter="20" type="flex" align="middle">
+            <el-col :span="12">
+              <ever-select v-model="drugStatus" :clearable="true" :options="drugPackStatus"></ever-select>
+            </el-col>
+            <el-col :span="12">
+              <span class="f14">共 {{totalCount}} 条记录</span>
+            </el-col>
+          </el-row>
+        </div>
+        <el-table
+          v-loading="leftLoading"
+          ref="singleTable"
+          :data="leftTableData"
+          highlight-current-row
+          :height="'calc(100vh - 270px)'"
+          @current-change="handleCurrentChange"
+          :row-class-name="patientTableRowClassName"
+          style="width: 100%">
+          <el-table-column
+            class-name="pointer"
+            prop="codes"
+            label="病区">
+            <template slot-scope="scope">
+              <span v-if="scope.row.spaceRecordObject">{{findBasesourceCode({arr: scope.row.spaceRecordObject.spaceRecordProperties, code: SPACE_CODE[0]})}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="patientName"
+            label="患者姓名"
+            width="120">
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          class="alg_c prescription_pagination"
+          small
+          :page-size="20"
+          :current-page.sync="currentPage"
+          layout="prev, next"
+          prev-text="上一页"
+          next-text="下一页"
+          @prev-click="pageClick('prev')"
+          @next-click="pageClick('next')"
+          :total="totalCount">
+        </el-pagination>
+      </el-aside>
+      <el-main class="inner ml10">
+        <!-- <div class="patient_title" v-if="tableData.length || errTableData.length">
+          {{!dispenseObj.oldCode ? '备药单号' : '批量备药单号'}}：{{leftCode}}
+          <span class="inUse ml5" v-if="inUse === 2">（该备药单已作废）</span>
+          <span class="inUse ml5" v-if="dispenseObj.oldCode">（原单号：{{dispenseObj.oldCode}}）</span>
+          <el-button type="text" @click="handlerSupplementPrint(true)" class="fr">补打药单</el-button>
+        </div> -->
+        <div class="list-msg">
+          <div class="list_box">
+            <div v-if="tableData.length" class="list">
+              <div v-for="(item, index) in tableData" :key="index">
+                <ipd-righttable
+                  :itemData="item"
+                  :thisIndex="tableData.length > 1 || errTableData.length ? index + 1 : 0"
+                  :isSee="1"
+                  @supplementPrint="supplementPrint"
+                  @updateStatus="updateStatus">
+                </ipd-righttable>
+              </div>
+            </div>
+            <div v-if="errTableData.length" class="list">
+              <div v-for="(item, index) in errTableData" :key="index">
+                <ipd-righttable
+                  :itemData="item"
+                  :thisIndex="tableData.length ? tableData.length + index + 1 : index + 1"
+                  :isSee="1"
+                  @updateStatus="updateStatus">
+                </ipd-righttable>
+              </div>
+            </div>
+            <everNoData v-if="!tableData.length && !errTableData.length"></everNoData>
+          </div>
+          <!-- // (drugStatus==4 || drugStatus==5) &&  -->
+          <div class="list-btn" v-if="tableData.length">
+            <el-row>
+              <el-col :span="24">
+                <div class="btn-container">
+                  <!-- <el-button v-if="tableData.length && errTableData.length" type="primary" @click="handlerSupplementPrint(false)" class="mr10">重打备药单</el-button> -->
+                  <span class="" v-if="drugStatus == 4 && !errTableData.length">
+                    <el-button type="primary" @click="handleFinish(1)">备药完成</el-button>
+                  </span>
+                  <span class="" v-if="drugStatus == 5 && !errTableData.length">
+                    <el-button type="primary" @click="handleFinish(2)">发药</el-button>
+                  </span>
+                </div>
+              </el-col>
+            </el-row>
+          </div>
+        </div>
+      </el-main>
+    </el-container>
+
+    <jcp-print :key="jcpKey" ref="jcpPrint"
+      :hospitalType="hospitalType"
+      :liveTableData="liveTableData"
+      :liveNonFatherAdvice="liveNonFatherAdvice"
+      :printPatientObj="printPatientObj"
+      :liveType="liveType"
+      :inpatientArea="inpatientArea"
+      :fatherAdvice="fatherAdvice"></jcp-print>
+  </div>
+</template>
+
+<script>
+import IpdRighttable from '../components/ipd.righttable'
+import hospitalApi from '../store/hospitalapi'
+import api from '../store/dispenseapi'
+import { DISPENSING_STATUS, objGet, patch, SEARCH_CODE, SPU_SPEC_CODE, DOSAGE, SPACE_CODE } from '@/util/common'
+import getStorage from '@/warehouse/page/storages/util/getstorage'
+import mixinsDespen from './mixins_despen'
+import dispenSearch from '@/warehouse/page/storages/components/dispensearch'
+import sendDrug from '@/warehouse/page/storages/mixins/senddrug'
+import JcpPrint from '@/warehouse/page/components/jcp.print'
+import hospitalPrintMixins from '@/warehouse/page/storages/util/hospitalprintmixins'
+import './index.scss'
+import { _findIndex } from '@/util/formcustom'
+export default {
+  mixins: [getStorage, mixinsDespen, sendDrug, hospitalPrintMixins],
+  data () {
+    return {
+      SEARCH_CODE,
+      SPU_SPEC_CODE,
+      DOSAGE,
+      DISPENSING_STATUS,
+      SPACE_CODE,
+      input: '',
+      leftTableData: [],
+      drugStatus: '',
+      leftLoading: false,
+      fullscreenLoading: false,
+      checked: false,
+      dialogTableVisible: false,
+      all: false,
+      checkedList: [],
+      multipleSelection: [],
+      offset: 0,
+      pagesize: 20,
+      totalCount: 0,
+      currentPage: 1,
+      tableData: [],
+      errTableData: [],
+      leftId: '',
+      leftCode: '',
+      dispenseObj: {},
+      drugPackStatus: [],
+      element: '',
+      inUse: null
+    }
+  },
+  created () {
+    this.DISPENSING_STATUS.forEach(item => {
+      if ([5, 6].includes(item.id)) this.drugPackStatus.push(item)
+      // this._objectFilter([this.DISPENSING_STATUS[0].id, this.DISPENSING_STATUS[1].id, this.DISPENSING_STATUS[5].id, this.DISPENSING_STATUS[6].id, this.DISPENSING_STATUS[7].id], item.id)) this.drugPackStatus.push(item)
+    })
+    this.drugStatus = 5
+  },
+  watch: {
+    // 药包状态
+    drugStatus: {
+      handler: function () {
+        this.checkedList = []
+        this.offset = 0
+        this.currentPage = 1
+        if (this.drugStatus) this.getDispenseCodesList()
+      },
+      immediate: true
+    }
+  },
+  components: {
+    JcpPrint,
+    IpdRighttable,
+    dispenSearch
+  },
+  methods: {
+    supplementPrint (v) {
+      let obj = Object.assign({}, this.inpatientArea)
+      delete obj.identification
+      this.gatherPrintSingle(Object.assign(v, obj))
+    },
+    updateStatus (v, data) {
+      let index = _findIndex(this.leftTableData, this.leftId)
+      this.$set(this.leftTableData[index], 'identification', 2)
+      if (data) {
+        this.$set(this.leftTableData[index], 'identification', 1)
+      }
+      this.getDispenseList()
+    },
+    pageClick (v) {
+      if (v === 'prev') {
+        this.offset = this.offset - this.pagesize
+      } else {
+        this.offset = this.offset + this.pagesize
+      }
+      this.getDispenseCodesList()
+    },
+    tableRowClassName ({ row, rowIndex }) {
+      if (row && row.cdssResult) {
+        return 'mark-cdss-row'
+      }
+      return ''
+    },
+    handlerSupplementPrint (flag) { // 补打备药单
+      if (flag) {
+        this._rePrint()
+      } else {
+        api.reprintDispense({ id: this.leftId }).then(res => {
+          if (res) {
+            this.$store.commit('updateDispenseCode', res.codes)
+            this._rePrint()
+            this.$messageTips(this, 'success', '重打备药单成功')
+            this.getDispenseCodesList()
+          }
+        })
+      }
+    },
+    _rePrint () {
+      this._initPrint()
+      this.liveTableData = {
+        tableData: this.tableData,
+        barCode: this.leftCode
+      }
+      this.$nextTick(_ => {
+        this.handlerPrint()
+      })
+    },
+    _objectFilter (array, key) {
+      let inow = true
+      for (let i = 0; i < array.length; i++) {
+        if (key === array[i]) {
+          inow = false
+        }
+      }
+      return inow
+    },
+    ...patch,
+    // 初始化状态
+    resetStatus () {
+      this.multipleSelection = []
+      this.checkedList = []
+      this.all = false
+    },
+    // 备药完成 / 批量发药和单个发药  (type = 1 备药完成  type = 2 发药)
+    handleFinish (type) {
+      const params = {
+        id: this.leftId,
+        status: this.drugStatus + 1, // 服务端自己取药包状态
+        storageRoomId: this.storageId
+      }
+      api.updateStatus(params).then(res => {
+        // 更改药包状态为待发药
+        if (res.flag) {
+          this.$messageTips(this, 'success', `${type === 1 ? '备药' : '发药'}完成`)
+          this.searchName = ''
+          this.getDispenseCodesList()
+        }
+      })
+    },
+    // 左侧列表
+    async getDispenseCodesList () {
+      const despenCode = this.$store.state.dispensing.dispenseCode
+      if (despenCode) {
+        this.searchName = despenCode
+        this.offset = 0
+      }
+      this.leftLoading = true
+      const result = await api.getList({
+        storageRoomId: this.storageId,
+        codes: this.searchName,
+        status: this.drugStatus,
+        offset: this.offset,
+        pagesize: this.pagesize,
+        relationType: 3 // 住院备药单
+      })
+      this.$store.commit('updateDispenseCode', '')
+      this.leftLoading = false
+      if (result.list && result.list.length) {
+        this.leftTableData = result.list
+        this.leftId = objGet(this.leftTableData[0], 'id', '')
+        this.leftCode = objGet(this.leftTableData[0], 'codes', '')
+        this.inUse = objGet(this.leftTableData[0], 'inUse', '')
+        this.leftId && this.getDispenseList()
+        this.inpatientArea = this.leftTableData[0]
+        this.inpatientArea.barCode = this.inpatientArea.codes
+      } else {
+        this.leftTableData = []
+        this.tableData = []
+        this.errTableData = []
+      }
+      this.totalCount = result.totalCount ? result.totalCount : 0
+    },
+    // 右侧列表
+    handleCurrentChange (data) {
+      if (data) {
+        this.inpatientArea = data
+        this.inpatientArea.barCode = this.inpatientArea.codes
+        this.leftId = data.id
+        this.leftCode = data.codes
+        this.inUse = data.inUse
+        this.getDispenseList()
+        this.multipleSelection = []
+        this.checkedList = []
+        this.all = false
+      }
+    },
+    getDispenseList () {
+      this.fullscreenLoading = true
+      api.getDispenseList({ id: this.leftId }).then(res => {
+        if (res.dispense) this.dispenseObj = res.dispense
+        let countObject = this._findArray(res.list || [])
+        this.tableData = countObject.newArr
+        this.errTableData = countObject.errArr
+        this.fullscreenLoading = false
+      })
+    },
+    // 处理异常
+    handleUnusual () {
+      if (!this.checkMultipleLength()) return
+      let ids = []
+      this.multipleSelection.forEach((item) => {
+        ids.push(item.id)
+      })
+      hospitalApi.getUddDispenseByIds({
+        ids: ids.join(',')
+      }).then(res => {
+        if (res) {
+          this.unusualTableData = res
+          this.dialogTableVisible = true
+          this.resetStatus()
+        }
+      })
+    },
+    // 取消异常
+    async cancelUnusual (id) {
+      const result = await hospitalApi.updateUddDispense({
+        id
+      }).then(res => res)
+      if (result.flag) {
+        this.$messageTips(this, 'success', '撤销异常成功')
+        this.getDispenseList()
+        this.resetStatus()
+      }
+    },
+    // 保存异常
+    async saveUnusual (data) {
+      // 更新发药接口测试
+      let params = []
+      data.checkedItems.forEach((item) => {
+        params.push({
+          id: item.id,
+          identification: 1,
+          identificationTxt: data.inputVal,
+          uddDispenseId: item.uddDispenseId
+        })
+      })
+      const result = await hospitalApi.updateUddDispenseItemList(params).then(res => res)
+      if (result) this.getDispenseList()
+      this.dialogTableVisible = false
+      this.resetStatus()
+    },
+    handleCheck (val) {
+      let chekedCount = val.length
+      this.all = chekedCount === this.tableData.length
+      this.setMultipleSelectionData(val)
+    },
+    handleCheckAll (checked) {
+      if (checked) {
+        this.tableData.forEach((item, index) => {
+          this.checkedList.push(index + 1)
+        })
+      } else {
+        this.checkedList = []
+      }
+      this.setMultipleSelectionData(this.checkedList)
+    },
+    setMultipleSelectionData (data) {
+      this.checkedList.forEach((item) => {
+        this.multipleSelection.push(this.tableData[item - 1])
+      })
+    },
+    // 当前病区 - 添加class
+    patientTableRowClassName ({ row }) {
+      return row.id === this.leftId ? 'current-table-row' : ''
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.el-main{
+  padding: 0px !important;
+}
+.hospital-layout{
+  .list-msg{
+    padding: 10px;
+    // padding-bottom: 60px;
+  }
+}
+.hospital-layout .list-msg .list_box {
+    overflow-x: hidden;
+    height: calc(100vh - 290px);
+    padding-bottom: 60px;
+}
+.light {
+  color: #1c7bef
+}
+.prescription_pagination /deep/ button{
+  color: #409eff;
+}
+.prescription_pagination /deep/ button[disabled=disabled]{
+  color: #c0c4cc;
+}
+.inUse{
+  color: #999;
+}
+</style>
+

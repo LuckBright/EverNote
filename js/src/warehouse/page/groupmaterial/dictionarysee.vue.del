@@ -1,0 +1,67 @@
+<template>
+  <div>
+    <ever-bread-crumb :name="breadCrumbName" :path="path" showTitle="true" :pathTo="true"></ever-bread-crumb>
+    <div class="layout_inner">
+      <!-- 标题 -->
+      <h2 class="alg_c" v-if="!WEST_MEDICINE_TYPE.includes(classifyId)">{{breadName || breadCrumbName}}</h2>
+      <!-- 西药/中成药 （当前区域供给机构关联物资时，查看物资详情的展示）-->
+      <wh-material-form
+        v-if="WEST_MEDICINE_TYPE.includes(classifyId)"
+        :systemType="STENCIL_TYPE[0].id"
+        :customApi="materialDictSpuApi"
+        :customType="STENCIL_TYPE[0].name"
+        :isSearch="true"
+        :backListRoute="path"
+        :isClinic="false"
+        :isEdit="true">
+      </wh-material-form>
+      <!-- 非西药非中成药 （当前区域供给集团或者机构查看物资详情）-->
+      <wh-form-custom-see
+        v-else
+        :breadName.sync="breadName"
+        :systemType="STENCIL_TYPE[0].id"
+        :customApi="materialDictSpuApi"
+        :customType="STENCIL_TYPE[0].name"
+        :backListRoute="path">
+      </wh-form-custom-see>
+    </div>
+  </div>
+</template>
+<script>
+import materialDictSpuApi from './store/materialdictspuapi'
+import whFormCustomSee from '@/warehouse/page/components/whformcustomsee.vue'
+import whMaterialForm from '@/warehouse/page/components/whmaterialform.vue'
+import { STENCIL_TYPE, WEST_MEDICINE_TYPE, getFirstRoutePath } from '@/util/common'
+export default {
+  data () {
+    return {
+      breadCrumbName: `查看${STENCIL_TYPE[0].name}`,
+      breadName: '',
+      STENCIL_TYPE,
+      WEST_MEDICINE_TYPE,
+      path: '',
+      materialDictSpuApi,
+      classifyId: this.$route.query.classifyId
+    }
+  },
+  created () {
+    if (this.$route.path.indexOf('workspace') > -1) {
+      this.path = '/workspace/druglist'
+      return
+    }
+    if (getFirstRoutePath(this.$route.path, 1) === 'group') {
+      this.path = '/group/materials'
+    } else if (getFirstRoutePath(this.$route.path, 1) === 'warehouse' && this.$route.query.source === 'local') {
+      this.path = '/warehouse/relationmaterial'
+    } else {
+      this.path = '/warehouse/materiallists'
+    }
+  },
+  components: {
+    whMaterialForm,
+    whFormCustomSee
+  }
+}
+</script>
+<style lang="scss" scoped>
+</style>

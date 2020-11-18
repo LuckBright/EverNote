@@ -1,0 +1,163 @@
+
+/** color */
+$c_ff:#fff;
+$c_f7:#f7f7f7;
+$c_form:#FEF5BE;
+$col_font_01:#000;
+
+/** base color */
+$col_ccc: #ccc;
+$col_ddd: #ddd;
+$col_fff: #fff;
+$col_bbb: #bbb;
+
+/** grey color */
+$col_g_01:#eee;
+$col_g_04:#f8f8f8;
+$col_g_06:#eee;
+$col_g_08:#ddd;
+$col_g_09:#ccc;
+
+/** other color */
+$col_o_01:#ebedef;
+$col_o_02:#f1f7fd;
+$col_o_03:#d5dff5;
+$col_o_04:#e4e6f1;
+$col_o_05:#1c7bef; // 主题色
+$col_o_06:#277dee;
+$col_o_07:#41aa07;
+$col_o_08:#ee4433;
+
+$col_o_09:#f27700;
+$col_o_010:#5cbc2c;
+
+/** button color */
+$col_btn_01:#409eff;
+$col_btn_02:#ecf5ff;
+$col_btn_03:#b3d8ff;
+$col_btn_04:#67c23a;
+$col_btn_05:#f0f9eb;
+$col_btn_06:#c2e7b0;
+$col_btn_07:#000;
+$col_btn_08:#f3f4f5;
+$col_btn_09:#cfd1d6;
+$col_btn_10:#eb9e05;
+$col_btn_11:#fdf5e6;
+$col_btn_12:#f7d89b;
+$col_btn_13:#fa5555;
+$col_btn_14:#fee;
+$col_btn_15:#fdbbbb;
+
+/** Background Style**/
+.bOrg {background: $col_o_09}
+
+/* ----------------------------------------------------------------------------------------------------------------
+                                          ^_^ ^_^ ^_^ 完美的分割线
+------------------------------------------------------------------------------------------------------------------- */
+.manages_wrap {
+  .query-style.el-form {
+    &.el-form--inline .el-form-item:last-child {
+      .el-form-item__content, .el-button {
+        margin-top: -1px; // everform2 query btn position fix
+      }
+      flex: 1;
+    }
+    display: flex
+  }
+}
+/** Main Style */
+.groupmanages {
+  &-aside-left {
+    &-content {
+      padding: 15px 10px 5px;
+    }
+    background: #f7f8f9;
+    border-right: 1px solid $col_ccc;
+    .ever-table-wrap {
+      margin: 10px;
+    }
+  }
+  &-main-right {
+    .el-radio-group.custom {
+      .el-radio-button {
+        .el-radio-button__orig-radio:checked + .el-radio-button__inner {
+          box-shadow: none;
+          border-color: transparent
+        }
+        .el-radio-button__inner {
+          border-left: 1px solid $col_bbb;
+        }
+        margin: 0 10px 10px 0;
+      }
+    }
+    padding: 15px 20px 5px!important;
+  }
+  background: $col_fff;
+  h3.title {
+    margin: 0;
+    line-height: 40px;
+    margin-bottom: 10px;
+  }
+}
+.custom_table_first_td_cell {
+  th:first-child, td:first-child {
+    .cell {
+      margin: 0;
+    }
+  }
+}
+.group-manangs-table {
+  .cell {
+    margin: 0 10px;
+  }
+}
+.no-margin-table {
+  margin-top: 0
+}
+.no-table-border-not-top {
+  border-top: 1px solid $col_ccc
+}
+.footer_custom {
+  .el-aside {
+    border-right: 1px solid $col_ccc;
+  }
+  .el-aside, .el-main {
+    display: flex;
+    padding: 0!important;
+    justify-content: center;
+    align-items: center;
+  }
+  padding: 0;
+}
+
+.el-pagination:not(.is-background) {
+  .el-pagination__jump {
+    margin-left: 10px;
+  }
+  .btn-prev, .btn-next {
+    padding: 0 5px;
+  }
+  .btn-prev, .btn-next, button:disabled, .el-pager li {
+    background: transparent;
+  }
+}
+.custom-sort-icon {
+  .caret-wrapper {
+    .sort-caret.ascending {
+      display: none
+    }
+    .sort-caret.descending {
+      bottom: 3px!important
+    }
+  }
+}
+// 管理工作站中popover内填充为10px
+.el-popover--plain {
+  padding: 10px;
+}
+.tree-height {
+  .flex_column_full_hidden {
+    position: static!important
+  }
+  min-height: 80px;
+}

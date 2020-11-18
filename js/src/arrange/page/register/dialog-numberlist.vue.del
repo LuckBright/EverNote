@@ -1,0 +1,274 @@
+<template>
+  <div>
+    <el-form :model="params" :inline="true">
+      <el-form-item label="患者">
+        <div style="width:360px">
+          <ever-patient-select
+            v-model="params.queryPatientParam"
+            :allow-create="true"
+            @select="selectPatient"
+          ></ever-patient-select>
+        </div>
+      </el-form-item>
+      <el-form-item label="日期">
+        <el-date-picker
+          v-model="params.appointmentDate"
+          type="date"
+          value-format="yyyy-MM-dd"
+          placeholder="选择日期"
+        ></el-date-picker>
+      </el-form-item>
+      <el-form-item label>
+        <el-button @click.native="getTableData">查询</el-button>
+      </el-form-item>
+    </el-form>
+    <el-table :stripe="false" max-height="680" class="mb20" :data="tableData" style="width: 100%">
+      <el-table-column label="姓名" width="100">
+        <template slot-scope="scope">
+          <span>{{scope.row.patient && scope.row.patient.name}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="性别" align="center" width="80">
+        <template slot-scope="scope">
+          <span>{{scope.row.patient && scope.row.patient.sex | formatSex}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="年龄" width="80">
+        <template slot-scope="scope">
+          <span>{{scope.row.patient && scope.row.patient.age}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="手机号码" width="120">
+        <template slot-scope="scope">
+          <span>{{scope.row.patient && scope.row.patient.mobile}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="来源" width="120">
+        <template slot-scope="scope">
+          <span>{{scope.row.patient && scope.row.patient.sourceName}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="挂号日期" width="120">
+        <template slot-scope="scope">
+          <span>{{$moment(scope.row.appointmentDate).format('YYYY/MM/DD')}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="时段" width="120">
+        <template slot-scope="scope">
+          <span>{{scope.row.appointmentStarttime}} - {{scope.row.appointmentEndtime}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="科室" width="120">
+        <template slot-scope="scope">
+          <span>{{scope.row.deptName}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="医生" width="120">
+        <template slot-scope="scope">
+          <span>{{scope.row.appointmentResourceName}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column width="120" label="服务">
+        <template slot-scope="scope">
+          <span>{{scope.row.serviceName}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="right" width="120" label="价格">
+        <template slot-scope="scope">
+          <span>{{scope.row.serviceOrder ? scope.row.serviceOrder.totalPrice.toFixed(2) : '--'}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column width="160" align="center" label="爱院科室">
+        <template slot-scope="scope">
+          <span>{{scope.row.referrerDeptName || '--'}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column width="160" align="center" label="爱院人">
+        <template slot-scope="scope">
+          <span>{{scope.row.referrerName || '--'}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column width="200" label="备注">
+        <template slot-scope="scope">
+          <span>{{scope.row.symptom}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column width="100" align="left" label="状态">
+        <template slot-scope="scope">
+          <span
+            :class="stateStyle[scope.row.appointmentState].color"
+          >{{stateStyle[scope.row.appointmentState].text}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column fixed="right" width="80" align="center" label="操作">
+        <template slot-scope="scope">
+          <service-icon-handler
+            :list-data="scope.row"
+            :show-key-list="iconList"
+            @update="getTableData"
+            @printReg="getPrintData"
+            @tuihao="appointCancel"
+            :is-register="true"
+          ></service-icon-handler>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-row>
+      <el-col :span="24" align="right">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[20, 50, 100]"
+          :page-size="params.pagesize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="totalCount"
+        ></el-pagination>
+      </el-col>
+    </el-row>
+    <!-- <printregistrationform :printinfo="settlementData" v-show="false" ref="registrationForm"></printregistrationform> -->
+  </div>
+</template>
+<script>
+import api from '@/arrange/store/appointapi'
+import serviceapi from '@/sob/store/service.panel'
+import appointapi from '@/workspace/store/appointapi'
+import settlementapi from '@/rcm/store/settlementapi'
+import serviceIconHandler from '@/workspace/page/service.panel/common/service.icon.handler'
+// 挂号条打印组件，没有调用打印方法，注释掉 (4.11.1) by lvjiangtao@everjiankang.com
+// import printregistrationform from '@/workspace/page/print-registrationform'
+import { NUMBER_STATUS, frPrint } from '@/util/common'
+
+export default {
+  props: ['show'],
+  data () {
+    return {
+      api,
+      serviceapi,
+      settlementapi,
+      appointapi,
+      showDialog: false,
+      tableData: [],
+      iconList: ['cancelappoint', 'printregister'],
+      settlementId: '',
+      orderId: '',
+      settlementData: {
+        id: '',
+        patientAge: 0,
+        patientName: '',
+        patientid: '',
+        settlecode: '',
+        doctorName: '',
+        visitSn: '',
+        payStatus: '',
+        details: {
+          settlementDetail: []
+        }
+      },
+      currentPage: 1,
+      totalCount: 0,
+      params: {
+        patientId: '',
+        queryPatientParam: '',
+        appointmentDate: this.$moment(new Date()).format('YYYY-MM-DD'),
+        pagesize: 20,
+        offset: 0
+      },
+      stateStyle: NUMBER_STATUS
+    }
+  },
+  watch: {
+    'params.queryPatientParam' (val, old) {
+      if (!val || val !== old) {
+        this.params.patientId = ''
+      }
+    }
+  },
+  created () {
+    this.getTableData()
+  },
+  methods: {
+    printFee () {
+      let that = this
+      let fee = 0
+      for (var v in that.settlementData.payDetails) {
+        if (v !== '会员卡支付') {
+          fee += that.settlementData.payDetails[v]
+        }
+      }
+      return fee.toFixed(2)
+    },
+    getTableData () {
+      this.api.getNumberList(this.params).then(rs => {
+        if (!rs.head.errCode) {
+          this.totalCount = rs.totalCount
+          this.tableData = rs.data
+        }
+      })
+    },
+    selectPatient (val) {
+      this.params.patientId = val.id
+    },
+    handleSizeChange (val) {
+      this.params.pagesize = val
+      this.params.offset = (this.currentPage - 1) * this.params.pagesize
+      this.getTableData()
+    },
+    handleCurrentChange (val) {
+      this.currentPage = val
+      this.params.offset = (val - 1) * this.params.pagesize || 0
+      this.getTableData()
+    },
+    // 打印挂号条
+    createPrint () {
+      let printModel = this.$ever.getClinicConfig().printModel
+      if (printModel === 1) {
+        let code = 'RCM-outpatient_info'
+        let params = { id: this.settlementId }
+        frPrint(code, params)
+      } else {
+        let code = 'thc_rcm.guahaotiao_mem_20181022'
+        let params = { id: this.settlementData.visitSn }
+        frPrint(code, params)
+      }
+    },
+    async getPrintData (value) {
+      let printStatus = false
+      let that = this
+      var params = {
+        returnFlag: 0,
+        orderid: value.orderid
+      }
+      let res = await that.serviceapi.getSettlementByOrderId(params)
+      if (res.data.length > 0) {
+        this.settlementapi.getById(res.data[0].id).then(result => {
+          that.settlementData = Object.assign(that.settlementData, result)
+          // that.payObj.flowfee = that.settlementData.totalPayedFee
+          that.settlementData.printfee = that.printFee()
+          that.settlementData.visitSn = result.details.settlementDetail[0].rootorderid
+          if (that.settlementData.payStatus === 2 && !printStatus) {
+            that.createPrint()
+          }
+          if (printStatus) {
+            that.createPrint()
+          }
+        })
+      } else {
+        this.$messageTips(this, 'warning', '没有结算单数据，dyd', '提示')
+      }
+    },
+    // 直接发请求退号
+    async appointCancel (id) {
+      const res = await this.appointapi.cancel(id)
+      if (res && res.head && res.head.errCode === 0) {
+        this.$messageTips(this, 'success', '取消成功', '提示')
+        this.list()
+      }
+    }
+  },
+  components: {
+    serviceIconHandler,
+    printregistrationform
+  }
+}
+</script>

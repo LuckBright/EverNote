@@ -1,0 +1,69 @@
+<template>
+  <span>
+    {{codeDisplay}}
+  </span>
+</template>
+
+<script>
+import api from '@/titancare/api/homeconfig/homeconfigapi'
+export default {
+  props: {
+    code: {
+      type: String,
+      default: ''
+    },
+    val: {
+      type: String,
+      default: ''
+    }
+  },
+  data () {
+    return {
+      options: []
+    }
+  },
+  computed: {
+    codeDisplay () {
+      // options要是数组，如果不是数组转一下
+      let tmp = ''
+      if (this.options.length > 0) {
+        this.options.filter(v => {
+          if (v.code === this.val) {
+            tmp = v.name
+          }
+        })
+      } else {
+        tmp = ''
+      }
+      return tmp
+    }
+  },
+  created () {
+    this.getSysValueList(this.code)
+  },
+  methods: {
+    getSysValueList (data) {
+      this.options = []
+      api.listOnce(data).then(result => {
+        if (result.data && Array.isArray(result.data)) {
+          this.options = result.data
+        } else {
+          this.options = []
+        }
+      })
+    }
+  },
+  watch: {
+    'val': {
+      handler: function (v) {
+        this.getSysValueList(this.code)
+      },
+    },
+    'code': {
+      handler: function (v) {
+        this.getSysValueList(v)
+      },
+    }
+  }
+}
+</script>

@@ -1,0 +1,1 @@
+export const GET_INSURANE_CENTER_LIST = 'GET_INSURANE_CENTER_LIST' // 获取医保中心列表数据

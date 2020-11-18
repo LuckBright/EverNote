@@ -1,0 +1,29 @@
+@import '../../../assets/base.scss';
+
+.design_table {
+  /deep/ tr th {
+    .cell {
+      background: none;
+    }
+    background: $gray2_color!important;
+    padding: 5px 0!important;
+  }
+  /deep/ tr td {
+    padding: 5px 0!important;
+    // background: $gray2_color!important;
+  }
+}
+.tcm-template {
+  &.select {
+    background: $gray2_color!important;
+  }
+}
+
+.design_error_table {
+  /deep/ tr th {
+    background: $col_error!important;
+  }
+  /deep/ tr td {
+    background: $col_error!important;
+  }
+}

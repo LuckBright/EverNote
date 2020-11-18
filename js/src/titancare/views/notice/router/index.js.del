@@ -1,0 +1,29 @@
+
+import Notice from '@/titancare/views/notice/page/notice.vue'
+
+export default [
+  // {
+  //   name: 'notice',
+  //   path: '/notice',
+  //   component: HomeManage,
+  //   meta: { noRequireAuth: true },
+  //   redirect: '/notice/noticeset',
+  //   children: [
+  //     {
+  //       path: 'noticeset',
+  //       name: 'noticeset',
+  //       component: Notice,
+  //       meta: {
+  //         thirdActiveIndex: '/notice'
+  //       }
+  //     }
+  //   ]
+  // },
+  {
+    path: 'notice',
+    name: 'noticeset',
+    component: Notice,
+    meta: {
+    }
+  }
+]

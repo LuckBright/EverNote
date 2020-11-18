@@ -1,0 +1,456 @@
+<template>
+  <div class="statistic">
+    <el-row :gutter="5">
+      <el-col :span="4">
+        <div class="discontainer">
+          <div class="title">报表名称</div>
+          <el-menu :default-active="activeName" @select="handleSelect">
+            <el-menu-item v-for="(item,index) in codeMap" :index="item.code" :key="index" v-if="$hasPermission(item.auth)">
+              <span slot="title">{{item.name}}</span>
+            </el-menu-item>
+          </el-menu>
+        </div>
+      </el-col>
+      <el-col :span="20">
+        <!-- 凡软报表组件 -->
+        <report-view-iframe
+          v-if="currentCode && !showTemp"
+          :code="currentCode"
+          :extUrlParams="extUrlParams"
+          currentStyle="width:100%;border:0;height:calc(100vh - 180px)"
+        ></report-view-iframe>
+        <!-- 润乾报表组件 -->
+        <temp
+          v-if="tempCode && showTemp"
+          :key="tempCode"
+          :code="tempCode"
+          :pageObject="pageObject">
+        </temp>
+      </el-col>
+    </el-row>
+  </div>
+</template>
+<script>
+import reportViewIframe from '@/bi/page/report.view.iframe'
+import storage from '@/util/storage'
+import temp from '@/bi/page/temp.vue'
+export default {
+  data () {
+    return {
+      codeMap: [
+        {
+          name: '门诊工作量统计汇总表',
+          code: 'thc_rcm.GONG_ZUO_LIANG_TONG_JI_BIAO_HUI_ZONG_200312',
+          auth: 'Auth_menu_bi_census_board_staff_outpatient'
+        }, {
+          name: '门诊工作量统计明细表',
+          code: 'thc_rcm.GONG_ZUO_LIANG_TONG_JI_BIAO_MING_XI_200311',
+          auth: 'Auth_menu_bi_census_board_staffOut_Detail'
+        }, {
+          name: '门诊药品耗材销售汇总表',
+          code: 'thc_rcm.HAO_CAI_XIAO_SHOU_BIAO_HUI_ZONG_200312',
+          auth: 'Auth_menu_bi_census_board_material_outpatient'
+        }, {
+          name: '门诊药品耗材销售明细表',
+          code: 'thc_rcm.HAO_CAI_XIAO_SHOU_BIAO_MING_XI_200312',
+          auth: 'Auth_menu_bi_census_board_materialOut_Detail'
+        }, {
+          name: '出院患者费用汇总表',
+          code: 'thc_adt.CHU_YUAN_BING_REN_ZHU_YUAN_FEI_YONG',
+          auth: 'bi_rcm_statistics_outPatientFees'
+        }, {
+          name: '住院工作量统计汇总表',
+          code: 'thc_rcm.ippatientfeesum_20200302',
+          auth: 'Auth_menu_bi_census_board_staff_hospitalization'
+        }, {
+          name: '住院工作量统计明细表',
+          code: 'thc_rcm.ippatientfeesumbypatient_20200311',
+          auth: 'Auth_menu_bi_census_board_staff_hosDetail'
+        }, {
+          name: '住院药品耗材销售汇总表',
+          code: 'thc_rcm.ippatientcostsum_20200302',
+          auth: 'Auth_menu_bi_census_board_material_hospitalization'
+        }, {
+          name: '住院药品耗材销售明细表',
+          code: 'thc_rcm.ippatientcostdetail_20200311',
+          auth: 'Auth_menu_bi_census_board_material_detail'
+        }, {
+          name: '医技工作量汇总表',
+          code: 'thc_rcm.doctorexcutereport_20200312',
+          auth: 'Auth_menu_bi_census_board_doctec'
+        }, {
+          name: '医技工作量统计表（已结算患者）',
+          code: 'thc_rcm.doctorexcutereport_20200312_copy_settled',
+          auth: 'bi_rcm_statistics_doctecSettled'
+        }, {
+          name: '医保在院患者查询',
+          code: 'thc_rcm.ippatientmedreport_20200326',
+          auth: 'bi_rcm_statistics_medPatientInHos'
+        }, {
+          name: '医保结算汇总表',
+          code: 'thc_rcm.medsettlesumreport_20200325',
+          auth: 'bi_rcm_statistics_medSettleStatistic'
+        }, {
+          name: '医保结算明细表',
+          code: 'thc_rcm.medsettledetailreport_20200325',
+          auth: 'bi_rcm_statistics_medSettleStatisticDetail'
+        }, {
+          name: '挂号工作量汇总表',
+          code: 'thc_rcm.opdoctorserverrepost_20200326',
+          auth: 'bi_rcm_statistics_appointment'
+        }, {
+          name: '药品销售双十排名表',
+          code: 'thc_rcm_YaoPinSaleDoubleTen',
+          auth: 'bi_rcm_statistics_medicineSaleSS'
+        }, {
+          name: '药品销售排名表',
+          code: 'thc_rcm_YaoPinSaleByDeptName',
+          auth: 'bi_rcm_statistics_medicineSale'
+        }, {
+          name: '科室收入分析表',
+          code: 'thc_rcm.jiTuanShouRuAnalyse',
+          auth: 'bi_rcm_statistics_dptIncome'
+        }, {
+          name: '病区日报',
+          code: 'ZY_CPOE_BING_QU_RI_BAO',
+          auth: 'Auth_menu_bi_census_board_warddaily'
+        }, {
+          name: '住院流动分析',
+          code: 'ZY_CPOE_ZHU_YUAN_LIU_DONG_FEN_XI',
+          auth: 'Auth_menu_bi_census_board_hospitalmobility'
+        },
+        {
+          name: '医技外送统计表',
+          code: 'thc_rcm.doctorexcutereport_20200312_copy_settled_xin',
+          auth: 'bi_rcm_statistics_doctecDelivery'
+        },
+        {
+          name: '当日费用清单',
+          code: 'ZY_DANG_RI_FEI_YONG_QING_DAN',
+          auth: 'bi_rcm_cost_of_the_day'
+        },
+        // -----------------------------【润乾报表】--------------------------------------
+        // 对象加上 mate 走润乾报表
+        // schema  报表需要搜索的条件 可以去temp组件里面定义搜索条件对应的组件 schema 也可以在当前 schema 里面定义好组件的对象
+        //    例如：
+        //          样例1：
+        //                schema: ['deptId', 'doctorId', 'visitStartDate', 'orgId']
+        //          样例2：schema: [{
+        //                      name: 'orderString',
+        //                      comp: 'select',
+        //                      label: '排序',
+        //                      props: {
+        //                        options: [
+        //                          {
+        //                            id: 'quantity',
+        //                            name: '数量'
+        //                          },
+        //                          {
+        //                            id: 'totalMoney',
+        //                            name: '金额'
+        //                          }
+        //                        ]
+        //                      }
+        //                    }]
+        //
+        // defaultQueryObj  搜索条件的默认值
+        //                  defaultQueryObj: {
+        //                    orderString: 'quantity',
+        //                    startTime: this.$moment().subtract(1, 'months').date(1).format('YYYY-MM-DD 00:00:00'),
+        //                    endTime: this.$moment().subtract(0, 'months').date(0).format('YYYY-MM-DD 00:00:00')
+        //                  }
+        {
+          name: '门诊工作量统计汇总表（润乾）',
+          code: 'report_work_out_gzltjhz',
+          schema: ['orgId', 'deptId', 'visitStartDate'],
+          defaultQueryObj: {
+            doctorId: storage.getLocalStorage('USERID'),
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().format('YYYY-MM-DD 23:59:59')
+          },
+          mate: 1,
+          auth: 'Auth_menu_bi_census_board_staff_outpatient_new'
+        },
+        {
+          name: '门诊工作量统计明细表（润乾）',
+          code: 'report_work_out_gzltjmx',
+          schema: ['orgId', 'deptId', 'visitStartDate'],
+          defaultQueryObj: {
+            doctorId: storage.getLocalStorage('USERID'),
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().format('YYYY-MM-DD 23:59:59')
+          },
+          mate: 1,
+          auth: 'Auth_menu_bi_census_board_staffOut_Detail_new'
+        },
+        {
+          name: '住院工作量统计汇总表（润乾）',
+          code: 'report_work_ip_gzltjhz',
+          schema: ['orgId', 'deptId', 'doctorId', 'visitStartDate'],
+          defaultQueryObj: {
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().format('YYYY-MM-DD 23:59:59')
+          },
+          mate: 1,
+          auth: 'Auth_menu_bi_census_board_staff_hospitalization_new'
+        },
+        {
+          name: '住院工作量统计明细表（润乾）',
+          code: 'report_work_ip_gzltjmx',
+          schema: ['orgId', 'deptId', 'doctorId', 'visitStartDate'],
+          defaultQueryObj: {
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().format('YYYY-MM-DD 23:59:59')
+          },
+          mate: 1,
+          auth: 'Auth_menu_bi_census_board_staff_hosDetail_new'
+        },
+        {
+          name: '医技工作量汇总表（润乾）',
+          code: 'report_work_mt_gzltj',
+          schema: ['orgId', 'deptId', 'doctorId', 'visitStartDate'],
+          defaultQueryObj: {
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().format('YYYY-MM-DD 23:59:59')
+          },
+          mate: 1,
+          auth: 'Auth_menu_bi_census_board_doctec_new'
+        },
+        {
+          name: '医技工作量统计表（已结算患者）（润乾）',
+          code: 'report_work_mt_gzltj_settlement',
+          schema: ['orgId', 'deptId', 'doctorId', 'visitStartDate'],
+          defaultQueryObj: {
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().format('YYYY-MM-DD 23:59:59')
+          },
+          mate: 1,
+          auth: 'bi_rcm_statistics_doctecSettled_new'
+        },
+        {
+          name: '门诊开单项目汇总表（润乾）',
+          code: 'report_work_out_kdltjmx_new',
+          schema: ['orgId', 'deptId', 'doctorId', {
+            name: 'itemType',
+            label: '项目名称', // 项目名称
+            span: 4,
+          }, 'visitStartDate'],
+          defaultQueryObj: {
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().format('YYYY-MM-DD 23:59:59')
+          },
+          mate: 1,
+          auth: 'Auth_menu_bi_census_board_staff_outpatient_hznew'
+        },
+        {
+          name: '住院开单项目汇总表（润乾）',
+          code: 'report_work_ip_kdltjmx_new',
+          schema: ['orgId', 'deptId', 'doctorId', {
+            name: 'itemType',
+            label: '项目名称', // 项目名称
+            span: 4,
+          }, 'visitStartDate'],
+          defaultQueryObj: {
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().format('YYYY-MM-DD 23:59:59')
+          },
+          mate: 1,
+          auth: 'Auth_menu_bi_census_board_staff_hospitalization_hznew'
+        },
+        {
+          name: '医技执行项目汇总表（润乾）',
+          code: 'report_work_mt_zxltjmx_new',
+          schema: ['orgId', 'deptId', 'doctorId', {
+            name: 'itemType',
+            label: '项目名称', // 项目名称
+            span: 4,
+          }, 'visitStartDate'],
+          defaultQueryObj: {
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().format('YYYY-MM-DD 23:59:59')
+          },
+          mate: 1,
+          auth: 'bi_rcm_statistics_doctecSettled_hznew'
+        },
+        {
+          name: '门诊药品耗材销售汇总表（润乾）',
+          code: 'report_sale_out_yphchz',
+          schema: ['orgId', 'deptId', 'doctorId', 'visitStartDate'],
+          defaultQueryObj: {
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().subtract(1, 'day').format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().subtract(1, 'day').format('YYYY-MM-DD 23:59:59')
+          },
+          mate: 1,
+          auth: 'Auth_menu_bi_census_board_material_outpatient_new'
+        },
+        {
+          name: '门诊药品耗材销售明细表（润乾）',
+          code: 'report_sale_out_yphcmx',
+          schema: ['orgId', 'storageRoomId', 'visitStartDate'],
+          defaultQueryObj: {
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().subtract(1, 'day').format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().subtract(1, 'day').format('YYYY-MM-DD 23:59:59')
+          },
+          mate: 1,
+          auth: 'Auth_menu_bi_census_board_materialOut_Detail_new'
+        },
+        {
+          name: '住院药品耗材销售汇总表（润乾）',
+          code: 'report_sale_ip_yphchz',
+          schema: ['orgId', 'deptId', 'doctorId', 'visitStartDate'],
+          defaultQueryObj: {
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().subtract(1, 'day').format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().subtract(1, 'day').format('YYYY-MM-DD 23:59:59')
+          },
+          mate: 1,
+          auth: 'Auth_menu_bi_census_board_material_hospitalization_new'
+        },
+        {
+          name: '住院药品耗材销售明细表（润乾）',
+          code: 'report_sale_ip_yphcmx',
+          schema: ['orgId', 'storageRoomId', 'visitStartDate'],
+          defaultQueryObj: {
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().subtract(1, 'day').format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().subtract(1, 'day').format('YYYY-MM-DD 23:59:59')
+          },
+          mate: 1,
+          auth: 'Auth_menu_bi_census_board_material_detail_new'
+        },
+        {
+          name: '药品销售双十排名表(已结算)（润乾）',
+          code: 'report_sale_out_ypsspm',
+          schema: ['orderString', 'itemType', 'visitStartDate', 'orgId'],
+          defaultQueryObj: {
+            orderString: 'quantity',
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().subtract(1, 'months').date(1).format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().subtract(0, 'months').date(0).format('YYYY-MM-DD 00:00:00')
+          },
+          mate: 1,
+          auth: 'bi_rcm_statistics_medicineSaleSS_jsnew'
+        },
+        {
+          name: '药品销售双十排名表（润乾）',
+          code: 'report_sale_out_ypsspm_all',
+          schema: ['orderString', 'itemType', 'visitStartDate', 'orgId'],
+          defaultQueryObj: {
+            orderString: 'quantity',
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().subtract(1, 'months').date(1).format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().subtract(0, 'months').date(0).format('YYYY-MM-DD 00:00:00')
+          },
+          mate: 1,
+          auth: 'bi_rcm_statistics_medicineSaleSS_new'
+        },
+        {
+          name: '药品销售排名表（润乾）',
+          code: 'report_sale_ip_yppm',
+          schema: ['orderString', 'itemType', 'visitStartDate', 'orgId'],
+          defaultQueryObj: {
+            orderString: 'quantity',
+            orgId: storage.getLocalStorage('CLINICID'),
+            startTime: this.$moment().subtract(1, 'months').date(1).format('YYYY-MM-DD 00:00:00'),
+            endTime: this.$moment().subtract(0, 'months').date(0).format('YYYY-MM-DD 00:00:00')
+          },
+          mate: 1,
+          auth: 'bi_rcm_statistics_medicineSale_new'
+        }
+      ],
+      extUrlParams: {
+        name: this.$store.state.currentUser.name + '', // 当前登录人
+        clinicId: this.$store.state.currentUser.organizationId + '', // 当前机构id
+        printer: this.$store.state.currentUser.name + '',
+        userId: this.$store.state.currentUser.userId + '', // 当前登录人id
+        tenantId: this.$store.state.currentUser.tenantId + '' // 租户id
+      },
+      activeName: 'thc_rcm.GONG_ZUO_LIANG_TONG_JI_BIAO_HUI_ZONG_200312',
+      currentCode: 'thc_rcm.GONG_ZUO_LIANG_TONG_JI_BIAO_HUI_ZONG_200312',
+      tempCode: '',
+      showTemp: null,
+      pageObject: {}
+    }
+  },
+  methods: {
+    handleSelect (index) {
+      if (this.codeMap.filter(item => item.mate).map(item => item.code).includes(index)) {
+        this.pageObject = this.codeMap.find(item => item.code === index)
+        this.showTemp = true
+        this.tempCode = index
+      } else {
+        this.showTemp = false
+        this.currentCode = index
+      }
+    }
+  },
+  components: {
+    reportViewIframe,
+    temp
+  },
+  watch: {
+    '$store.state.currentUser': function (val) {
+      if (val) {
+        Object.keys(this.extUrlParams).forEach(key => {
+          if (key === 'clinicId') {
+            this.extUrlParams[key] = val['organizationId'] + ''
+          } else {
+            this.extUrlParams[key] = val[key] + ''
+          }
+        })
+      }
+    },
+    deep: true
+  }
+}
+</script>
+<style scoped lang='scss'>
+#friframe {
+  .setIframeStyle .content-container {
+    overflow: inherit;
+  }
+}
+.statistic {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.statistic .el-row {
+  height: 100%;
+}
+.statistic .el-col {
+  height: 100%;
+}
+.discontainer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ccc;
+  background-color: white;
+  .title {
+    font-size: 16px;
+    line-height: 40px;
+    background: #ccc;
+    text-align: center;
+  }
+  .el-menu {
+    overflow: auto;
+    border-right: none;
+    .el-menu-item {
+      height: 32px;
+      line-height: 32px;
+    }
+  }
+}
+</style>

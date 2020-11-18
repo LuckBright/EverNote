@@ -1,0 +1,76 @@
+<template>
+  <div class="ever_bg_01">
+    <div class="ever_box ever_box_02">
+      <h3 class="alg_c">设置新密码</h3>
+      <el-form class="pwd_form" :rules="smsRules" ref="smsForm" :model="smsForm" label-width="100px">
+        <el-form-item label="密码" prop="password">
+          <el-input class="spe_mobile_inp" type="password" :maxlength="11" v-model="smsForm.password" size="large" placeholder="请输入新密码"></el-input>
+        </el-form-item>
+        <el-form-item label="确认密码" prop="checkPwd">
+          <el-input class="spe_mobile_inp" type="password" :maxlength="11" v-model="smsForm.checkPwd" size="large" placeholder="请确认密码" auto-complete="off" @keyup.enter.native="handleSubmit2"></el-input>
+        </el-form-item>
+        <el-form-item class="mt40" style="margin: 0 20px 0 -20px">
+          <el-button class="el-button-01" type="primary" size="large" @click="submitForm('smsForm', 2)" :disabled="smsFormDisable">提 交</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+  </div>
+</template>
+
+<script>
+import validator from '@/titancare/utils/validator'
+import api from '@/titancare/api/password'
+export default {
+  data () {
+    let validatePass2 = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请再次输入密码'))
+      } else if (value !== this.smsForm.password) {
+        callback(new Error('两次输入密码不一致!'))
+      } else {
+        callback()
+      }
+    }
+    return {
+      logining: false,
+      smsCodeDisable: true,
+      smsFormDisable: false,
+      smsCodeIng: false,
+      smsForm: {
+        password: null,
+        checkPwd: null
+      },
+      smsRules: {
+        password: [
+          { required: true, message: '请输入新密码', trigger: 'blur' },
+          { validator: validator.checkPassword, trigger: 'blur' }
+        ],
+        checkPwd: [
+          { validator: validatePass2, trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  methods: {
+    async submitForm (formName, step) {
+      this.$refs[formName].validate(async (valid) => {
+        if (valid) {
+          const result = await api.modifyFirstPassword({ newPwd: this.smsForm.password })
+          if (result.head.errCode === 0) this.$router.push('/login')
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style scoped>
+@import url(./index.scss);
+.ever_box_02 {
+  height: 260px;
+  width: 400px;
+  margin-left: -350px;
+  padding: 30px 150px;
+  margin-top: -130px;
+}
+</style>

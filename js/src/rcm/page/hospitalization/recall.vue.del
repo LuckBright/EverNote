@@ -1,0 +1,372 @@
+<template>
+  <div class="containHeight">
+    <el-container v-loading="cardloading">
+      <patient-list ref="patientlist" :hosType="2" v-if="!$route.query.source" @getdata="list"></patient-list>
+      <div @click="togglePatientList" class="maincontainer">
+        <el-header>
+          <ever-query-form
+            :schema="querySchema"
+            v-model="queryObj"
+            class="main-form"
+            v-if="!$route.query.source"
+          >
+            <template slot-scope="scope" slot="hospitalobj">
+              <hospitalselect
+                :hosType="2"
+                v-model="scope.obj.hospitalobj"
+                @change="handlePatientChange"
+              ></hospitalselect>
+            </template>
+          </ever-query-form>
+          <div style="background-color:#fff;padding:100px;" v-if="noData">
+            <ever-no-data></ever-no-data>
+          </div>
+        </el-header>
+        <div v-if="!noData" class="dataArea">
+          <div class="info-container">
+            <common-head
+              v-if="$route.query.patientId"
+              :patientId="$route.query.patientId"
+              :visitNumber="$route.query.ipNo"
+              code="010"
+              :key="$route.query.patientId"
+            ></common-head>
+          </div>
+          <el-menu
+            :default-active="activeIndex"
+            class="el-menu-demo"
+            mode="horizontal"
+            @select="handleSelect"
+            :router="false"
+          >
+            <el-menu-item index="/adt/recall/dischargemanage">收款查询</el-menu-item>
+            <el-menu-item index="/adt/recall/backchargedetail">费用明细</el-menu-item>
+          </el-menu>
+          <div class="routerview" :key="obj.id">
+            <router-view @refresh="refresh" :paramsObj="obj" :useType="useType"></router-view>
+          </div>
+        </div>
+      </div>
+    </el-container>
+  </div>
+</template>
+<script>
+import patientList from '@/rcm/page/hospitalization/patientlist'
+import { getPatientInfo } from '@/rcm/store/hospital/hospital'
+import list from '@/util/list'
+import backChargeDetail from '@/rcm/page/hospitalization/backchargedetail'
+import CommonHead from '@/inpatient/components/common.head.js'
+import hospitalselect from '@/components/hospitalselect'
+
+let schema = [
+  {
+    label: '病案号',
+    name: 'hospitalobj',
+    placeholder: '输入患者姓名',
+    type: 'custom'
+  }
+]
+export default {
+  mixins: [list],
+  components: {
+    patientList,
+    backChargeDetail,
+    CommonHead,
+    hospitalselect
+  },
+  watch: {
+    $route: {
+      handler: function (val, oldval) {
+        this.activeIndex = val.path
+      },
+      immediate: true
+    },
+  },
+  data () {
+    var queryObj = this.$ever.createObjFromSchema(schema)
+    queryObj.requestSwitch = true
+    return {
+      dialogVisible: false,
+      querySchema: schema,
+      queryObj: queryObj,
+      noData: true,
+      activeIndex: '/adt/recall/dischargemanage',
+      obj: {
+        payType: 2,
+        payObj: {
+          paymethod: 1,
+          remark: '',
+          flowfee: 0,
+          auth_code: ''
+        },
+        id: '',
+        ipStatus: 0,
+        /** 优惠信息字段 */
+        medFundFee: 0,
+        memberCardPayedFee: 0,
+        memberCardBenefitFee: 0,
+        medPersonCountFee: 0,
+        medFee: 0,
+        comInsurancePayedFee: 0,
+        comInsuranceFee: 0,
+        comInsuranceBenefitFee: 0,
+        totalFee: 0,
+        promotionFee: 0,
+        benefitCardFee: 0,
+        giftCardFee: 0,
+        totalDeposit: 0,
+        refundFee: 0,
+        receivableFee: 0,
+        payTradeLog: []
+      },
+      cardloading: false,
+      // 新页面
+      info: [],
+      useType: 'recall'
+    }
+  },
+  created () {
+    this.list()
+    document.onclick = event => {
+      // console.log(event, event.target.className, '点击事件')
+      let e = event.target || event.srcElement
+      if (e.className === 'containHeight') {
+        this.togglePatientList()
+      }
+    }
+  },
+  methods: {
+    getFromChild (data) {
+      this.obj = Object.assign({}, this.obj, data)
+    },
+    // 患者列表
+    async list () {
+      // 方运哲提 乔登涛改 出院管理》费用明细》结算记录》详情 进来的这个页面的 recalled参数传
+      let source = this.$route.query.source // 跳转过来的标志
+      this.cardloading = true
+      let params = {
+        ipNo: this.$route.query.ipNo, // 病案号
+        patientId: this.$route.query.patientId, // 患者id
+        recalled: source ? 0 : 1, // 患者id
+        settlementId: this.$route.query.settlementId, // 结算单id
+        containsOutHospitalSettle: true // 押金列表中包含出院计算
+      }
+      try {
+        let data = await getPatientInfo(params)
+        if (data && Object.getOwnPropertyNames(data.data).length > 0) {
+          this.noData = false
+          data.data.billSumFeeNoSettle = data.billSumFeeNoSettle
+          // 如果url上本身就有，就不用覆盖了，这块儿是中途结算跳转的时候，加入这个人本身又有了出院结算id，data.data就会带有出院结算的结算单id
+          if (this.$route.query.settlementId) {
+            delete data.data.settlementId
+          }
+          // printControl是控制发票打印重打，补打按钮的
+          this.obj = Object.assign({}, this.obj, data.data)
+          // 是否需要替换
+          let chargedetail = {
+            patientId: this.obj.patientId,
+            ipNo: this.obj.ipNo,
+            ipStatus: this.obj.ipStatus, // 在院状态
+            ipSettleStatus: this.obj.ipSettleStatus // 住院结算状态
+          }
+          if (this.obj.settlementId) { // 如果有就是出院结算的结算单，把它带到url上
+            chargedetail.settlementId = this.obj.settlementId
+          }
+          this.$router.replace({
+            path: this.$route.path,
+            query: Object.assign(this.$route.query, chargedetail)
+          })
+        } else {
+          this.noData = true
+        }
+        this.cardloading = false
+      } catch (err) {
+        console.log(err)
+        this.cardloading = false
+      }
+    },
+    query () {
+      this.list()
+    },
+    refresh (val) {
+      this.list()
+    },
+    togglePatientList () {
+      if (this.$refs.patientlist && this.$refs.patientlist.isShow) {
+        this.$refs.patientlist.isShow = false
+      }
+    },
+    handlePatientChange (val) {
+      if (val) {
+        this.$router.push({
+          path: '/adt/recall/dischargemanage',
+          query: {
+            id: val.id,
+            patientId: val.patientId,
+            ipNo: val.hospitalizedNumber, // 住院流水号
+            providerId: val.admitDeptId,
+            visitNumber: val.visitNumber,
+            ipStatus: val.status, // 在院状态
+            patientName: val.patientName || '',
+            birthday: val.birthday || '',
+            sexName: val.sex === '1' ? '男' : '女',
+          }
+        })
+        this.list()
+      }
+    },
+    handleSelect (key, keyPath) {
+      this.$router.replace({
+        path: key,
+        query: this.$route.query
+      })
+    }
+  }
+}
+</script>
+<style lang="less" scoped>
+.info-container {
+  // padding: 20px 20px 0 20px;
+  background-color: #fff;
+  .box {
+    float: left;
+    margin-right: 20px;
+    height: 28px;
+    .boxContent {
+      color: #000;
+    }
+  }
+  .el-col-6 {
+    padding-bottom: 20px;
+    font-size: 14px;
+    color: #000;
+    .el-col-8 {
+      text-align: right;
+      padding-right: 10px;
+      color: #666;
+    }
+    .depositBalance {
+      font-weight: bold;
+      color: #ff9c00;
+    }
+  }
+}
+</style>
+<style scoped>
+.main-form {
+  padding: 10px 20px 0 20px;
+  background-color: #fff;
+  margin-bottom: 10px;
+}
+.containHeight {
+  height: 100%;
+  background: white;
+}
+.containHeight .maincontainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.containHeight .maincontainer .dataArea {
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+}
+.containHeight .el-header {
+  /* height: 40px !important; */
+  height: auto !important;
+  background-color: #eaeaea;
+  padding: 0;
+  margin-bottom: 10px;
+}
+.containHeight .el-header /deep/ .el-form {
+  background-color: #fff;
+  /* border-bottom: 1px solid #eaeaea; */
+}
+.containHeight
+  .el-header
+  /deep/
+  .el-form
+  .el-form-item--mini
+  .el-form-item__label {
+  height: 28px;
+  line-height: 28px;
+}
+.containHeight .el-menu--horizontal > .el-menu-item {
+  color: #000;
+  height: 40px;
+  line-height: 40px;
+}
+.containHeight .el-menu-demo {
+  margin-top: 10px;
+  background-color: #f4f4f4;
+}
+.containHeight .el-container {
+  background-color: #ebedef;
+  flex-direction: column;
+  height: 100%;
+}
+.containHeight .el-container.is-vertical {
+  position: relative;
+  height: 100%;
+}
+.containHeight .el-menu-demo .is-active {
+  font-weight: bold;
+  color: #1c7bef;
+  background-color: #f4f4f4;
+}
+.containHeight .el-menu-demo .el-dropdown-menu__item--divided:before,
+.el-menu,
+.el-menu--horizontal > .el-menu-item:not(.is-disabled):focus,
+.el-menu--horizontal > .el-menu-item:not(.is-disabled):hover,
+.el-menu--horizontal > .el-submenu .el-submenu__title:hover {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  color: #1c7bef;
+}
+.routerview {
+  background-color: #fff;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.list_item {
+  float: right;
+  padding-right: 20px;
+  padding-top: 14px;
+  text-align: right;
+}
+.settlement_detail_label {
+  font-size: 14px;
+  color: #999;
+}
+.settlement_detail_money {
+  color: #000;
+  font-size: 14px;
+}
+.settle_totalFee,
+.settle_needpay {
+  font-size: 16px;
+  color: #999;
+  font-weight: 400;
+  line-height: 50px;
+  vertical-align: middle;
+}
+.settle_totalFee span {
+  color: #666;
+  line-height: 50px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: right;
+  margin-right: 10px;
+}
+.settle_needpay span {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 40px;
+  display: inline-block;
+  text-align: right;
+  margin-right: 10px;
+}
+</style>

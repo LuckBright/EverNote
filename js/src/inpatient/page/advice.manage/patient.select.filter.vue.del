@@ -1,0 +1,95 @@
+
+<!--
+  患者选择组件，需要过滤一些状态的患者，调用不同的接口，不同于公共组件
+-->
+<template>
+  <span>
+    <el-select
+      v-model="select"
+      filterable
+      clearable
+      remote
+      :disabled="disabled"
+      :placeholder="placeholder || '患者姓名/健保卡/病案号'"
+      :remote-method="remoteMethod"
+      @change="change"
+      :style="{width:'100%'}"
+      :size="size || 'small'"
+    >
+      <el-option
+        v-for="item in patients"
+        :key="item.patientId"
+        :label="item.patientName"
+        :value="useText ? item.patientName : item.patientId"
+      >
+        <span class="option-field">{{ item.patientName }}</span>
+        <template v-if="item.patient">
+          <span class="option-field">
+            <sys-value type="GBT.2261.1" :code="item.patient.sex"></sys-value>
+          </span>
+          <span class="option-field">{{ item.patient.age }}</span>
+          <span class="option-field">{{ item.patient.mobile }}</span>
+        </template>
+      </el-option>
+    </el-select>
+  </span>
+</template>
+<script>
+import api from '@/inpatient/store/advice/review'
+
+export default {
+  props: ['value', 'placeholder', 'useText', 'disabled', 'patientName', 'size'],
+  data () {
+    return {
+      patients: []
+    }
+  },
+  methods: {
+    remoteMethod (query) {
+      query = query && String(query).trim() || this.patientName
+      let postdata = {
+        hosStatusList: [11, 12, 13, 14],
+        patientMsg: query
+      }
+      api.getPatientsByStatus(postdata).then(results => {
+        if (results.data && results.data.length) {
+          this.patients = results.data
+          return this.patients
+        } else {
+          this.patients = []
+          return this.patients
+        }
+      })
+    },
+    change (val) {
+      if (!val) this.remoteMethod()
+      this.$emit('change', val)
+    }
+  },
+  computed: {
+    select: {
+      set (newVal) {
+        this.$emit('input', newVal)
+        this.$emit('select', this.patients.filter(v => v.id === newVal)[0])
+      },
+      get () {
+        return this.value
+      }
+    }
+  },
+  created () {
+    this.remoteMethod()
+  },
+  watch: {
+  }
+}
+</script>
+<style scoped>
+p {
+  margin: 0;
+}
+.option-field {
+  display: inline-block;
+  margin-right: 10px;
+}
+</style>

@@ -1,0 +1,163 @@
+@import "base";
+// 随访模块公共样式
+.common-el {
+  font-size: 14px;
+  &.el-aside, &.el-main, &.el-header, &.el-footer {
+    padding: 0!important;
+    //overflow: hidden;
+    .common-border;
+    & > .common-box {
+      border: none;
+    }
+  }
+  &.el-header {
+    min-height: 60px!important; // 注意 这里的样式与base.less中的.common-auto-header-height有耦合 60px只的是
+  }
+}
+/* 最外层的大布局 */
+.common-inner {
+  background-color: #f8f9fa;
+}
+/* 每个盒子模块的小布局 */
+.common-box {
+  .common-border;
+  & > .common-header:not(.jcfs) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 50px;
+    border-bottom: @common-border;
+    padding: 0 20px;
+  }
+  & > .common-header.h60 {
+    height: 60px;
+  }
+  /* 上为0 左右下为20 */
+  & > .common-content {
+    // padding: 10px 20px;
+    padding: 20px;
+  }
+}
+/* label 颜色为浅灰色的表单 */
+.gray-label-form,
+.el-form--label-top.gray-label-form.el-form {
+  .el-form-item__label {
+    .common-label-text-color;
+    font-weight: normal;
+  }
+}
+/* 表单行间距 */
+.el-form:not(.custom-form) .el-form-item--small.el-form-item:not(.custom-form-item) {
+  margin-bottom: 5px;
+}
+/* label在上方的表单行高改为26px */
+.el-form.el-form--label-top .el-form-item__label {
+  height: 26px;
+  line-height: 26px;
+}
+/* readonlyitem 展示多行的内容 */
+.el-form-item__content .view-item {
+  padding-left: 38px;
+}
+/* readonlyitem 展示单行的内容 */
+.el-form-item__content .view-inline-item {
+  padding-right: 10px;
+}
+/* readonlyitem 展示缩进的内容 */
+.el-form-item__content .indent-content {
+  padding-left: 20px;
+}
+.el-select__input {
+  margin-left: 8px;
+}
+
+.tree-node {
+  width: 100%;
+  display: inline-block;
+  padding-right: 10px;
+}
+
+.tree .el-tree-node__content {
+  height: 36px;
+  border-bottom: 1px solid #d9dee5;
+  .el-tree-node__expand-icon {
+    color: #000;
+    &.is-leaf {
+      color: transparent;
+    }
+  }
+}
+.follow-syscode-tree.tree {
+  .el-tree-node {
+    white-space: unset;
+  }
+  .tree-node {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 10px;
+  }
+  .el-tree-node__content {
+    height: auto;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    .syscode-name {
+      margin-right: 10px;
+    }
+  }
+}
+.follow-template-tree.tree {
+  .el-tree-node__content {
+    border-bottom: none;
+  }
+}
+.tree.follow-template-tree.el-tree--highlight-current {
+  .el-tree__empty-block {
+    display: none;
+  }
+  .el-tree-node {
+    .bgc-gray;
+    white-space: unset;
+  }
+  .el-tree-node.is-current > .el-tree-node__content {
+    .bgc-fff;
+  }
+  .el-tree-node__children {
+    .el-tree-node.is-current {
+      .bgc-fff;
+      border-bottom: 1px solid #ccc;
+      border-top: 1px solid #ccc;
+      color: #1c7bef;
+      &::before {
+        position: absolute;
+        content: '';
+        width: 1px;
+        height: 36px;
+        background-color: #fff;
+        right: -1px;
+      }
+    }
+  }
+}
+.follow-template-tree{
+  > .el-tree-node{
+    > .el-tree-node__content {
+      padding-left: 14px !important;
+    }
+  }
+}
+.add-follow.ui_dialog_0{
+  z-index:2999!important;
+}
+.add-follow.ui_dialog_0 >div{
+  padding:0px;font-size:16px;
+}
+.add-follow.ui_dialog_0 .el-dialog__body{padding:0px;}
+.add-follow.ui_dialog_0 .footer{
+        text-align:right;
+        padding: 7px 20px;
+    }
+.add-follow.ui_dialog_0 .follow-patient{
+    padding:0 20px;
+  }

@@ -1,0 +1,269 @@
+<template>
+  <el-dialog
+    title="修改排班"
+    :visible="dialogFormVisible"
+    :before-close="closepup"
+    :close-on-click-modal="false"
+    :close-on-press-escape="false"
+  >
+    <div class="ever_allergichis_wrap" style="overflow:hidden;padding-right:10px">
+      <el-form v-for="(item, i) in input" :key="i" :rules="rules" :model="item" ref="form">
+        <el-row :gutter="10">
+          <el-col :span="6">
+            <el-form-item prop="timeTrunkId">
+              <el-select v-model="item.timeTrunkId" placeholder="选择班次" clearable>
+                <el-option
+                  v-for="(temp, i) in orgItemListpro"
+                  :key="i"
+                  :value="temp.id"
+                  :label="temp.name"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item prop="relationList">
+              <el-select
+                v-model="item.relationList"
+                placeholder="跟诊医生"
+                clearable
+                multiple
+                :multiple-limit="5"
+                value-key="id"
+              >
+                <el-option
+                  v-for="(temp, i) in orgArrangeList"
+                  :key="i"
+                  :value="temp"
+                  :label="temp.name"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item prop="arrangeUse">
+              <el-select v-model="item.arrangeUse" placeholder="出勤方式" clearable>
+                <el-option
+                  v-for="(temp, i) in arrangeUseList"
+                  :key="i"
+                  :value="temp.id"
+                  :label="temp.name"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="2" class="handle_btn">
+            <i class="iconfont icon-delete" @click="delAllergyItem(i)" v-if="input.length > 1"></i>
+            <i class="iconfont icon-tianjia" @click="addItem(i)" v-if="(i + 1) === (input.length)"></i>
+          </el-col>
+        </el-row>
+      </el-form>
+    </div>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="closepup">取 消</el-button>
+      <el-button type="primary" @click="successPup">确 定</el-button>
+    </div>
+  </el-dialog>
+</template>
+<script>
+import nurseapi from '@/arrange/store/nurseapi'
+export default {
+  props: ['clinicId', 'objval', 'value', 'newvalue', 'clinicName'],
+  data () {
+    let emptyObj = { timeTrunkId: '', relationList: [], arrangeUse: '' }
+    return {
+      nurseapi,
+      emptyObj,
+      dialogFormVisible: false,
+      arrangeUseList: [],
+      orgItemListpro: [],
+      orgArrangeList: [],
+      showselect: true,
+      input: this.newvalue && this.newvalue.length ? this.newvalue : [Object.assign({}, emptyObj)],
+      disabled: true,
+      baseinfo: '',
+      rules: {
+        timeTrunkId: [
+          { required: true, message: '必填项', trigger: ['blur', 'change'] }
+        ],
+        relationList: [
+          { type: 'array', required: true, message: '必填项', trigger: ['blur', 'change'] }
+        ],
+        arrangeUse: [
+          { required: true, message: '必填项', trigger: ['blur', 'change'] }
+        ]
+      }
+    }
+  },
+  watch: {
+    dialogFormVisible (v) {
+      if (v) {
+        this.getNurseResourceArrangeDetail()
+      }
+    },
+    objval (v) {
+      let newarr = []
+      if (v.hasval === 1) {
+        v.getval.map(item => {
+          let obj = {
+            arrangeUse: item.arrangeUse,
+            id: item.id,
+            resourceId: item.resourceId,
+            resourceName: item.resourceName,
+            date: this.$moment(item.date).format('YYYY-MM-DD'),
+            timeTrunkId: item.timeTrunkId,
+            timeTrunkName: item.timeTrunkName,
+            relationList: item.relationList,
+            organId: item.organId,
+            organName: item.organName
+          }
+          newarr.push(obj)
+        })
+        this.baseinfo = v.baseinfo
+        this.input = newarr
+      } else {
+        this.baseinfo = v.baseinfo
+        this.input = [Object.assign({}, this.emptyObj, this.baseinfo)]
+      }
+    }
+  },
+  created () {
+  },
+  methods: {
+    getNurseResourceArrangeDetail () {
+      this.nurseapi.getNurseResourceArrangeDetail({ clinicId: this.clinicId })
+        .then(rs => {
+          if (rs.head.errCode || !rs.data) {
+            return false
+          }
+          this.arrangeUseList = rs.data.arrangeUseList
+          this.orgItemListpro = rs.data.timeTrunks
+          this.orgArrangeList = rs.data.staffList
+        })
+    },
+    closepup () {
+      this.$emit('refresh')
+      this.input = [Object.assign({}, this.emptyObj)]
+      this.dialogFormVisible = false
+    },
+    successPup () {
+      this.input.map(item => {
+        this.orgItemListpro.map(val => {
+          if (item.timeTrunkId === val.id) {
+            item.timeTrunkName = val.name
+          }
+        })
+      })
+      let params = {
+        clinicId: this.clinicId,
+        clinicName: this.clinicName ? this.clinicName : '',
+        arrangeList: this.input
+      }
+      let isValid = true
+      this.$refs.form.forEach(item => {
+        item.validate(valid => {
+          if (!valid) {
+            isValid = false
+          }
+        })
+      })
+      if (isValid) {
+        this.nurseapi.saveOrUpdateNurseResourceArrange(params)
+          .then(rs => {
+            if (rs.head.errCode) {
+              return false
+            }
+            this.$notify({
+              title: '成功',
+              message: '保存成功',
+              type: 'success'
+            })
+            this.$emit('refresh')
+            this.dialogFormVisible = false
+          })
+      }
+    },
+    addItem () {
+      let isValid = true
+      this.$refs.form.forEach(item => {
+        item.validate(valid => {
+          if (!valid) {
+            isValid = false
+          }
+        })
+      })
+      if (isValid) this.input.push(Object.assign({}, this.baseinfo, this.emptyObj))
+    },
+    delAllergyItem (i) {
+      this.nurseapi.deleteNurseResourceArrange({ ids: [this.input[i].id] }).then(rs => {
+        if (rs.head.errCode) {
+          return false
+        }
+        this.$notify({
+          title: '成功',
+          message: '删除成功',
+          type: 'success'
+        })
+        this.input.splice(i, 1)
+      })
+    }
+  }
+}
+</script>
+<style scoped lang="scss">
+table {
+  width: 100%;
+  text-align: center;
+  border-collapse: collapse;
+  border: 1px solid gainsboro;
+}
+table thead th,
+table,
+table tr,
+table tr th,
+table tr td {
+  border: 1px solid gainsboro;
+}
+tr,
+td,
+th {
+  height: 50px;
+}
+table > thead {
+  background-color: #eef1f7;
+}
+.el-select {
+  width: 100%;
+}
+.ever_allergichis_wrap {
+  .el-form {
+    margin-bottom: 40px;
+    /deep/ .el-form-item {
+      margin-bottom: 0;
+      .el-select {
+        width: 100%;
+      }
+    }
+  }
+  .handle_btn {
+    line-height: 36px;
+    white-space: nowrap;
+    .iconfont {
+      font-size: 14px;
+      padding: 5px;
+      color: #333;
+      &.icon-tianjia {
+        color: #1c7bef;
+      }
+      &.icon-delete {
+        color: #aaa;
+      }
+    }
+  }
+  .el-col {
+    &:nth-last-child(2) {
+      padding-right: 5px !important;
+    }
+  }
+}
+</style>

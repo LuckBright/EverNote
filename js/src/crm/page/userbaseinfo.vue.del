@@ -1,0 +1,175 @@
+<template>
+  <div class="main-war add_user_info">
+    <div class="l1">
+      <el-row>
+        <el-col :span="20">
+          <div class="userProfileWar">
+            <ever-form-model
+              :schema="schema"
+              v-model="obj"
+              :api="api"
+              :rules="rules"
+              ref="userinfo"
+              label-position="right">
+              <template slot-scope="scope" slot="sex">
+                <div v-if="scope.obj.sex">
+                  <sys-value type="GBT.2261.1" :code="scope.obj.sex"></sys-value>
+                  <span v-if="scope.obj.pregnant === 1"> (孕妇)</span>
+                </div>
+                <div v-else>- -</div>
+              </template>
+              <template slot-scope="scope" slot="type">
+                <div v-if="scope.obj.iden && scope.obj.iden.type">
+                  <sys-value type="CV02.01.101" :code="scope.obj.iden.type"></sys-value>
+                </div>
+                <div v-else>- -</div>
+              </template>
+              <template slot-scope="scope" slot="idNo">
+                <label>{{scope.obj.iden && scope.obj.iden.idNo ? scope.obj.iden.idNo : '--'}}</label>
+              </template>
+              <template slot-scope="scope" slot="birthday">
+                <label>{{scope.obj.birthday ? scope.obj.birthday.split(' ')[0] : '--'}}</label>
+              </template>
+              <div slot="default"></div>
+            </ever-form-model>
+          </div>
+        </el-col>
+      </el-row>
+    </div>
+  </div>
+</template>
+
+<script>
+  import api from '../store/memberapi'
+  // import snapi from '../../workspace/store/userbaseapi'
+  var schema = [
+    {
+      name: 'name',
+      label: '姓名',
+      type: 'label',
+      span: 12
+    },
+    {
+      name: 'sex',
+      type: 'custom',
+      span: 12,
+      label: '性别'
+    },
+    {
+      name: 'type',
+      type: 'custom',
+      span: 12,
+      className: 'idType',
+      label: '证件类型'
+    },
+    {
+      name: 'idNo',
+      type: 'custom',
+      span: 12,
+      label: '证件号码'
+    },
+    {
+      name: 'mobile',
+      type: 'label',
+      span: 12,
+      placeholder: '手机号与联系方式必须输入一项',
+      label: '手机号'
+    },
+    {
+      name: 'birthday',
+      type: 'custom',
+      span: 12,
+      label: '生日'
+    },
+    {
+      name: 'remark',
+      type: 'label',
+      label: '备注',
+      span: 24
+    }
+  ]
+
+  export default {
+    props: ['initdata'],
+    data () {
+      var obj = this.$ever.createObjFromSchema(schema)
+      obj.sex = ''
+      obj.pregnant = 0
+      return {
+        dialogVisible: false,
+        schema,
+        obj,
+        api,
+        // snapi,
+        objId: this.$route.params.id > -1 ? this.$route.params.id : null,
+        pickerOptions0: {
+          disabledDate (time) {
+            return time.getTime() > Date.now()
+          }
+        },
+        rules: {
+          name: [
+            { required: true, message: '请输入姓名', trigger: 'blur' },
+            { min: 2, max: 40, message: '长度在 2 到 40 个字符', trigger: 'blur' }
+          ],
+          mobile: [
+            { required: true, message: '请输入手机号', trigger: 'blur' },
+            { min: 11, max: 11, message: '请输入11位手机号码', trigger: 'blur' }
+          ],
+          sex: [
+            { required: true, message: '请选择性别', trigger: 'blur' }
+          ]
+        },
+        options: [
+          {id: 1, 'name': '男'},
+          {id: 2, 'name': '女'}
+        ]
+      }
+    },
+    methods: {
+      // 4.11.1 by lvjiangtao@everjiankang.com 无人调用，删除
+      // createorUpuserInfo () {
+      //   if (localStorage.getItem('storagesn')) {
+      //     this.obj.sn = localStorage.getItem('storagesn')
+      //   } else {
+      //     this.snapi.getSn().then(res => {
+      //       localStorage.setItem('storagesn', res.data)
+      //       this.obj.sn = res.data
+      //     })
+      //   }
+      //   this.api.createOrUpdate(this.obj).then(rs => {
+      //     if (rs.head.errCode === 0) {
+      //     }
+      //   })
+      // }
+    },
+    created () {
+      if (this.initdata.patient) {
+        this.obj = this.initdata.patient ? this.initdata.patient : {}
+        this.obj.type = this.initdata.patient.iden && this.initdata.patient.iden.type ? this.initdata.patient.iden.type : null
+        this.obj.idNo = this.initdata.patient.iden && this.initdata.patient.iden.idNo ? this.initdata.patient.iden.idNo : ''
+      }
+    },
+    watch: {
+      'initdata': {
+        handler: function (val) {
+          if (val) {
+            this.obj = val
+          }
+        },
+        deep: true
+      },
+      'obj.sex': {
+        handler: function (val, oldVal) {
+          if (val === '1') {
+            this.obj.pregnant = 0
+            this.$emit('sexChange', true)
+          } else {
+            this.$emit('sexChange', false)
+          }
+        },
+        deep: true
+      }
+    }
+  }
+</script>

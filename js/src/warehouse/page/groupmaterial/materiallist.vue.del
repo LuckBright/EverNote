@@ -1,0 +1,317 @@
+<template>
+  <div>
+    <!-- <ever-bread-crumb name="物资目录" showTitle="true" path="/group/materials"></ever-bread-crumb> -->
+    <div class="layout_inner pos_re">
+      <!-- <el-button type="primary" class="pos_ab template" @click="$router.push('/group/dictionaryadd')">创建物资</el-button> -->
+      <div class="main-head pos_re">
+        <ever-form2
+          :schema="schema"
+          v-model="queryObj"
+          ref="form"
+          :inline="true"
+          @query="query(queryObj)"
+        >
+          <template slot="classifyId">
+            <ever-select
+              v-model="queryObj.type1"
+              filterable
+              placeholder="一级分类"
+              :clearable="true"
+              :options="options1"
+              class="queryClass"
+            ></ever-select>
+            <ever-select
+              v-if="queryObj.type1 && options2.length"
+              filterable
+              v-model="queryObj.type2"
+              placeholder="二级分类"
+              :clearable="true"
+              :options="options2"
+              class="queryClass"
+            ></ever-select>
+            <ever-select
+              v-if="queryObj.type2 && options3.length"
+              filterable
+              v-model="queryObj.type3"
+              placeholder="三级分类"
+              :clearable="true"
+              :options="options3"
+              class="queryClass"
+            ></ever-select>
+          </template>
+          <template slot="state">
+            <ever-select v-model="queryObj.state" :options="stateOption" :clearable="false"></ever-select>
+          </template>
+          <template slot="default">
+            <el-form-item>
+              <el-button type="primary" @click="query(queryObj)">
+                <i class="el-icon-search"></i>查询
+              </el-button>
+            </el-form-item>
+          </template>
+        </ever-form2>
+        <div class="pos_ab head-btn-right">
+          <el-button type="primary" @click="$router.push('/group/materialadd')">创建物资</el-button>
+        </div>
+      </div>
+      <el-table v-loading.body="loading" :data="tableData" style="width: 100%">
+        <el-table-column width="10"></el-table-column>
+        <el-table-column :resizable="false" label="物资名称">
+          <template slot-scope="scope">
+            <a
+              v-if="scope.row.classifyId == BLOOD_CLASSIFYID"
+              @click="handleLookDetail(scope.row)"
+            >
+              <wh-code-to-name
+                :patchObj="{
+                  code: GENERAL_CODE,
+                  list: scope.row.materialPropertys,
+                  attributeValue: 'materialPropertyValues',
+                  isInfo: false
+                }"
+              ></wh-code-to-name>
+            </a>
+            <a
+              v-else
+              @click="handleLookDetail(scope.row)">
+              <wh-code-to-name
+                :patchObj="{
+                  code: MATERILA_NAME_CODE,
+                  list: scope.row.materialPropertys,
+                  isInfo: false
+                }"
+              ></wh-code-to-name>
+            </a>
+          </template>
+        </el-table-column>
+        <el-table-column :resizable="false" width="500" label="生产厂商">
+          <template slot-scope="scope">
+            <span>
+              <wh-code-to-name
+                :showIcon="false"
+                :patchObj="{
+                  code: [PRODUCER],
+                  list: scope.row.materialPropertys,
+                  isInfo: false
+                }"
+              ></wh-code-to-name>
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column :resizable="false" width="200" label="物资类型">
+          <template slot-scope="scope">{{templateTypeName(scope.row.classifyVoObject)}}</template>
+        </el-table-column>
+        <el-table-column :resizable="false" width="120" label="状态">
+          <span
+            slot-scope="scope"
+            :class="{'red': scope.row.state === 1}"
+          >{{scope.row.state | stateDesc}}</span>
+        </el-table-column>
+        <!-- <el-table-column
+          :resizable="false"
+          label="操作"
+          align="center"
+          width="120">
+          <template slot-scope="scope">
+            <div class>
+              <el-button
+                v-if="scope.row.state === 1"
+                size="small"
+                type="primary"
+                @click="changeStatus(scope.row)"
+              >启用</el-button>
+              <el-button v-else size="small" type="danger" @click="changeStatus(scope.row)">禁用</el-button>
+              <el-button size="small" type="primary" @click="handleEdit(scope.row.materialSpuId)">编辑</el-button>
+              <el-button size="small" type="primary" @click="handleHistory(scope.row.id)">历史记录</el-button>
+            </div>
+          </template>
+        </el-table-column>-->
+      </el-table>
+      <el-row type="flex" justify="end">
+        <ever-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current="current"
+          :totalCount="totalCount"
+        ></ever-pagination>
+      </el-row>
+    </div>
+    <!-- 历史记录dialog -->
+    <!-- 不能删除模版dialog -->
+    <history-log ref="history"></history-log>
+  </div>
+</template>
+<script>
+import list from '@/util/list'
+import classify from '@/warehouse/util/classify'
+import materialDictSpuapi from './store/materialdictspuapi'
+import { debounce, GLOBAL_ATTR, STENCIL_TYPE, SEARCH_CODE, MATERILA_NAME_CODE, PRODUCER, SPU_SPEC_CODE, MATERILA_PINYIN_CODE, BLOOD_CLASSIFYID, GENERAL_CODE, BLOOD_SPECIFICATION, WEST_MEDICINE_TYPE, CHINESE_MEDICINE_TYPE, CONSUMABLES_TYPE } from '@/util/common'
+import historyLog from '@/warehouse/dialog/historylog'
+import modifyRecordApi from './store/modifyrecordapi'
+let schema = [
+  {
+    name: 'classifyId',
+    label: '物资类型',
+    comp: 'custom'
+  },
+  {
+    name: 'name',
+    label: '物资名称',
+    props: {
+      placeholder: '商品名/通用名/证件编号'
+    },
+    style: 'width: 200px'
+  },
+  {
+    name: 'state',
+    label: '状态',
+    comp: 'custom'
+  }
+]
+let stateOption = [
+  {
+    name: '全部',
+    id: ''
+  },
+  {
+    name: '启用',
+    id: '0'
+  },
+  {
+    name: '禁用',
+    id: '1'
+  }
+]
+let systemType = STENCIL_TYPE[0].id
+export default {
+  mixins: [list, classify],
+  data () {
+    let codeQuery = [...MATERILA_PINYIN_CODE, ...SEARCH_CODE, GENERAL_CODE]
+    let queryObj = this.$ever.createObjFromSchema(schema)
+    queryObj.type1 = ''
+    queryObj.type2 = ''
+    queryObj.type3 = ''
+    queryObj.codesMatchValues = [{ codes: codeQuery, value: '' }]
+    queryObj.systemType = systemType
+    queryObj.isClinic = false
+    return {
+      noClearParams: ['classifyId', 'name'],
+      stateOption,
+      api: materialDictSpuapi,
+      queryObj,
+      schema,
+      deleteId: '',
+      GLOBAL_ATTR,
+      routeName: this.$route.name,
+      systemType,
+      MATERILA_NAME_CODE,
+      PRODUCER,
+      SPU_SPEC_CODE,
+      BLOOD_CLASSIFYID,
+      GENERAL_CODE,
+      BLOOD_SPECIFICATION
+    }
+  },
+  methods: {
+    handleLookDetail (data) {
+      if ([...WEST_MEDICINE_TYPE, ...CHINESE_MEDICINE_TYPE, ...CONSUMABLES_TYPE].includes(data.classifyId)) { // 西药/中药/耗材
+        this.$router.push(`/group/materialdetail/${data.id}`)
+      } else {
+        this.$router.push(`/group/dictionarysee/${data.id}?routeEdit=dictionary`)
+      }
+    },
+    handleEdit (id) {
+      this.$router.push(`/group/dictionary/${id}?status=edit`)
+    },
+    handleHistory (correspondId) {
+      let params = {
+        correspondId,
+        objectName: 'MaterialDict'
+      }
+      modifyRecordApi.list(params).then(result => {
+        this.$refs.history.open(result)
+      })
+    },
+    // 启用禁用物资
+    changeStatus: debounce(function (data) {
+      this.$confirm(`
+        <p class="confirm-title">是否${data.state === 1 ? '启用' : '禁用'}该物资？</p>
+        <p class="confirm-text">1、该物资对应的医嘱项和收费项一同${data.state === 1 ? '启用' : '禁用'}</p>
+        <p class="confirm-text">2、机构中${data.state === 1 ? '被禁用的物资不会自动启用' : '该物资一同禁用'}</p>`,
+        `${data.state === 1 ? '启用' : '禁用'}物资`, {
+          customClass: 'confirmstyle',
+          dangerouslyUseHTMLString: true,
+          confirmButtonText: '确定',
+          cancelButtonText: '取消'
+        }).then(() => {
+          this.fetchChangeStatus(data)
+        }).catch(() => { })
+    }),
+    // 请求启用禁用
+    fetchChangeStatus (data) {
+      const params = {
+        id: data.id,
+        state: data.state === 1 ? 0 : 1,
+        isClinic: false
+      }
+      this.api.updateMaterialSpuMaster(params).then(res => {
+        if (res && !res.flag) return
+        this.$messageTips(this, 'success', `物资${res.state === 1 ? '禁用' : '启用'}成功`, '提示')
+        data.state = params.state // 主动更改状态，避免状态刷新不及时
+        // this.list()
+      })
+    }
+  },
+  watch: {
+    'queryObj.classifyId' (val) {
+      this.query(this.queryObj)
+    },
+    'queryObj.name' (v) {
+      this.queryObj.codesMatchValues[0].value = v
+      this.query(this.queryObj)
+    },
+    'queryObj.state' (val) {
+      this.query(this.queryObj)
+    }
+  },
+  filters: {
+    stateDesc (val) {
+      let statedesc = val === 1 ? '禁用' : '启用'
+      return statedesc
+    }
+  },
+  components: {
+    historyLog
+  }
+}
+</script>
+<style lang="scss" scoped>
+.el-icon-search {
+  font-size: 14px;
+  margin-right: 5px;
+}
+.el-table__body .el-table__row td .cell .btn {
+  display: none;
+}
+.el-table__body .el-table__row:hover td .cell .btn {
+  display: block;
+}
+.queryClass {
+  width: 180px;
+  display: inline-block;
+  margin-right: 5px;
+}
+.red {
+  color: red;
+}
+</style>
+<style lang="scss" scoped>
+/deep/ .confirmstyle {
+  .confirm-title {
+    text-align: center;
+  }
+  .confirm-text {
+    text-align: center;
+  }
+}
+</style>

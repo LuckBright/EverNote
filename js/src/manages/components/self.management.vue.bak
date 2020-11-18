@@ -1,0 +1,125 @@
+<template>
+  <div>
+    <el-dialog title="自主管理机构" :visible.sync="dialogVisible" class="ui_dialog_02">
+      <div style="min-height: 400px;" class="flex_column_full">
+        <!-- <ever-form2
+          onsubmit="return false;"
+          :schema="querySchema"
+          v-model="queryObj"
+          ref="form"
+          :inline="true"
+          :is-query="true"
+          v-ever-bind-enter
+          @query="list(true)"
+        ></ever-form2> -->
+        {{tableLoading}}
+        <tree-table-component
+          property-name="isConfig"
+          :data="treeData"
+          :tableLoading="tableLoading"
+          :newTreeData.sync="newTreeData"
+          @eventChange="eventChange"
+          :selectData.sync="selectData"
+          :filterNeedFul="filterNeedFul"
+          switchProp="switchDisabled"
+          title="全选"
+          :ctrlSwitch="true">
+        </tree-table-component>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="submit" type="primary" :loading="submitLoading">确认自主管理机构</el-button>
+      </span>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+import treeTableComponent from '@/manages/components/treetable'
+// import list from '@/util/list'
+import api from '@/manages/page/configure/configapi'
+const querySchema = [
+  {
+    name: 'name',
+    props: {
+      placeholder: '请输入机构名称'
+    },
+    style: {
+      width: '360px'
+    }
+  },
+  {
+    name: 'select',
+    comp: 'everSelect',
+    props: {
+      placeholder: '请选择类型',
+      clearable: true,
+      options: [
+        { id: 1, name: '已选机构' },
+        { id: 2, name: '未选机构' }
+      ]
+    }
+  }
+]
+export default {
+  // mixins: [list],
+  props: {
+    treeData: {
+      type: Array,
+      default: () => []
+    },
+    tableLoading: {
+      type: Boolean,
+      default: false
+    },
+    dictType: Number, // 数据字典类型
+    dictId: Number // 数据字典id
+  },
+  data () {
+    const queryObj = this.$ever.createObjFromSchema(querySchema)
+    queryObj.requestSwitch = true
+    return {
+      querySchema,
+      queryObj,
+      listApiName: 'tree',
+      api,
+      dialogVisible: false,
+      submitLoading: false,
+      newTreeData: [],
+      selectData: []
+    }
+  },
+  methods: {
+    filterNeedFul ({ clinicObject, usePermissionId }) {
+      // 默认解构selectChecked数据中需要的字段
+      return {
+        usePermissionId,
+        clinicObject
+      }
+    },
+    open (val) {
+      this.dialogVisible = val
+    },
+    submit () {
+      const exceprionOrg = []
+      this.selectData.map(item => {
+        exceprionOrg.push(item.clinicObject.id)
+      })
+      const params = {
+        id: this.dictId,
+        type: this.dictType,
+        exceprionOrg
+      }
+      api.updateManage(params).then(res => {
+        console.log(res, 121)
+      })
+    },
+    eventChange () {
+
+    }
+  },
+  components: {
+    treeTableComponent
+  }
+}
+</script>
+

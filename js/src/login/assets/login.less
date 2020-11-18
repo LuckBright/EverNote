@@ -1,0 +1,178 @@
+@import "../../assets/css/app-variables";
+@color_01: #f1f6fd;
+
+.workbench{text-align: center;-webkit-box-flex: 1;}
+.workbench .welMsg .tit{font-size: 24px;margin: 30px 0 20px;color: #222; line-height: 48px; padding-top: 50px;}
+.workbench .welMsg .bdy{font-size: 18px;margin: 0 0 30px;color: #666; line-height: 28px;}
+ul.bench li{display: inline-block; margin:0 10px 20px;width: 130px;height: 155px;background: #fff;
+box-shadow: 0 2px 10px 0 #C7E1FF;border-radius: 4px;}
+ul.bench li p{margin: 0;}
+ul.bench li a{color: #000}
+ul.bench li .ico{width: 140px; height: 120px; line-height: 120px;}
+ul.bench li .ico .icon{font-size: 38px}
+ul.bench li .fnt{font-size:14px;height: 40px; font-weight: bold; color: #666}
+.clinic-box.el-popover {
+  padding: 12px 0;
+}
+
+/** 盒子 */
+// .ever_bg_01{
+//   position:fixed;
+//   top: 0;
+//   left: 0;
+//   right: 0;
+//   bottom: 0;
+//   background: url('../../../static/assets/login_bg.png') no-repeat center;
+//   background-size: 100% 100%;
+//   overflow-x: hidden;
+//   overflow-y: auto;
+// }
+// .login_bg {
+//   display: -webkit-box;
+//   -webkit-box-orient: horizontal;
+//   -webkit-box-align: center; /*水平居中*/
+//   -webkit-box-pack: center; /*垂直居中*/
+// }
+.ever_box{
+  // position:absolute;
+  // top:50%;
+  // left:50%;
+  width: 580px;
+  // height:344px;
+  // margin-top:-172px;
+  // margin-left:-290px;
+  border-radius:4px;
+  background:@c_ff;
+  box-shadow: 0 5px 20px 0 rgba(28,123,239,.2);
+  // width: 600px;
+  padding: 60px 60px 10px 60px;
+}
+
+.login_bg {
+  a {
+    color: #277dee;
+  }
+  .login_war {
+    overflow: hidden;
+    border-radius: 4px;
+    height: 344px;
+    padding: 0;
+    margin-top: -50px;
+    .login_left {
+      width: 260px;
+      height: 100%;
+      float: left;
+      img{width: 100%; height: 100%;}
+      .el-image {
+        width: 100%;
+        height: 100%;
+        .image-slot {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          height: 100%;
+          background: rgb(250, 250, 250);
+          color: #909399;
+          font-size: 14px;
+        }
+      }
+    }
+    .login_right {
+      width: 320px;
+      float: left;
+      position: relative;
+      .dow{
+        float: right;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+      }
+      .login-container{
+        box-sizing: border-box;
+        padding: 20px 30px 0;
+      }
+      .alg_r {
+        text-align: right;
+      }
+      .title {
+        height: 50px;
+        margin: 10px auto 0 auto;
+        text-align: center;
+        color: #666;
+        font-size: 14px;
+      }
+      .el-form-item {
+        margin-bottom: 20px;
+        margin-right: 0;
+        input:-webkit-autofill {
+          box-shadow: 0 0 0 1000px @color_01 inset;
+        }
+        .el-input-group__prepend {
+          border: none;
+          background-color: @color_01;
+          padding: 0 15px;
+          .icon {
+            font-size: 16px;
+            color: #bfcadb;
+          }
+        }
+        .el-input-group__append {
+          border: none;
+          background-color: @color_01;
+        }
+        .el-input__inner {
+          height: 40px;
+          padding-left: 0;
+          font-size: 14px;
+          background: @color_01;
+          color: #666;
+          font-weight: bold;
+          border: none;
+        }
+        .el-button {
+          width: 100%;
+          height: 40px;
+          border-radius: 41px;
+          border: none;
+          font-weight: bold;
+          color: #fff;
+        }
+      }
+      .el-form-item.spe_item {
+        margin-bottom: 30px;
+        .el-form-item__content {
+          line-height: 20px;
+        }
+        .el-checkbox {
+          color: #999;
+        }
+      }
+    }
+  }
+}
+
+.loginBtn{background-image: linear-gradient(-180deg, #4481EB 0%, #1C7BEF 100%);box-shadow:0 5px 20px 0 rgba(28,123,239,.2);}
+
+.remember .el-checkbox__inner{border:1px solid #1C7BEF;}
+.remember .is-focus .el-checkbox__inner{border:1px solid #1C7BEF;}
+.remember .is-checked .el-checkbox__inner{border:1px solid #1C7BEF;background:#1C7BEF}
+
+// 绿色主题
+.ever_bg_01.themegreen {
+  background: url('../../../static/assets/login_bg_green.jpg') no-repeat center;
+  .loginBtn{
+    background-image: linear-gradient(-180deg, #07CEB7 3%, #16BAA8 98%)!important;
+    box-shadow: 0 2px 8px 0 rgba(22,186,168,0.50)!important;
+  }
+  .remember .el-checkbox__inner{border:1px solid #16BAA9;}
+  .remember .is-focus .el-checkbox__inner{border:1px solid #16BAA9;}
+  .remember .is-checked .el-checkbox__inner{border:1px solid #16BAA9;background:#16BAA9}
+  .ever_box{
+    box-shadow: 0 5px 20px rgba(22, 186, 168, 0.2);
+  }
+}
+
+.login_bg .login_war .login-container .el-form-item .el-button.is-disabled {
+  background: #a0cfff;
+}

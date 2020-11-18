@@ -1,0 +1,242 @@
+<template>
+  <div class='vouch'>
+    <el-table :data="tableData" highlight-current-row style="width: 100%" v-show='isShow'>
+      <el-table-column type="index" width="80" label="编号">
+      </el-table-column>
+      <el-table-column prop="project" label="单据项目">
+        <template slot-scope="scope">
+          <el-select v-model="scope.row.project" placeholder="请选择">
+            <el-option v-for="item in productOptions" :key="item" :label="item" :value="item">
+            </el-option>
+          </el-select>
+        </template>
+      </el-table-column>
+      <el-table-column prop="lendingDirection" label="借贷方" width='120px'>
+        <template slot-scope="scope">
+          <el-select v-model="scope.row.lendingDirection" placeholder="请选择">
+            <el-option v-for="item in lendingOptions" :key="item.value" :label="item.name" :value="item.value">
+            </el-option>
+          </el-select>
+        </template>
+      </el-table-column>
+      <el-table-column prop="symbol" label="正负号" width='120px'>
+        <template slot-scope="scope">
+          <el-select v-model="scope.row.symbol" placeholder="请选择">
+            <el-option v-for="item in symbolOptions" :key="item.value" :label="item.name" :value="item.value">
+            </el-option>
+          </el-select>
+        </template>
+      </el-table-column>
+      <el-table-column prop="subject" label="对应科目" min-width="200px">
+        <template slot-scope="scope">
+          <subject-search :placeholder="'请选择科目'" v-model='scope.row.subject'></subject-search>
+        </template>
+      </el-table-column>
+      <el-table-column prop="statistics" label="辅助核算">
+        <template slot-scope="scope">
+          <el-button type="text" @click="setBtn(scope.row,scope.$index)">设置</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column prop="" label="操作">
+        <template slot-scope="scope">
+          <el-button type="primary" size="small" @click='addPrice(scope.$index)'>新增行</el-button>
+          <el-button type="danger" size="small" @click='del(scope.$index)' :disabled="tableData.length<=1">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-dialog title="提示" :visible.sync="dialogVisible" size="tiny">
+      <el-table :data="setData" highlight-current-row style="width: 100%">
+        <el-table-column prop="name" label="科目辅助核算">
+        </el-table-column>
+        <el-table-column prop="calcuName" label="结算单项目">
+          <template slot-scope="scope">
+            <el-select v-model="scope.row.calcuName" placeholder="请选择" clearable>
+              <el-option v-for="item in statisticsOptions" :key="item" :label="item" :value="item">
+              </el-option>
+            </el-select>
+          </template>
+        </el-table-column>
+      </el-table>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
+    <div class="panel-footer">
+      <el-button type="primary" @click.native.prevent="createRules()" v-show='isShow'>保存</el-button>
+    </div>
+  </div>
+</template>
+<script>
+import { initRuleDetail, update } from '../store/voucherEntries'
+import subjectSearch from './subjectSearch'
+export default {
+  props: ['tradeType', 'id', 'tableData'],
+  components: {
+    subjectSearch
+  },
+  data () {
+    return {
+      setData: [
+        {
+          calcu1: ''
+        }
+      ],
+      currentRow: null,
+      isShow: false,
+      productOptions: [],
+      statisticsOptions: [],
+      dialogVisible: false,
+      lendingOptions: [
+        {
+          value: 0,
+          name: '贷方'
+        },
+        {
+          value: 1,
+          name: '借方'
+        }
+      ],
+      symbolOptions: [
+        {
+          value: 0,
+          name: '负号'
+        },
+        {
+          value: 1,
+          name: '正号'
+        }
+      ]
+    }
+  },
+
+  methods: {
+    setBtn (row, index) {
+      row.isSet = true
+      this.dialogVisible = true
+      this.setData = []
+      if (row.subject.isChange) {
+        row.statistics = []
+      }
+      if (row.subject) {
+        let project = ''
+        if (row.subject.statisticsDimension && Object.keys(JSON.parse(row.subject.statisticsDimension)) && Object.keys(JSON.parse(row.subject.statisticsDimension)).length !== 0) {
+          project = JSON.parse(row.subject.statisticsDimension)
+        } else {
+          project = ''
+        }
+        if (project) {
+          Object.keys(project).map(v => {
+            if (row.statistics.length) {
+              row.statistics.forEach(item => {
+                if (v === item.value) {
+                  this.setData.push({
+                    value: item.value,
+                    name: project[v],
+                    calcuName: item.calcuName
+                  })
+                }
+              })
+            } else {
+              this.setData.push({
+                value: v,
+                name: project[v],
+                calcuName: ''
+              })
+            }
+          })
+        }
+      }
+      row.statistics = this.setData
+    },
+    addPrice (index) {
+      this.tableData.splice(index + 1, 0, {
+        // 单据项目
+        project: '',
+        // 借贷方
+        lendingDirection: '',
+        // 正负号
+        symbol: '',
+        // 对应科目
+        value: '',
+        valueId: '',
+        inputProject: '',
+        // 科目对象
+        subject: '',
+        // 辅助核算对象
+        statistics: [],
+        // 辅助核算
+        statisticsDimension: []
+
+      })
+    },
+    del (index) {
+      this.tableData.splice(index, 1)
+    },
+    async getVoucher (id) {
+      try {
+        let params = {
+          tradeType: id
+        }
+        let data = await initRuleDetail(params)
+        this.productOptions = data.data.accounts
+        this.statisticsOptions = data.data.statistics
+      } catch (err) {}
+    },
+    async createRules () {
+      let setData = []
+      this.tableData.forEach((v, index) => {
+        v.statisticsDimension = {}
+        if (v.statistics.length > 0) {
+          v.statistics.forEach(item => {
+            v.statisticsDimension[item.value] = item.calcuName
+          })
+        } else {
+        }
+        setData.push({
+          rowNum: index,
+          type: 1,
+          id: v.id,
+          valueId: v.subject.id,
+          value: v.subject.accountCode,
+          inputProject: v.subject.accountName,
+          project: v.project,
+          symbol: v.symbol,
+          lendingDirection: v.lendingDirection,
+          statisticsDimension: v.statisticsDimension
+        })
+      })
+      let params = {
+        id: this.id,
+        details: setData
+      }
+      try {
+        let data = await update(params)
+        if (data && data.head && data.head.errCode === 0) {
+          this.$notify({
+            message: '保存成功',
+            type: 'success'
+          })
+        }
+      } catch (err) {}
+    }
+  },
+  watch: {
+    tradeType: {
+      handler (val, oldVal) {
+        if (val) {
+          this.isShow = true
+        }
+        this.productOption = []
+        this.getVoucher(val)
+      }
+    }
+  }
+}
+</script>
+<style scoped>
+.vouch .panel-footer {
+  padding: 0;
+}
+</style>
+

@@ -1,0 +1,30 @@
+[
+  {
+      "diagnoseType": 1, 
+      "groupList": null, 
+      "diseaseType": 2, 
+      "diseaseCodeCategory": "ICD-10", 
+      "diseaseName": "霍乱", 
+      "diseaseAlias": null, 
+      "comment": "123", 
+      "diseaseCode": "A00.901", 
+      "value": "霍乱", 
+      "diseaseNameEn": null
+  }, 
+  {
+      "diseaseType": 2, 
+      "diseaseCode": "D22.900x002", 
+      "diseaseCodeCategory": "ICD-10", 
+      "diseaseName": "痣", 
+      "diseaseNameEn": null, 
+      "diseaseOrigId": "215389", 
+      "diagnoseType": 2, 
+      "comment": "456", 
+      "position": "", 
+      "diagnoseList": [ ], 
+      "positionData": [ ], 
+      "diseaseAlias": "", 
+      "value": "痣", 
+      "groupList": [ ]
+  }
+]

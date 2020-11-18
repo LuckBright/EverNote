@@ -1,0 +1,150 @@
+@maxFontSize: 18px;
+@minFontSize: 10px;
+@middleFontSize: 12px;
+
+.bill{
+  background: #FFF;
+  padding: 5px;
+  p {
+    padding: 0;
+    margin: 0;
+  }
+}
+
+.barcode{
+  display: block;
+  text-align: center;
+  height: 70px;
+  overflow: hidden;
+  canvas {
+    margin-top: -75px;
+  }
+}
+
+.patientMessage{
+  line-height: 24px;
+  font-size: @middleFontSize;
+  > div {
+    display: flex;
+    // justify-content: space-between;
+  }
+}
+
+#prescriptionList{
+  padding: 20px 5px !important;
+  header{
+    h1{
+      text-align: center;
+      font-size: @maxFontSize;
+      margin-top: 0;
+    }
+  }
+  ul{
+    margin: 10px 0 0 0;
+    padding: 0;
+    li{
+      margin: 5px 10px 0;
+      padding: 5px;
+      font-size: @middleFontSize;
+      line-height: 20px;
+      border-bottom: 1px dashed #999;
+      p.isMine{
+        position: relative;
+        &:before{
+          position: absolute;
+          width: 12px;
+          left: -20px;
+          top: 0;
+          height: 20px;
+          line-height: 20px;
+        }
+      }
+      .father{
+        &:before{
+          content: "┏";
+        }
+      }
+      .son{
+        &:before{
+          content: "┗";
+        }
+      }
+      .unknown{
+        &:before{
+          content: "┣";
+        }
+      }
+      div{
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+    li:last-child{
+      border: none;
+    }
+  }
+  .patientMessage{
+    width: 65%;
+  }
+}
+
+#prescriptionLabel{
+  overflow: hidden;
+  *{
+    line-height: 13px !important;
+  }
+  >*{
+    font-size: @minFontSize;
+    -webkit-transform:scale(0.9);
+    width: 110%;
+    margin-left: -6.5%;
+  }
+  .patientMessage{
+    font-size: @minFontSize;
+    >*{
+      width: 70%;
+    }
+  }
+  header{
+    font-size: @minFontSize;
+    border-bottom: 1px solid #000;
+    padding: 0 3px;
+  }
+  section{
+    div{
+      display: flex;
+      justify-content: space-between;
+      p{
+        display: inline-block;
+      }
+    }
+  }
+}
+
+#prescriptionLabel.vertical{
+  .patientMessage{
+    >*{
+      width: 100%;
+    }
+    margin: 10px 0;
+  }
+}
+
+#drugLabel {
+  > section {
+    font-size: @minFontSize;
+    -webkit-transform: scale(0.8);
+    width: 120%;
+    margin-left: -10%;
+    header{
+      display: flex;
+      justify-content: space-between;
+      .patientMessage{
+        flex: 1;
+      }
+      .barcode{
+        flex: .6;
+      }
+    }
+  }
+}

@@ -1,0 +1,151 @@
+<template>
+  <div>
+    <!-- <ever-bread-crumb name="成本项目科目对应" path="/warehouse/costcorrespondence"></ever-bread-crumb> -->
+    <div class="layout_inner">
+      <div class="main-head">
+        <ever-query-form :schema="querySchema" v-model="queryObj" @query="query"></ever-query-form>
+      </div>
+      <el-table
+        v-loading.body="loading"
+        :data="tableData"
+        @selection-change="handleSelectionChange"
+        :border="false"
+      >
+        <el-table-column prop="accountCode" label="会计科目编码" align="center"></el-table-column>
+        <el-table-column prop="accountName" label="会计科目名称" align="center"></el-table-column>
+        <el-table-column prop="code" label="成本项目编码" align="center">
+          <template slot-scope="scope">
+            <el-select
+              v-model="scope.row.costItemId"
+              placeholder="请选择"
+              @change="(id)=>{changeback(id,scope)}"
+            >
+              <el-option v-for="item in costArr" :key="item.id" :label="item.code" :value="item.id">
+                <span style="float: left">{{ item.code }}</span>
+                <span style="float: right; color: #8492a6; font-size: 13px">{{ item.name }}</span>
+              </el-option>
+            </el-select>
+          </template>
+        </el-table-column>
+        <el-table-column prop="costName" label="成本项目名称" align="center"></el-table-column>
+      </el-table>
+    </div>
+  </div>
+</template>
+<script>
+import api from '@/warehouse/store/costcorrespondenceapi.js'
+
+var schema = [
+  {
+    name: 'leftAccountCode',
+    label: '会计科目'
+  },
+  {
+    name: 'name1',
+    label: '是否对应',
+    type: 'select',
+    options: [
+      { id: '', name: '全部' },
+      { id: 1, name: '未对应' }
+    ]
+  }
+]
+export default {
+  data () {
+    var obj = this.$ever.createObjFromSchema(schema)
+    return {
+      loading: false,
+      querySchema: schema,
+      queryObj: obj,
+      api,
+      tableData: [],
+      costArr: []
+    }
+  },
+  methods: {
+    handleSelectionChange () {
+
+    },
+    query () {
+      let key = false
+      if (this.queryObj.name1 === 1) {
+        key = true
+      }
+      this.list(key)
+    },
+    async list (key) {
+      this.loading = true
+      this.getSelect()
+      let params = { type: '4' }
+      if (this.queryObj.leftAccountCode) {
+        params['accountCode'] = this.queryObj.leftAccountCode
+        params['accountName'] = this.queryObj.leftAccountCode
+      }
+      let acclist = api.getAccListEnd(params)
+      let acclista = await acclist
+      let all = await api.getAll()
+      let data = []
+      acclista.data.forEach(item => {
+        data = data.concat(item)
+      })
+
+      this.initData(data, all.data, key)
+    },
+    getSelect () {
+      api.getSelect().then(result => {
+        this.costArr = result.data
+      })
+    },
+    initData (list, all, key) {
+      let obj = {}
+      all.forEach(item => {
+        obj[item.subjectId] = item
+      })
+      let alllist = []
+      list.forEach(item => {
+        item['costItemId'] = ''
+        item['costName'] = ''
+        if (obj[String(item.id)]) {
+          let val = obj[item.id]
+          item['corresid'] = val.id
+          item['costItemId'] = val.costItemId
+          item['costName'] = val.costItem ? val.costItem.name : ''
+        }
+        if (key && !item.corresid) {
+          alllist.push(item)
+        }
+      })
+      this.loading = false
+      this.tableData = key ? alllist : list
+    },
+    changeback (val, scope) {
+      this.costArr.forEach(item => {
+        if (item.id === val) {
+          scope.row.costName = item.name
+        }
+      })
+      let url = 'add'
+      let params = {}
+      if (scope.row.corresid) {
+        url = 'edit'
+        params['id'] = scope.row.corresid
+        params['costItemId'] = val
+      } else {
+        params['subjectId'] = scope.row.id
+        params['costItemId'] = val
+      }
+      api[url](params).then(result => {
+        this.$notify({
+          title: '',
+          message: '保存成功',
+          type: 'success'
+        })
+        this.list()
+      })
+    }
+  },
+  created () {
+    this.list(false)
+  }
+}
+</script>

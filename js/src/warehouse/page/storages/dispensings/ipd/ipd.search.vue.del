@@ -1,0 +1,305 @@
+<template>
+  <div class="hospital-container">
+    <!-- 搜索框 -->
+    <div class="hospital-search ">
+      <div class="custom-search-component searchClassName">
+        <dispen-search
+          ref="inputSeach"
+          placeholder="药包编号／患者姓名／备药单号"
+          @searchQuery="handleSearch"
+          @seachAfterInquiry="handleAfterInquiry"
+          :isAfterInquiry="isAfterInquiry"
+        ></dispen-search>
+      </div>
+    </div>
+    <div class="pos_re mb15" v-if="showPatient">
+      <patient-header :patientId="tableData[0].patientId" :visitNumber="tableData[0].hospitalizedNumber" :code="PATIENT_HEAD"></patient-header>
+    </div>
+    <!-- 患者信息 -->
+    <el-container class="hospital-layout">
+      <el-main class="inner" v-if="tableData.length || errTableData.length">
+        <el-row class="patient_title f_bold" v-if="barCode" style="margin-top:-10px; height:46px; width:110%; margin-left:-10px">
+          {{!oldCode ? '备药单号' : '批量备药单号'}}：{{barCode}}
+          <span class="inUse ml5" v-if="inUse === 2">（该备药单已作废）</span>
+          <span class="inUse ml5" v-if="oldCode">（原单号：{{oldCode}}）</span>
+          <el-button type="text" @click="handlerSupplementPrint(true)" class="fr" style="margin-right: 9%">补打备药单</el-button>
+        </el-row>
+        <!-- 患者信息 -->
+        <div class="list-msg" :class="barCode && 'mt10'">
+          <div class="list_box">
+            <ipd-righttable
+              v-for="(item, index) in tableData"
+              :key="index"
+              :itemData="item"
+              :isSee="!showPatient ? 1 : 0"
+              :dispenCode="barCode"
+              :outTest="outTest"
+              :testResult="testResult"
+              @seePrescription="seePrescription"
+              @supplementPrint="supplementPrint"
+              @updateStatus="updateStatus">
+            </ipd-righttable>
+            <ipd-righttable
+              v-for="(item, index) in errTableData"
+              :key="index"
+              :itemData="item"
+              :isSee="!showPatient ? 1 : 0"
+              :dispenCode="barCode"
+              :outTest="outTest"
+              :testResult="testResult"
+              @seePrescription="seePrescription"
+              @updateStatus="updateStatus">
+            </ipd-righttable>
+          </div>
+        </div>
+        <div class="list-btn" v-if="!showPatient && inUse !== 2">
+          <el-row>
+            <el-col :span="24">
+              <div class="btn-container">
+                <el-button v-if="tableData.length && errTableData.length" type="primary" @click="handlerSupplementPrint(false)" class="mr10">重打备药单</el-button>
+                <span class="" v-if="drugStatus == 4 && !errTableData.length">
+                  <el-button type="primary" @click="handleFinish(1)">备药完成</el-button>
+                </span>
+                <span class="" v-if="drugStatus == 5 && !errTableData.length">
+                  <el-button type="primary" @click="handleFinish(2)">发药</el-button>
+                </span>
+              </div>
+            </el-col>
+          </el-row>
+        </div>
+      </el-main>
+    </el-container>
+    <jcp-print
+      :key="jcpKey"
+      ref="jcpPrint"
+      :hospitalType="hospitalType"
+      :liveTableData="liveTableData"
+      :liveNonFatherAdvice="liveNonFatherAdvice"
+      :printPatientObj="printPatientObj"
+      :liveType="liveType"
+      :inpatientArea="inpatientArea"
+      :fatherAdvice="fatherAdvice"
+    ></jcp-print>
+  </div>
+</template>
+
+<script>
+import { TERM_TYPE, DISPENSING_STATUS, PATIENT_HEAD, patch, SEARCH_CODE, SPU_SPEC_CODE, SPACE_CODE, DOSAGE } from '@/util/common'
+import api from '../store/hospitalapi.js'
+import setName from '@/util/setstatusname'
+import storage from '@/util/storage'
+import sendDrug from '@/warehouse/page/storages/mixins/senddrug'
+import dispenseApi from '../store/dispenseapi.js'
+import mixinsDespen from './mixins_despen'
+import medicinePrint from '@/warehouse/page/storages/util/medicineprint'
+import dispenSearch from '@/warehouse/page/storages/components/dispensearch'
+import patientHeader from '@/inpatient/components/common.head.js'
+import JcpPrint from '@/warehouse/page/components/jcp.print'
+import hospitalPrintMixins from '@/warehouse/page/storages/util/hospitalprintmixins'
+import getstorage from '@/warehouse/page/storages/util/getstorage'
+import IpdRighttable from '../components/ipd.righttable'
+import skinTestMixins from '../mixins/skinTest.mixins'
+export default {
+  mixins: [sendDrug, setName, mixinsDespen, medicinePrint, hospitalPrintMixins, getstorage, skinTestMixins],
+  data () {
+    return {
+      loading: false,
+      DOSAGE,
+      fullscreenLoading: false,
+      leftLoading: false,
+      dialogTableVisible: false,
+      showPatient: false,
+      inUse: 1,
+      drugStatus: 4,
+      oldCode: '',
+      SPACE_CODE,
+      SPU_SPEC_CODE,
+      SEARCH_CODE,
+      PATIENT_HEAD,
+      TERM_TYPE,
+      unusualTableData: [],
+      recordTableData: [],
+      DISPENSING_STATUS,
+      checked: '',
+      searchObj: '',
+      leftId: '',
+      isAfterInquiry: false,
+      status: '',
+      termType: '',
+      leftTableData: [],
+      liveTableData: {},
+      totalCount: 0,
+      tableData: [],
+      errTableData: [],
+      obj: {},
+      hospitalQuery: 3, // handleSearch 使用
+      currentId: '',
+      barCode: '',
+      inpatientArea: {},
+    }
+  },
+  created () {
+    this.searchObj = JSON.parse(storage.getLocalStorage('HOSPITAL_QUERY'))
+    if (this.searchObj) {
+      this.getUddList(this.searchObj)
+    }
+    this._getCursor()
+  },
+  computed: {
+    drugPackStatus () {
+      let list = this.DISPENSING_STATUS.filter(item => {
+        return item.id !== 9 && item.id !== 10
+      })
+      return list
+    }
+  },
+  components: {
+    dispenSearch,
+    JcpPrint,
+    IpdRighttable,
+    patientHeader
+  },
+  watch: {
+    status () {
+      this.getUddList(this.searchObj)
+    },
+    termType () {
+      this.getUddList(this.searchObj)
+    }
+  },
+  methods: {
+    ...patch,
+    supplementPrint (v) {
+      this.gatherPrintSingle(Object.assign(v, this.inpatientArea))
+    },
+    handlerSupplementPrint (flag) { // 补打备药单
+      if (flag) {
+        this._rePrint()
+      } else {
+        dispenseApi.reprintDispense({ id: this.leftId }).then(res => {
+          if (res) {
+            this.$store.commit('updateDispenseCode', res.codes)
+            this._rePrint()
+            this.$messageTips(this, 'success', '重打备药单成功')
+            this.getUddList(this.searchObj)
+          }
+        })
+      }
+    },
+    _rePrint () {
+      this._initPrint()
+      this.liveTableData = {
+        tableData: this.tableData,
+        barCode: this.barCode
+      }
+      this.$nextTick(_ => {
+        this.handlerPrint()
+      })
+    },
+    //  查看备药单
+    seePrescription (v) {
+      dispenseApi.getDispenseForUdd({ uddId: v.id }).then(res => {
+        if (res) {
+          let data = this._findArray(res.uddDispenseList)
+          // this.$store.commit('updateDispenseCode', res.code)
+          // this.$router.push(`/storages/dispensingipd/ipdprescription`)
+          this.barCode = res.code
+          this.tableData = data.newArr
+          this.errArr = data.errArr
+        }
+      })
+    },
+    // 备药完成 / 批量发药和单个发药  (type = 1 备药完成  type = 2 发药)
+    handleFinish (type) {
+      const params = {
+        id: this.leftId,
+        status: this.drugStatus + 1, // 服务端自己取药包状态
+        storageRoomId: this.storageId
+      }
+      this._getCursor()
+      dispenseApi.updateStatus(params).then(res => {
+        // 更改药包状态为待发药
+        if (res.flag) {
+          this.$messageTips(this, 'success', `${type === 1 ? '备药' : '发药'}完成`)
+          this.searchName = ''
+          this.getUddList(this.searchObj)
+        }
+      })
+    },
+    handleAfterInquiry () {
+      this.isAfterInquiry = false
+    },
+    updateStatus (v) {
+      this.getUddList(this.searchObj)
+    },
+    // 查询
+    handleSearch (data) {
+      this.searchObj = data
+      this.barCode = ''
+      this.getUddList(data)
+    },
+    async getUddList (data) {
+      if (!data.searchValue) {
+        return this.$messageTips(this, 'warning', '请输入需要查询的药包编号或患者姓名', '')
+      }
+      const params = {
+        storageRoomId: this.storageId
+      }
+      if (data) {
+        data.searchSelect ? Object.assign(params, { patientId: data.searchSelect }) : Object.assign(params, { code: data.searchValue })
+      }
+      storage.removeLocalStorage('HOSPITAL_QUERY')
+      this.leftLoading = true
+      this.fullscreenLoading = true
+      const result = await api.getUddDipsenseListBySearch(params).then(res => res)
+      this.leftLoading = false
+      this.fullscreenLoading = false
+      if (result && (result.length || (result.uddDispenseList && result.uddDispenseList.length))) {
+        let data = []
+        if (result.length && result[0].hospitalizedNumber) { this.getUddSkinTest(result[0].hospitalizedNumber) }
+        if (result.uddDispenseList) {
+          data = this._findArray(result.uddDispenseList)
+          this.barCode = result.code
+          this.showPatient = false
+          this.inUse = result.inUse
+          this.oldCode = result.oldCode
+          this.leftId = result.id
+          this.inpatientArea = { spaceRecordObject: result.spaceRecordObject }
+        } else {
+          data = this._findArray(result)
+          this.showPatient = true
+          this.inUse = 1
+          this.oldCode = ''
+        }
+        this.tableData = data.newArr
+        this.errTableData = data.errArr
+        this.drugStatus = data.newArr.length && data.newArr[0].status
+      } else {
+        this.$messageTips(this, 'warning', '未查询到药包或备药单信息', '')
+      }
+    },
+    _getCursor () {
+      this.$nextTick(() => {
+        this.$refs.inputSeach.$el.querySelectorAll('input.el-input__inner')[0].focus()
+        this.isAfterInquiry = true
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.patient_title {
+  padding: 15px;
+  padding-bottom: 0;
+}
+.hospital-layout {
+  position: relative;
+  .list-msg {
+    padding-bottom: 0px;
+    .list_box {
+      height: calc(100vh - 215px);
+    }
+  }
+}
+</style>

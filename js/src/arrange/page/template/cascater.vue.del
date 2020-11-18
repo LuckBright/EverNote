@@ -1,0 +1,71 @@
+<template>
+  <!-- <el-select v-model="serviceClassfication" placeholder="请选择"></el-select> -->
+  <el-cascader
+    style="width:100%;"
+    v-model="serviceClassfication"
+    :options="mainResult"
+    @active-item-change="handleItemChange"
+    :props="props"
+  ></el-cascader>
+</template>
+<script>
+  import sysvalue from '@/warehouse/store/sysvalueapi'
+  export default {
+    props: ['value'],
+    data () {
+      return {
+        sysvalue,
+        serviceClassfication: [],
+        mainResult: [],
+        subResult: [],
+        props: {
+          value: 'id',
+          label: 'name',
+          children: 'children'
+        }
+      }
+    },
+    watch: {
+      value (val) {
+        this.serviceClassfication = val
+        if (val && val[0]) {
+          this.handleItemChange(val)
+        }
+      },
+      serviceClassfication (val) {
+        this.$emit('input', val)
+      }
+    },
+    created () {
+      this.sysvalue.listOnce('THC_WH_OBJECT_SUB_TYPE').then(rs => {
+        rs.map(item => {
+          this.subResult.push({id: item.id + '', parentId: item.parentId + '', code: item.code, name: item.name})
+        })
+      })
+      this.sysvalue.listOnce('THC_WH_OBJECT_TYPE').then(rs => {
+        rs.map(item => {
+          this.mainResult.push({id: item.id + '', code: item.code, name: item.name, children: []})
+        })
+      })
+    },
+    methods: {
+      getItemIndex (id) {
+        let index = -1
+        this.mainResult.map((item, i) => {
+          if (item.id === id) {
+            index = i
+          }
+        })
+        return index
+      },
+      handleItemChange (val) {
+        let parentId = val[0]
+        let index = this.getItemIndex(parentId)
+        let data = this.subResult.filter(item => {
+          return item.parentId === parentId
+        })
+        this.mainResult[index].children = data
+      }
+    }
+  }
+</script>

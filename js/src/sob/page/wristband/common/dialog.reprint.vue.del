@@ -1,0 +1,100 @@
+<template>
+  <div class="reprint_wristband">
+    <el-dialog title="补打腕带" :visible.sync="dialogVisible" class="ui_dialog_02" @close="dialogClose">
+      <div class="top_info">
+        <patient-info :patient="wristbandData"></patient-info>
+      </div>
+      <div class="form_wrap mt20">
+        <label class="item_label">补打原因：</label>
+        <div class="form_item">
+          <el-radio-group v-model="reasonId">
+            <template v-for="item,key in WRISTBAND_REPRINT_REASON">
+              <el-radio :label="key">{{item}}</el-radio>
+            </template>
+          </el-radio-group>
+          <el-input
+            class="mt20"
+            type="textarea"
+            :autosize="{ minRows: 2, maxRows: 4}"
+            :maxlength="50"
+            placeholder="请输入补打理由"
+            v-model="reason">
+          </el-input>
+        </div>
+      </div>
+      <div class="dialog-footer" slot="footer">
+        <el-button @click="close">取消</el-button>
+        <el-button type="primary" @click="reprintWristband" :disabled="pDisabled">打印</el-button>
+      </div>
+    </el-dialog>
+    <print-wrap v-show="false" id="wristbandPrint" v-if="wristbandConfig && wristbandConfig.length && printData" v-model="printData" :settings="wristbandConfig" :type="1" :view-type="1"></print-wrap>
+  </div>
+</template>
+<script>
+  import api from '@/sob/store/wristband'
+  import patientInfo from './patient.info'
+  import PrintWrap from '@/sob/page/wristband/common/print.wrap'
+  import {doPrint} from '@/util/print'
+  import {WRISTBAND_REPRINT_REASON} from './config'
+  export default {
+    data () {
+      return {
+        reasonId: '1',
+        reason: '',
+        dialogVisible: false,
+        WRISTBAND_REPRINT_REASON,
+        printData: null,
+        pDisabled: false
+      }
+    },
+    props: ['wristbandConfig', 'wristbandData'],
+    components: {
+      patientInfo,
+      PrintWrap
+    },
+    methods: {
+      dialogClose () {
+        this.$emit('close')
+      },
+      open () {
+        this.dialogVisible = true
+      },
+      close () {
+        this.dialogVisible = false
+      },
+      print () {
+        doPrint(this, 'wristbandPrint', false, false, false, _ => {
+          this.reprintWristband()
+        })
+      },
+      async reprintWristband () {
+        this.pDisabled = true
+        let data = {id: this.wristbandData.id, reprintReasonId: this.reasonId, reprintReason: this.reason}
+        const res = await api.reprint(data)
+        if (res && res.data && res.data.id) {
+          this.printData = res.data
+          doPrint(this, 'wristbandPrint', false, false, false, _ => {
+            this.close()
+            this.$emit('update')
+          })
+        } else {
+          this.pDisabled = false
+        }
+      }
+    }
+  }
+</script>
+<style lang="scss" scoped>
+  .reprint_wristband{
+    .top_info{
+      background: #f4f4f4;
+      border-radius: 4px;
+    }
+    .form_wrap{
+      display: flex;
+      .form_item{
+        flex: 1
+      }
+    }
+  }
+</style>

@@ -1,0 +1,29 @@
+// import HomeConfig from '@/titancare/views/index.vue'
+import ConfigIndex from '@/titancare/views/homeconfig/page/configindex.vue'
+
+export default [
+  // {
+  //   name: 'homeconfig',
+  //   path: 'homeconfig',
+  //   component: HomeConfig,
+  //   meta: { noRequireAuth: true },
+  //   redirect: '/homeconfig/configindex',
+  //   children: [
+  //     {
+  //       path: 'configindex',
+  //       name: 'configindex',
+  //       component: ConfigIndex,
+  //       meta: {
+  //         thirdActiveIndex: '/homeconfig'
+  //       }
+  //     }
+  //   ]
+  // }
+  {
+    path: 'configindex',
+    name: 'configindex',
+    component: ConfigIndex,
+    meta: {
+    }
+  }
+]

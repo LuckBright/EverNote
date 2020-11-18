@@ -1,0 +1,789 @@
+
+@import './base.scss';
+@import '../../../manages/assets/base.scss';
+$warnColor: #FCF8E3;
+$red: #ee4433;
+
+.red {
+  color: $red
+}
+.note {
+  color: #666;
+  font-size: 14px;
+  line-height: 20px;
+}
+@mixin shadow_radius {
+  border-radius: 3px;
+  box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+.reset-form_width {
+  /deep/ .el-form-item, /deep/ .el-form-item__content {
+    width:  100%;
+  }
+}
+.warehouse_wrap {
+  .panel-body {
+    padding: 0;
+    /deep/ h4 {
+      padding: 0;
+      margin: 10px 0;
+      padding-left: 10px;
+      border-left: 3px solid #1c7bef;
+      line-height: 18px;
+    }
+    .readform {
+      /deep/ .el-form-item__label {
+        color: #999;
+      }
+    }
+  }
+  .panel-footer{
+    padding: 10px 0;
+  }
+}
+// 库房发药 :start (样式提取)
+.aligin-items-center {
+  display: flex;
+  align-items: center;
+}
+.invoice {
+  margin-top: 30px;
+  position: relative;
+}
+.invoice /deep/ .el-form--inline .el-form-item__label {
+  font-size: 16px;
+  font-weight: bold;
+}
+.invoice /deep/ .yellow {
+  color: #ff9c01;
+  font-size: 16px;
+  font-family: "微软雅黑";
+}
+.deleteInvoice {
+  position: absolute;
+  right: 0;
+  top: 0;
+  line-height: 38px;
+  font-size: 14px;
+  color: #999;
+}
+.deleteInvoice .iconfont {
+  font-size: 14px;
+}
+.table2 /deep/ .el-table__empty-block {
+  height: 200px;
+}
+.table /deep/ .el-input-number__decrease, .table /deep/ .el-input-number__increase { width: 28px;}
+.table /deep/ .el-input-number__decrease { right: 29px}
+.table /deep/ .el-input-number { width: 135px}
+.table /deep/ .el-input-number .el-input__inner { padding-right: 65px}
+.readform /deep/ .el-form-item, .invoice /deep/ .el-form--inline .el-form-item {
+  margin-bottom: 0!important;
+}
+.readform {
+  /deep/ .el-form-item__label {
+    height: 26px;
+  }
+  /deep/ .el-form-item__content {
+    line-height: 26px;
+  }
+}
+.ungenerated { color: #999999; }
+.print_btn_01 i {font-size:12px;}
+// 库房发药 :end
+
+.el-select-dropdown__list {
+  max-width: 1400px!important;
+}
+.main-head{
+  padding: 0!important;
+  .el-form{
+    margin-bottom: 0!important;
+    border-bottom: none!important;
+  }
+  h4 {
+    padding: 15px 0;
+    margin: 0
+  }
+}
+.el-form--inline .el-form-item {
+  margin-bottom: 10px;
+}
+span.blue {
+  color: #1c7bef;
+  cursor: pointer;
+}
+span.blue:hover {
+  text-decoration: underline;
+}
+.homePage p {
+  margin: 0;
+  padding: 0;
+}
+.custom_table_box {
+  margin: -8px -12px;
+  .ls {
+    &:last-child {
+      border-bottom: none;
+    }
+    border-bottom: 1px solid #ddd;
+    line-height: 36px;
+    height: 36px;
+    padding: 0 20px;
+  }
+}
+.homePage .home-default {
+  border: none;
+  background: #ffffff;
+  box-shadow: 0 1px 8px 0 rgba(204, 204, 204, 0.36);
+  border-radius: 4px 4px;
+}
+.homePage .home-default > .home-body {
+  padding: 0;
+}
+.homePage .home-default > .home-heading {
+  background: #fff;
+  padding: 0 20px;
+  padding-top: 20px;
+  border-bottom: none;
+}
+.homePage .home-default > .home-heading h4 {
+  border-left: 4px solid #1c7bef;
+  font-size: 18px;
+  padding-left: 10px;
+  margin: 0;
+}
+.homePage .home-default > .home-heading .opt {
+  float: right;
+  margin: 0;
+  font-weight: normal;
+  color: #999;
+}
+.homePage {
+  .table {
+    padding-left: 20px;
+    .el-table {
+      overflow: auto
+    }
+  }
+}
+
+.weekDayWar {
+  margin-left: 100px;
+}
+.weekTable {
+  margin-left: 100px;
+  padding-bottom: 20px;
+  color: #000;
+}
+// .weekTable .el-table td {
+//   height: 40px;
+//   line-height: 40px;
+//   font-weight: bold;
+//   color: #000;
+// }
+.homePage .com_no_data {
+  margin: 0 auto !important;
+}
+// .schList .el-table th.is-leaf,
+// .schList .el-table td {
+//   height: 40px;
+//   line-height: 40px;
+// }
+.noCnt {
+  min-height: 150px;
+  display: -webkit-box;
+  -webkit-box-pack: center;
+  -webkit-box-align: center;
+}
+
+.things-header {
+  background: #f4f4f4;
+  height: 40px;
+  border: 1px solid #eee;
+  ul {
+    padding: 0;
+    margin: 0;
+    // display: flex;
+    li {
+      // flex: 1;
+      text-align: center;
+      float: left;
+      line-height: 40px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    :first-child {
+      width: 600px;
+    }
+    :nth-child(2) {
+      width: 400px;
+      text-align: left;
+      padding-left: 10px;
+    }
+    :last-child {
+      padding-right: 60px;
+      float: right;
+    }
+  }
+}
+.f12.iconfont {
+  font-size: 12px
+}
+.TCM_cdss {
+  background: $warnColor;
+  color: $red;
+  padding: 10px!important;
+  line-height: 24px;
+}
+
+.el-table .el-table__header {
+  tr.mark-cdss-row>th {
+    background: $warnColor !important;
+    border-bottom: 1px solid #ccc!important;
+  }
+  tr.mark-cdss-row:last-child>th {
+    border-bottom: none!important;
+  }
+}
+.el-table .el-table__body {
+  tr.mark-cdss-row>td {
+    // border-bottom: 1px solid #ccc!important;
+    background: $warnColor !important;
+  }
+  tr.mark-cdss-row:last-child>td {
+    border-bottom: none!important;
+  }
+  tr.mark-cdss-row + .el-table__row--striped > td{
+    // border-bottom: 1px solid #ccc!important;
+    background: $warnColor !important;
+  }
+  tr.mark-cdss-row + .el-table__row--striped:last-child >td {
+    border-bottom: none!important;
+  }
+}
+// /deep/
+// 门诊 ====
+.clinic-container {
+  > div {
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  p {
+    margin: 0;
+  }
+  // .clinic-search {
+  //   display: flex;
+  //   align-items: center;
+  //   color: #666;
+  //   > div {
+  //     display: flex;
+  //     align-items: center;
+  //     margin-right: 20px;
+  //     .el-input {
+  //       width: 280px;
+  //       margin-right: 10px;
+  //     }
+  //     > span {
+  //       font-size: 18px;
+  //       color: #000;
+  //       padding: 0 5px;
+  //     }
+  //   }
+  // }
+  // .clinic-patient {
+  //   background-color: #fff;
+  //   box-shadow: 0 0 8px 0 rgba(204, 204, 204, 0.36);
+  //   color: #000;
+  //   display: flex;
+  //   align-items: center;
+  //   position: relative;
+  //   > div {
+  //     display: flex;
+  //   }
+  //   .avatar {
+  //     width: 70px;
+  //     height: 70px;
+  //     border-radius: 35rpx;
+  //     margin-right: 20px;
+  //   }
+  //   p {
+  //     display: flex;
+  //     align-items: center;
+  //     padding: 5px 0;
+  //     span {
+  //       margin-right: 15px;
+  //     }
+  //     .name {
+  //       font-size: 24px;
+  //       font-weight: 700;
+  //       margin-right: 10px;
+  //     }
+  //     .msg {
+  //       color: #999;
+  //       margin-right: 10px;
+  //     }
+  //     .tips {
+  //       padding: 4px 10px;
+  //       background-color: $warnColor;
+  //       i {
+  //         font-size: 14px;
+  //       }
+  //     }
+  //     .subsequent {
+  //       padding: 2px 6px;
+  //       border: 1px solid #EE4433;
+  //       color:#EE4433;
+  //     }
+  //     .red {
+  //       color: #ee4433;
+  //     }
+  //   }
+  //   .contro-btn {
+  //     position: absolute;
+  //     right: 20px;
+  //     top: 20px;
+  //     padding: 0;
+  //   }
+  // }
+
+  // #common_head {
+  //   @include shadow_radius
+  // }
+  .clinic-table {
+    @include shadow_radius;
+    padding: 15px;
+    background-color: #fff;
+    color: #000;
+    p {
+      span {
+        margin-right: 10px;
+        button {
+          padding: 0;
+        }
+      }
+    }
+    .table-type {
+      padding-left: 10px;
+      border-left: 3px solid #1c7bef;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .table-content {
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+      // 发药背景匹配 start
+      .el-table .el-table__header {
+        tr.mark-row>th {
+          background: #d1e8c6 !important;
+          div.cell { background: #d1e8c6 !important;  }
+        }
+      }
+      .el-table .el-table__header {
+        tr.mark-cdss-row>th {
+          background: $warnColor !important;
+          div.cell { background: $warnColor !important;  }
+        }
+      }
+      .el-table .el-table__body {
+        tr.mark-row>td {
+          background: #C2E7B0 !important;
+          div.cell { background: #C2E7B0 !important;  }
+        }
+        tr.mark-row + .el-table__row--striped > td{
+          background: #d1e8c6 !important;
+          > div.cell { background: #d1e8c6 !important;  }
+        }
+      }
+      .el-table .el-table__body {
+        tr.mark-cdss-row>td {
+          background: $warnColor !important;
+          div.cell { background: $warnColor !important;  }
+        }
+        tr.mark-cdss-row + .el-table__row--striped > td{
+          background: $warnColor !important;
+          > div.cell { background: $warnColor !important;  }
+        }
+      }
+      // 发药背景匹配 end
+      .el-table .el-table__body {
+        td.danger-row {
+          background: #ffdfdf!important;
+        }
+        td.danger-row:first-child {
+          // border-left: 3px solid #ee4433;
+        }
+        .tips-row {
+          background: #1c7bef;
+          color: #fff;
+          width: 16px;
+          height: 16px;
+          border-radius: 5px;
+          padding: 1px;
+          text-align: center;
+          line-height: 16px;
+          font-weight: bold;
+          display: inline-block;
+          font-size: 12px;
+        }
+      }
+    }
+    .table-content:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+    .table-tcm-content {
+      padding-bottom: 20px;
+      .tcm-template {
+        margin-top: 10px;
+      }
+    }
+    .table-tcm-content:last-child {
+      padding-bottom: 10px;
+    }
+  }
+  .red {
+    color: #ee4433;
+  }
+}
+.prescription-layout {
+  overflow: hidden;
+  margin-bottom: -10px;
+  .pr-l-w400 {
+    width: 400px;
+    .pr-l
+    {
+      // padding: 100px 0 36px;
+      @include shadow_radius;
+      width: 310px;
+      background-color: #fff;
+      position: relative;
+      z-index: 5;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      transition: width 0.3s;
+      .patient-list {
+        font-size: 14px;
+        color: #000;
+        padding: 0 10px;
+        padding-top: 10px;
+        .pt-title {
+          font-size: 16px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 5px;
+          i {
+            font-size: 12px;
+          }
+          .i-zhankai {
+            transform: rotate(180deg);
+          }
+        }
+        .pt-params {
+          margin-bottom: 10px;
+          > div {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            > button {
+              margin-left: 10px;
+            }
+            > div {
+              flex: 1;
+            }
+          }
+        }
+      }
+      .patient-table {
+        i {
+          font-size: 12px;
+        }
+        .i-zhankai {
+          transform: rotate(180deg);
+        }
+        .pos_ab {
+          right: 10px;
+          // top: -3px;
+          font-size: 12px;
+          z-index: 5;
+        }
+        .el-table__body {
+          .current-patient-row {
+            background: #eaf2fc;
+            td {
+              background: transparent !important;
+            }
+          }
+        }
+      }
+      .patient-handle {
+        // position: absolute;
+        // bottom: 0;
+        // left: 0;
+        width: 100%;
+        text-align: center;
+        border-top: 1px solid #ccc;
+        background-color: white;
+        z-index: 1;
+        .is-disabled {
+          background-color: transparent;
+          border-color: transparent;
+        }
+      }
+    }
+  }
+  .pr-l-w {
+    width: 469px;
+  }
+  .pr-l-w2 {
+    width: 760px
+  }
+  .pr-r {
+    width: calc(100vw - 342px);
+    // height: calc(100vh - 300px);
+    position: absolute;
+    left: 322px;
+    top: 0;
+  }
+  .pr-r-w427 {
+    width: calc(100vw - 427px);
+    position: absolute;
+    left: 406px;
+    top: 0;
+  }
+  .clinic-table {
+    margin-bottom: 0;
+    padding-bottom: 5px;
+    .el-checkbox-group {
+      font-size: 14px;
+    }
+  }
+  .pr-handle {
+    padding: 0 15px 15px;
+    background-color: #fff;
+  }
+}
+// =========
+.hospital-container {
+  .hospital-search {
+    padding-bottom: 5px;
+  }
+  p {
+    margin: 0;
+  }
+  .hospital-search {
+    display: flex;
+    align-items: center;
+    color: #666;
+    > div {
+      display: flex;
+      align-items: center;
+      .el-input {
+        width: 310px;
+        margin-right: 6px;
+      }
+      > span {
+        font-size: 18px;
+        color: #000;
+        padding: 0 5px;
+      }
+    }
+  }
+}
+
+.queryClass {
+  width: 180px !important;
+  display: inline-block;
+  margin-right: 5px;
+}
+.additem {
+  margin-top: -71px;
+  height: 61px;
+}
+.additem /deep/ thead tr {
+  display: none;
+}
+.additem /deep/ .el-table__body-wrapper tbody tr td {
+  height: 61px;
+}
+.additem2 {
+  margin-top: -11px;
+}
+.additem2 /deep/ thead tr {
+  display: none;
+}
+.additem2 /deep/ .el-table__body-wrapper tbody tr td {
+  height: 30px;
+}
+
+.main-option h4 {
+  margin: 0;
+  float: left;
+  line-height: 36px;
+}
+
+// .hospital-layout {
+//   .el-main {
+//     padding: 10px 10px 0 10px;
+//   }
+//   .title_info {
+//     font-size: 14px;
+//     line-height: 26px;
+//     label {
+//       color: #666;
+//       padding-right: 10px;
+//     }
+//     span {
+//       margin-right: 20px;
+//     }
+//   }
+//   .record {
+//     color: #1c7bef;
+//     margin-right: 20px;
+//   }
+//   .status {
+//     font-size: 18px;
+//     color: #1c7bef;
+//     font-weight: bold;
+//   }
+//   .date_picker_box {
+//     padding: 15px;
+//     padding-bottom: 5px;
+//   }
+//   .inner {
+//     background: #fff;
+//     overflow: hidden;
+//   }
+//   .high {
+//     height: calc(100vh - 160px);
+//   }
+//   .strong {
+//     font-size: 40px;
+//     font-family: Arial, Helvetica, sans-serif, SimSun;
+//   }
+//   .list-msg {
+//     position: relative;
+//     padding-bottom: 60px;
+//     .list_box {
+//       overflow-x: hidden;
+//       height: calc(100vh - 240px);
+//     }
+//     p {
+//       line-height: 26px;
+//       span {
+//         margin-left: 20px;
+//       }
+//     }
+//   }
+//   .list-btn {
+//     box-sizing: border-box;
+//     padding-left: 30px;
+//     height: 50px;
+//     border-top: 1px solid #ccc;
+//     line-height: 50px;
+//     position: absolute;
+//     left: -20px;
+//     right: -20px;
+//     bottom: 0px;
+//     background: #fff;
+//     .btn-container {
+//       width: calc(100% - 70px);
+//       text-align: center;
+//     }
+//   }
+//   .el-table__body {
+//     .current-table-row {
+//       background: #eaf2fc;
+//       td {
+//         background: transparent !important;
+//       }
+//     }
+//   }
+//   .pointer {
+//     cursor: pointer;
+//   }
+// }
+
+.current-row,
+.current-patient-row {
+  color: #1c7bef;
+}
+
+// 货位号input
+.quantity_input { width: 65%; display: inline-block; }
+
+.ever-tab {
+  .settle_inner .settlemenu {background-color: #fff; font-family: PingFangSC-Semibold; font-size: 16px; color: #000; line-height: 16px;  border-bottom: 1px solid #eee; border-radius: 4px 4px 0 0; padding: 0 20px; border-right: none}
+  .settlemenu .el-menu-item { padding: 0 15px; background-color: #fff; font-size: 16px;}
+  .settlemenu .el-menu-item { height: 50px; line-height: 50px; border-bottom: 3px solid transparent;display:inline-block; }
+  .settlemenu .el-menu-item:hover, .settlemenu .el-menu-item.is-active { border-bottom: 3px solid #1c7bef; }
+  .settlemenu /deep/ .el-menu-item.is-inactive {border-bottom: none !important;}
+}
+.bg_OOS {
+  background-color: #ffcc99;
+  font-size: 12px;
+  color: #ff3300;
+  font-weight: 700;
+  border-radius: 2px;
+  border-color: #ff9900;
+  padding: 2px 4px;
+  margin: 0 0 0 5px;
+  transform: scale(0.85);
+  display: inline-block;
+  height: 20px;
+  line-height: 20px;
+}
+
+.icon-shuoming{
+  font-size: 16px;
+  padding: 0px;
+  color: $blue_color;
+}
+.tableiconhover {
+  /deep/ .el-table__row .icon-shuoming {
+    color: #409eff;
+    display: none;
+  }
+  .printshow{
+    display: none;
+  }
+
+  /deep/ .el-table__row:hover .icon-shuoming,
+  .el-table__row:hover .printshow {
+    display: inline-block;
+  }
+}
+.sortbox{
+  position: relative;
+  .iconfont{
+    position: absolute;
+    color: #c0c4cc;
+    font-size: 13px;
+  }
+  .top{
+    top: -5px;
+    height: 13px;
+  }
+  .down{
+    bottom: -3px;
+    line-height: 13px;
+  }
+  .sortactive{
+    color: #1c7bef
+  }
+}
+.common-datetime-range-picker {
+  .el-range-editor {
+    width: 400px!important;
+  }
+}
+// .table-scroll-more{
+//   /deep/ .el-table__row{
+//     display: none;
+//   }
+// }

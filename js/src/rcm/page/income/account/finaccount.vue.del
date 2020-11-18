@@ -1,0 +1,271 @@
+<template>
+  <div>
+    <ever-bread-crumb name="凭证创建" path="/financial/finaccount"></ever-bread-crumb>
+    <div class="layout_inner" v-loading="loading">
+      <ever-form2 ref="form" :schema="schema" v-model="obj" :rules="rules" :span="12" label-position="right">
+        <template slot="tradeType">
+          <el-checkbox-group v-model="obj.tradeType">
+            <template v-for="(item, index) in tradeType">
+              <el-checkbox :label="Number(item.value)" :key="item.value">{{item.label}}</el-checkbox>
+            </template>
+          </el-checkbox-group>
+        </template>
+        <template slot="period">
+          <el-col :span="12">
+            <el-form-item prop="period" label="期间" v-if="obj.cycle === 3">
+              <ever-select v-model="obj.period" :options="periodArr" style="width: 100%">
+              </ever-select>
+            </el-form-item>
+          </el-col>
+        </template>
+        <template slot="endDate" v-if="obj.cycle === 1">
+          <el-col :span="12">
+            <el-form-item prop="endDate" label="日期范围">
+              <date-picker v-model="obj.endDate" outformat="yyyy-MM-dd" :pickerOptions="pickerOptions">
+              </date-picker>
+            </el-form-item>
+          </el-col>
+        </template>
+        <template slot="enum">
+          <el-col :span="12">
+            <el-form-item prop="enum" label="模块">
+              <!-- <el-select v-model="obj.enum" placeholder="请选择">
+                <el-option v-for="item in enumArr" :key="item.key" :label="item.name" :value="item.id">
+                </el-option>
+              </el-select> -->
+              <ever-select v-model="obj.enum" :options="enumArr" style="width: 100%">
+              </ever-select>
+            </el-form-item>
+          </el-col>
+        </template>
+        <template slot="default">
+          <el-col>
+            <el-form-item>
+              <el-button type="primary" @click="submitForm('form')">创建</el-button>
+              <el-button @click="clearForm">重置</el-button>
+            </el-form-item>
+          </el-col>
+        </template>
+      </ever-form2>
+    </div>
+  </div>
+</template>
+<script>
+import {
+  summaryData,
+  getModuleAndTrade,
+  getModuleTypeEnum
+} from '../../../store/income/account/summary'
+import medicalinsuexportapi from '@/insurance/store/medicalinsuexportapi'
+import arperiodmangeapi from '@/rcm/store/arperiodmangeapi'
+var schema = [
+  {
+    name: 'organizationCode',
+    label: '医疗机构编码',
+    props: {
+      disabled: true
+    }
+  },
+  {
+    name: 'name',
+    label: '医疗机构名称',
+    props: {
+      disabled: true
+    }
+  },
+  {
+    name: 'cycle',
+    label: '确认周期',
+    comp: 'ever-select',
+    props: {
+      placeholder: '确认周期',
+      options: [
+        {
+          name: '日',
+          id: 1
+        },
+        {
+          name: '月',
+          id: 3
+        }
+      ]
+    }
+  },
+  {
+    name: 'period',
+    comp: 'custom',
+    noWrap: true
+  },
+  {
+    name: 'endDate',
+    comp: 'custom',
+    noWrap: true
+  },
+  {
+    name: 'enum',
+    comp: 'custom',
+    noWrap: true
+  },
+  {
+    name: 'tradeType',
+    label: '',
+    comp: 'custom',
+    span: 24
+  }
+]
+
+export default {
+  data () {
+    var obj = this.$ever.createObjFromSchema(schema)
+    obj.tradeType = []
+    obj.cycle = 1
+    return {
+      pickerOptions: {
+        // disabledDate (time) {
+        //   return time.getTime() > Date.now() - 8.64e7
+        // }
+      },
+      schema,
+      obj: obj,
+      loading: false,
+      tradeType: [],
+      periodArr: [],
+      enumArr: [],
+      tradeArr: {},
+      rules: {
+        cycle: [
+          { required: true, message: '必填项', trigger: 'blur', type: 'number' }
+        ],
+        enum: [{ required: true, message: '必填项', trigger: 'blur' }],
+        period: [
+          {
+            required: true,
+            message: '必填项',
+            type: 'string',
+            trigger: 'change'
+          }
+        ],
+        endDate: [
+          {
+            type: 'string',
+            required: true,
+            message: '必填项',
+            trigger: 'change'
+          }
+        ]
+      }
+    }
+  },
+  methods: {
+    async submitForm (formName) {
+      this.$refs[formName].$refs[formName].validate(async valid => {
+        if (valid) {
+          let params = {
+            cycle: this.obj.cycle,
+            endDate: this.obj.endDate,
+            period: this.obj.period,
+            tradeType: this.obj.tradeType
+          }
+          let data = await summaryData(params)
+          if (data.head && data.head.errCode === 0) {
+            this.$message({
+              message: data.head.errMsg,
+              type: 'success'
+            })
+            this.clearForm()
+          } else {
+            this.$message({
+              message: data.head.errMsg,
+              type: 'error'
+            })
+          }
+        } else {
+          return false
+        }
+      })
+    },
+    async getEnum () {
+      try {
+        let data = await getModuleTypeEnum()
+        data.data.forEach(v => {
+          Object.keys(v).forEach(i => {
+            this.enumArr.push({
+              id: i,
+              name: v[i]
+            })
+          })
+        })
+      } catch (err) {
+        console.log(err)
+      }
+    },
+    async getTransaction () {
+      try {
+        let data = await getModuleAndTrade()
+        this.tradeArr = data.data
+      } catch (err) {
+        console.log(err)
+      }
+    },
+    clearForm () {
+      this.obj.cycle = ''
+      this.obj.endDate = ''
+      this.obj.period = ''
+      this.obj.enum = ''
+      this.obj.tradeType = []
+    },
+    setArr (obj) {
+      this.obj.tradeType = []
+      Object.keys(obj).length > 0 &&
+        Object.keys(obj).forEach(v => {
+          this.obj.tradeType.push(Number(v))
+          this.tradeType.push({
+            value: v + '',
+            label: obj[v]
+          })
+        })
+    }
+  },
+  watch: {
+    'obj.cycle': {
+      handler (n, o) {
+        if (n === 3) {
+          this.obj.endDate = ''
+        }
+      }
+    },
+    'obj.enum': {
+      handler (n, o) {
+        switch (Number(n)) {
+          case 1:
+            this.tradeType = []
+            this.setArr(this.tradeArr[n])
+            break
+          case 2:
+            this.tradeType = []
+            this.setArr(this.tradeArr[n])
+            break
+          case 3:
+            this.tradeType = []
+            this.setArr(this.tradeArr[n])
+            break
+          default:
+            this.tradeType = []
+            break
+        }
+      }
+    }
+  },
+  created () {
+    medicalinsuexportapi.getClinicInfo().then(result => {
+      this.obj.name = result.data.name
+      this.obj.organizationCode = result.data.organizationCode
+    })
+    arperiodmangeapi.getArPeriodList({}).then(result => {
+      this.periodArr = result.data
+    })
+    this.getEnum()
+    this.getTransaction()
+  }
+}
+</script>

@@ -1,0 +1,60 @@
+<template>
+  <div class="layout_inner">
+    <el-row class="common_head">
+      <el-col :span="12">允许医生在问诊时推荐商品</el-col>
+      <el-col :span="12">
+        <el-switch v-model="open" class="switch" @change="change"></el-switch>
+      </el-col>
+    </el-row>
+  </div>
+</template>
+
+<script>
+import { requestIh } from '@/util/req'
+import urlMap from '@/titancare/utils/urls.js'
+
+export default {
+  data () {
+    return {
+      open: false
+    }
+  },
+  created () {
+    this.getGoodsAllow() // 1
+  },
+  methods: {
+    change () {
+      requestIh(urlMap.config.createOrUpdateGoodsAllow, { open: this.open }).then(rs => {
+        if (rs.errCode === 0) {
+          this.$notify({
+            message: '保存成功',
+            type: 'success'
+          })
+        }
+      })
+    },
+    getGoodsAllow () {
+      requestIh(urlMap.config.getGoodsAllow).then(rs => {
+        this.open = rs.data
+      })
+    }
+  }
+}
+</script>
+
+<style scoped lang="less">
+.mgl10 {
+  margin-left: 20px;
+}
+.switch {
+  margin: 4px;
+  float: right;
+}
+.mgt {
+  margin: 2px;
+}
+.setinput {
+  width: 500px;
+  margin-left: 20px;
+}
+</style>

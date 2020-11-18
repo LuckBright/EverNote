@@ -1,0 +1,24 @@
+<template>
+  <div>
+    <div v-if="value">
+      <img :src="imgUrl + value">
+    </div>
+    <div v-else >
+      <img src="../../static/assets/nopic.svg">
+    </div>
+  </div>
+</template>
+<script>
+import { diction } from '@/store/common'
+export default {
+  props: ['value'],
+  data () {
+    return {
+      imgUrl: diction.imgurl
+    }
+  }
+}
+</script>
+<style scoped>
+  img { width: 100%; max-width: 60px}
+</style>

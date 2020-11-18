@@ -1,0 +1,130 @@
+.chat-sender{
+  clear:both;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.chat-sender > div:nth-of-type(1){
+  float: left;
+}
+.chat-sender > .msgbox {
+  position: relative;
+  background-color: white;
+  float: left;
+  margin: 0 50px 20px 7px;
+  padding: 10px;
+  border-radius:7px; 
+  max-width: 248px;
+}
+.chat-sender > .msgimage {
+  float: left;
+  border-radius:7px;
+  max-width: 268px;
+  margin: 0 10px 10px 10px;
+  cursor: pointer;
+}
+.chat-sender > .custombox {
+  margin: 0px 50px 20px 50px;
+  border-radius:7px;
+}
+.chat-receiver{
+  clear:both;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.chat-receiver > div:nth-of-type(1){
+  float: right;
+}
+.chat-receiver > .msgbox{
+  position: relative;
+  float:right;
+  background-color: #b2e281;
+  margin: 0px 7px 20px 50px;
+  padding: 10px;
+  border-radius:7px;
+  max-width: 248px;
+  flex-direction: row-reverse;
+  word-break: break-all;
+}
+.chat-receiver > .msgimage {
+  float:right;
+  border-radius:7px;
+  max-width: 268px;
+  margin: 0 10px 10px 10px;
+  cursor: pointer;
+}
+.chat-receiver > .custombox {
+  margin: 0px 50px 20px 50px;
+  border-radius:7px;
+}
+.chat-receiver div:first-child img,
+.chat-sender div:first-child img{
+  width: 40px;
+  height: 40px;
+  border-radius: 10%;
+}
+.msgbox > .chat-left_triangle{
+  height: 0px;
+  width: 0px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent white transparent transparent;
+  position: absolute;
+  left: -11px;
+  top: 14px;
+}
+.msgbox > .chat-right_triangle{
+  float:right;
+  height: 0px;
+  width: 0px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent transparent #b2e281;
+  position: absolute;
+  right:-11px;
+  top:14px;
+}
+.chat-tips {font-size: 12px; text-align: center; line-height: 1.75; padding: 10px 50px; margin-bottom: 10px; color:#999;}
+.chat-notice{
+  clear: both;
+  font-size: 12px;
+  color: white;
+  text-align: center;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+.chat-notice span{
+  background-color: #cecece;
+  line-height: 25px;
+  border-radius: 5px;
+  padding: 5px 10px;
+}
+.audio {
+  display: flex;
+  align-items: center;
+  font-family: PingFangSC-Regular;
+  font-size: 14px;
+  color: #191919;
+  padding: 10px 15px;
+  text-indent: 0;
+  cursor: pointer;
+} 
+.audio .audio-icon {
+  display: flex;
+  align-items: center;
+  width: 15px;
+  height: 15px;
+}
+.audio .audio-icon .audio1 {
+  width: 3.5px;
+  height: 4px;
+}
+.audio .audio-icon .audio2 {
+  width: 7px;
+  height: 8px;
+}
+.audio .audio-icon .audio3 {
+  width: 10px;
+  height: 15px;
+}
+.el-image {border-radius:4px;}
+.emoji {width: 16px;}

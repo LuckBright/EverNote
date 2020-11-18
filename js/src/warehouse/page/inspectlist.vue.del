@@ -1,0 +1,153 @@
+<template>
+  <div>
+    <ever-bread-crumb name="检验项目管理" path="/warehouse/inspects"></ever-bread-crumb>
+    <div class="layout_inner">
+      <div class="main-head">
+        <ever-query-form :schema="querySchema" v-model="queryObj" @query="query"></ever-query-form>
+        <div class="main-option">
+          <router-link :to="'/warehouse/inspectadd'">
+            <el-button type="primary">新建</el-button>
+          </router-link>
+        </div>
+      </div>
+      <el-table v-loading.body="loading" :data="tableData" style="width: 100%" border>
+        <el-table-column prop="name" label="项目名称">
+          <template slot-scope="scope">
+            <el-tooltip
+              popper-class="nameTip"
+              effect="light"
+              :content="scope.row.name"
+              placement="bottom-start"
+            >
+              <a
+                class="cBlue"
+                @click="$router.push('/warehouse/inspectdetail/' + scope.row.id)"
+              >{{scope.row.name}}</a>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column prop="shortName" label="英文缩写"></el-table-column>
+        <el-table-column prop="unit" label="单位"></el-table-column>
+        <el-table-column prop label="参考值">
+          <template slot-scope="scope">
+            <span>{{scope.row.refValue ? JSON.parse(scope.row.refValue).min : ''}}</span>
+            <span>{{scope.row.refValue ? '~' +JSON.parse(scope.row.refValue).max : ''}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop label="操作" width="150" align="center">
+          <template slot-scope="scope">
+            <el-button
+              type="primary"
+              size="small"
+              @click="$router.push('/warehouse/inspects/' + scope.row.id)"
+            >编辑</el-button>
+            <!-- <el-popover
+                ref="popover"
+                placement="left"
+                popper-class="deleteTip">
+                <p>
+                  <i class="icon iconfont icon-info" ></i>
+                  确定删除模版吗？
+                </p>
+                <div style="text-align: center; margin: 0">
+                  <el-button class="middleBtn">取消</el-button>
+                  <el-button class="middleBtn"type="primary" @click="deleteinspect(scope.row.id)">确定</el-button>
+                </div>
+            </el-popover>-->
+            <!-- <el-button v-popover:popover size="small" type="danger">删除</el-button> -->
+            <el-button size="small" type="danger" @click="deleteRow(scope.$index, tableData)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <el-row type="flex" justify="end">
+        <ever-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :totalCount="totalCount"
+          :current="current"
+        ></ever-pagination>
+      </el-row>
+    </div>
+  </div>
+</template>
+
+<script>
+import api from '../store/inspect'
+import list from '@/util/list'
+var schema = [
+  {
+    name: 'name',
+    label: '项目名称',
+    placeholder: '请输入项目名称'
+  }
+]
+export default {
+  mixins: [list],
+  data () {
+    return {
+      querySchema: schema,
+      queryObj: this.$ever.createObjFromSchema(schema)
+    }
+  },
+  methods: {
+    deleteRow (index, rows) {
+      if (rows && rows[index]) {
+        this.api.del(rows[index].id).then(res => {
+          rows.splice(index, 1)
+          this.$notify({
+            title: '成功',
+            message: '删除成功',
+            type: 'success'
+          })
+        })
+      }
+    }
+  },
+  beforeCreate () {
+    this.api = api
+  }
+}
+</script>
+<style scoped>
+.deleteTip {
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+.deleteTip p {
+  font-size: 16px;
+  color: #000;
+  margin: 0 0 18px;
+  font-weight: bold;
+}
+.deleteTip i {
+  color: #1c7bef;
+  font-size: 24px;
+  vertical-align: middle;
+  font-weight: normal;
+}
+.middleBtn {
+  height: 30px;
+  line-height: 30px;
+  padding: 0 15px;
+}
+.cBlue {
+  color: #1c7bef;
+  white-space: nowrap;
+}
+.el-tooltip__popper.is-light.nameTip {
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 14px;
+  color: #666;
+  line-height: 22px;
+  max-width: 202px;
+}
+/*.el-tooltip__popper .popper__arrow{background: #ddd;border: none;}*/
+</style>

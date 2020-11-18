@@ -1,0 +1,130 @@
+@col_o_05: #1c7bef;
+@col_o_333: #333;
+@col_b_08: #cccccc59;
+@col_b_04: #999;
+@col-e-e5: #E5E5E5;
+
+@10px: 10px;
+
+p {
+  margin: 0;
+  padding: 0;
+}
+
+// .main {
+//   margin: @10px;
+//   margin-top: 40px;
+//   //min-height: 88vh;
+//   //overflow: auto;
+// }
+
+.bg-color {
+  background-color: @col_b_08;
+}
+
+.span-color {
+  font-size: 14px;
+  margin-right: 11px;
+  color: @col_b_04;
+}
+
+// 详情页分块
+.region {
+  margin-bottom: @10px;
+  padding: 20px;
+  background-color: #fff;
+
+  .topTitle {
+    line-height: 16px;
+    margin-bottom: 19px;
+
+    span {
+      color: @col_o_333;
+      font-size: 14px;
+    }
+
+    &::before {
+      content: "";
+      display: inline-block;
+      border: 2px solid @col_o_05;
+      border-radius: 2px;
+      height: 13px;
+      vertical-align: bottom;
+      margin-right: 6px;
+    }
+  }
+}
+
+// 图片显示
+.common_img {
+  width: 100px;
+  height: 70px;
+
+  a {
+    text-decoration: none;
+    word-break: break-all;
+    display: block;
+    overflow: hidden;
+
+    img {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+      width: 100px;
+      height: 70px;
+    }
+  }
+}
+
+// 布局
+// .el-header {
+//   padding: 0 !important;
+//   height: 40px !important;
+//   background-color: #323639;
+// }
+
+// .el-header .el-menu-demo {
+//   display: inline-block;
+// }
+
+// .el-header .el-menu-demo .el-menu-item {
+//   height: 40px;
+//   line-height: 40px;
+// }
+
+// 分页
+.el-pagination {
+  text-align: right;
+}
+
+// 对话框
+.el-dialog__body {
+  padding: 0 20px 10px !important;
+}
+
+// input边框颜色
+.el-input__inner {
+  border: 1px solid @col-e-e5;
+}
+
+// 头部返回
+.el-page-header__content {
+  font-size: 14px !important;
+}
+
+// 弹框
+.el-message-box .el-message-box__btns {
+  text-align: left !important;
+
+  .el-button--primary {
+    float: left;
+    margin-left: 0 !important;
+    margin-right: 10px;
+  }
+}
+
+// 分页
+.active {
+  background: @col_o_05 !important;
+  color: #fff !important;
+}

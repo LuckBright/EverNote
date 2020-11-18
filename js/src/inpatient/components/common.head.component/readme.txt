@@ -1,0 +1,23 @@
+1. 自定义组件
+├── common.head.adviceshare.vue
+├── common.head.bizinsurance.vue
+├── common.head.bloodoxygen.vue
+├── common.head.bloodpressure.vue
+├── common.head.bmi.vue
+├── common.head.breath.vue
+├── common.head.diagnose.vue
+├── common.head.doctoradvicesharing.vue
+├── common.head.drugallergy.vue
+├── common.head.gestational.vue
+├── common.head.headcircumference.vue
+├── common.head.heartrate.vue
+├── common.head.height.vue
+├── common.head.infectiousdiseases.vue
+├── common.head.medpersoninfo.vue
+├── common.head.name.vue
+├── common.head.nondrugallergy.vue
+├── common.head.pulse.vue
+├── common.head.settlementbutton.vue
+├── common.head.temperature.vue
+├── common.head.weight.vue
+2.

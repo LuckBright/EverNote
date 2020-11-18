@@ -1,0 +1,31 @@
+<template>
+  <div id="tpl-form">
+    <tpl-form :visit-id="visitId" :dataId="dataId" :patient-id="patientId" :code="code" :userId="userId" :providerId="providerId" :dptId="origId" v-model="obj" ref="form" :schemaId.sync="tplId"></tpl-form>
+  </div>
+</template>
+
+<script>
+import tplForm from './tplform'
+export default {
+  data () {
+    return {
+      tplId: '',
+      visitId: this.$route.query.visitId,
+      patientId: this.$route.query.patientId,
+      obj: null,
+      code: this.$route.query.code,
+      userId: this.$route.query.userId || '437d6bcc-a744-44df-8784-17e7b872beee',
+      dataId: '',
+      providerId: this.$route.query.providerId,
+      origId: this.$route.query.origId
+    }
+  },
+  created () {
+    this.dataId = this.$route.query.dataId
+    if (this.dataId === 'undefined' || this.dataId === 'null' || !this.dataId) this.dataId = -1
+  },
+  components: {
+    tplForm
+  }
+}
+</script>

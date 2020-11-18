@@ -1,0 +1,139 @@
+.table_spe{
+  padding:5px; // 解决打印是边框不全的问题
+  table {
+    width: 100%;
+    font-size: 14px;
+    border: 1px solid #000;
+    line-height: 35px;
+    border-spacing: 0;
+    border-collapse: collapse;
+    thead, tbody {
+      width: 100%;
+      tr{
+        border-bottom: 1px solid #000;
+        th{background:#e4e4e4}
+        th, td {
+          text-align:center;
+          padding:10px 0;
+          line-height:20px;
+          vertical-align:baseline;
+          border-right: 1px solid #000;
+          overflow: hidden;
+          div.pCountBox {
+            position: relative;
+          }
+          span.pCount {
+            position: absolute;
+            right:0;
+            top:-10px;
+            padding: 0 10px;
+            line-height:41px;
+            height:41px;
+            border-left: 1px solid #000;
+          }
+        }
+        td.alg_top{vertical-align:top}
+        td.alg_mid{vertical-align:middle}
+        td.alg_bom{vertical-align:bottom}
+        th.no_padding, td.no_padding {
+          padding:0
+        }
+        th.gutter{
+          display:none;
+        }
+      }
+    }
+  }
+  .inner_table{
+    border:none;
+    border-bottom: 1px solid #000;
+    margin-bottom:-1px;
+    thead, tbody {
+      width: 100%;
+      tr:nth-last-child(1){
+        border-bottom: none;
+      }
+      tr{
+        th:nth-last-child(1), td:nth-last-child(1) {
+          border-right:none
+        }
+      }
+    }
+    .inner_table{
+      thead, tbody {
+        tr:first-child{
+          border-bottom: 1px solid #000;
+        }
+      }
+    }
+  }
+  .inner_table.bom_bor{
+    border-bottom: 1px solid #fff;
+  }
+  .middle{vertical-align:middle}
+  .alg_l{text-align:left}
+  .alg_r{text-align:right}
+  .center{text-align:center}
+  .print_header{
+    font-size:16px;
+    text-align:center;
+    margin:10px auto;
+  }
+  .print_footer_txt{
+    font-size:14px;
+    margin-top:20px;
+    .el-row{
+      .el-col{line-height:16px;padding:5px 0;
+        span{display:inline-block;height:16px}
+      }
+    }
+    .el-row.bom_bor{
+      .el-col{
+        span{min-width:50%;border-bottom:1px solid #000;text-align:center}
+      }
+    }
+  }
+}
+
+@media print{
+  .table_spe{
+    font-family: Simsun,Arial,sans-serif;
+    table {
+      line-height: 28px;
+      font-size: 12px;
+      border: 1px solid #000;
+      thead, tbody {
+        tr{
+          border-bottom: 1px solid #000;
+          th, td {
+            padding:5px;
+            line-height:18px;
+            color:#000;
+            border-right: 1px solid #000;
+            a{
+              color:#000;
+              text-decoration: none;
+            }
+          }
+        }
+      }
+    }
+    .inner_table{
+      border-bottom: 1px solid #000;
+      .inner_table{
+        thead, tbody {
+          tr:first-child{
+            border-bottom: 1px solid #000;
+          }
+        }
+      }
+    }
+    .print_footer_txt{
+      font-size:12px;
+      margin-top:15px;
+      .el-row{
+        .el-col{padding:3px 0;}
+      }
+    }
+  }
+}

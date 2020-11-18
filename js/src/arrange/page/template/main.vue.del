@@ -1,0 +1,47 @@
+<template>
+  <div id="template">
+    <el-row :gutter="10" type="flex">
+      <el-col class="left">
+        <templateform :value="initForm" :flag="flag" @update="setUpdate"></templateform>
+      </el-col>
+      <el-col class="right">
+        <templatelist @edit="setEditForm" :is-update.sync="isUpdate" @reback="reback"></templatelist>
+      </el-col>
+    </el-row>
+  </div>
+</template>
+
+<script>
+  import templateform from '@/arrange/page/template/form.vue'
+  import templatelist from '@/arrange/page/template/list.vue'
+  export default {
+    data () {
+      return {
+        activeIndex: 'template',
+        initForm: '',
+        isUpdate: false,
+        flag: ''
+      }
+    },
+    methods: {
+      setEditForm (val, flag) {
+        this.initForm = val
+        this.flag = flag
+      },
+      setUpdate (val) {
+        this.isUpdate = val
+      },
+      reback (val) {
+        this.isUpdate = val
+      }
+    },
+    components: {
+      templateform,
+      templatelist
+    }
+  }
+</script>
+<style scoped>
+  .left {width:550px; background: #fff;}
+  .right{overflow-x:auto;}
+</style>

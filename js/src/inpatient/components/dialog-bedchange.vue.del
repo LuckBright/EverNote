@@ -1,0 +1,396 @@
+<template>
+   <el-dialog title="换床" :visible.sync="flag" class="dialog-oudepart ui_dialog_02" id="indepart">
+    <span slot="title">
+      <strong>换床</strong>
+    </span>
+    <div class="userinfo">
+      <el-row>
+        <el-col :span='4' class='patientName'>
+          <span v-if="inpatientInfo.patient">{{inpatientInfo.patient.name}}</span>
+        </el-col>
+        <el-col :span='18'>
+           <el-row class='detail'>
+             <el-col>
+              <sys-value  type="GBT.2261.1" :code="inpatientInfo.patient.sex" v-if="inpatientInfo.patient"></sys-value>
+              {{data.patient && data.patient.age ? data.patient.age : '--'}}岁
+              NO.{{data.patientId}}
+              <label>诊断：</label><span>{{inpatientInfo.diagnosis || '--'}}</span>
+              <label>入院科室：</label><span>{{data.providerName || '--'}}</span>
+             </el-col>
+           </el-row>
+           <el-row>
+             <el-col>
+               <label>住院号：</label><span>{{data.hospitalizedNumber || '--'}}</span>
+               <label>入院时间：</label><span>{{data.hospitalizedTime || '--'}}</span>
+               <label>医保信息：</label><span>无医保</span>
+             </el-col>
+           </el-row>
+        </el-col>
+      </el-row>
+    </div>
+    <el-form label-width="80px" :model="indepartFormObj" :rules="rules" ref="indepartForm">
+      <el-form-item label="选择病区" prop="hospitalizedAreaObj">
+        <el-select clearable placeholder="请选择" filterable class="wb100" v-model="indepartFormObj.hospitalizedAreaObj" value-key="id" @change='changeArea(indepartFormObj.hospitalizedAreaObj)'>
+          <el-option
+            v-for="item in hospitalizedAreaOptions"
+            :key="item.id"
+            :label="item.name"
+            :value="item">
+            <div>
+              <span class="fr">
+                共{{item.totalBed || 0}}床位
+                <template v-if="item.remainBed > 0">
+                  剩余<span class="cBlue"> {{item.remainBed}} </span>床位
+                </template>
+                <template v-else>
+                  <span class="cRed">已满</span>
+                </template>
+              </span>
+              {{item.name}}
+            </div>
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="选择病房" prop="hospitalizedWardsItem">
+        <el-select clearable placeholder="请选择" :disabled="!indepartFormObj.hospitalizedAreaObj" filterable class="wb100" v-model="indepartFormObj.hospitalizedWardsItem" value-key="id" @change="changeWard(indepartFormObj.hospitalizedWardsItem)">
+          <el-option
+            v-for="item in hospitalizedWardsOptions"
+            :key="item.id"
+            :label="item.name"
+            :value="item">
+             <div>
+              <span class="fr">
+                <template v-if="item.sexMsg && item.sexMsg.length>0">
+                   <span class="cgBlue" v-if="item.sexMsg.indexOf('1')>-1">男</span>
+                   <span class="cgBlue" v-if="item.sexMsg.indexOf('2')>-1">女</span>
+                 </template>
+                 <template v-if="item.ageMsg && item.ageMsg.length>0">
+                   <span class="cgBlue">儿童</span>
+                 </template>
+                 <template v-if="item.totalBed">
+                  共{{item.totalBed || 0}}位床位
+                 </template>
+                 <template v-if="item.patientCount">
+                   剩余<span class="cBlue">{{item.totalBed&&item.patientCount&&item.totalBed>=item.patientCount?item.totalBed-item.patientCount : 0}}</span>位床位
+                 </template>
+              </span>
+              {{item.name}}
+            </div>
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="选择病床" prop="hospitalizedBedName">
+       <div class="bedWrapper">
+            <el-input class='bedIpt' v-model="hospitalizedBedName" placeholder="请选择病床" :disabled="!indepartFormObj.hospitalizedWardsItem" @focus="showBed"></el-input>
+            <ul class="bed_wrapper clearfix" v-if="isHidden && hospitalizedBedOptionsFull[0]">
+                <li v-for="item in this.hospitalizedBedOptionsFull" :key="item.id">
+                  <img v-if="!item.patient" src="../../assets/img/empty_bed.png" @click="chooseBed(item)"/>
+                  <i v-if="item.patient && item.patient.sex && item.patient.sex==='1'" class="iconfont icon-men"></i>
+                  <i v-if="item.patient && item.patient.sex && item.patient.sex==='2'" class="iconfont icon-laddy"></i>
+                  <div :class="[!item.patient ? 'cBlue': 'cGray']">{{item.bedCode}}</div>
+                </li>
+            </ul>
+        </div>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button type="primary" @click="submitForm" v-ever-click-once="disabled" :disabled="disabled">确认</el-button>
+    </div>
+     <print-wrap v-show="false" id="wristbandPrint" v-if="wristbandConfig && wristbandConfig.length && wristbandData" v-model="wristbandData" :settings="wristbandConfig" :type="1"></print-wrap>
+   </el-dialog>
+</template>
+<script>
+  import api from '../store/bedchangeapi'
+  import indepartapi from '../store/indepartapi'
+  // import {doPrint} from '@/util/print'
+  import wristbandApi from '@/sob/store/wristband'
+  import PrintWrap from '@/sob/page/wristband/common/print.wrap'
+
+  export default {
+    props: ['visible', 'inpatientInfo'],
+    data () {
+      return {
+        disabled: false,
+        api,
+        indepartapi,
+        query: this.$route.query,
+        isHidden: false,
+        flag: false,
+        data: {},
+        indepartFormObj: {
+          hospitalizedAreaObj: null,
+          hospitalizedWardsItem: null,
+          hospitalizedBedObj: null,
+          hospitalizedBedName: ''
+        },
+        hospitalizedAreaOptions: [],
+        hospitalizedBedOptions: [],
+        hospitalizedWardsOptions: [],
+        hospitalizedBedOptionsFull: [],
+        hospitalizedAreaId: 1,
+        hospitalizedBedId: '',
+        hospitalizedBedName: '',
+        rules: {
+          hospitalizedAreaObj: [
+            { required: true, message: '请选择病区', trigger: 'change', type: 'object' }
+          ],
+          hospitalizedBedName: [
+            { required: true, message: '请选择病床', trigger: 'change', type: 'string' }
+          ],
+          hospitalizedWardsItem: [
+            { required: true, message: '请选择病房', trigger: 'change' }
+          ]
+        },
+        wristbandConfig: [],
+        wristbandData: null
+      }
+    },
+    components: {
+      PrintWrap
+    },
+    created () {
+      // this.getWristbandConfig(0)
+    },
+    watch: {
+      'visible' (val) {
+        if (val) {
+          this.isHidden = false
+          this.setData()
+          this.getAreaList()
+        } else {
+          this.indepartFormObj.hospitalizedAreaObj = ''
+          this.indepartFormObj.hospitalizedAreaOptions = []
+          this.indepartFormObj.hospitalizedWardsItem = ''
+          this.hospitalizedWardsOptions = []
+          this.hospitalizedBedId = ''
+          this.hospitalizedBedName = ''
+          this.hospitalizedBedOptionsFull = []
+          this.hospitalizedBedOptions = []
+        }
+        this.flag = val
+      },
+      'indepartFormObj.hospitalizedAreaObj' (val, old) {
+        // if (old) {
+        //   this.indepartFormObj.hospitalizedWardsItem = ''
+        //   this.hospitalizedWardsOptions = []
+        //   this.hospitalizedBedId = ''
+        //   this.hospitalizedBedName = ''
+        // }
+        if (val) {
+          this.getWardsList(val)
+        } else {
+          this.hospitalizedBedOptionsFull = []
+          this.hospitalizedWardsOptions = []
+        }
+      },
+      'indepartFormObj.hospitalizedWardsItem' (val, old) {
+        // if (old) {
+        //   this.hospitalizedBedId = ''
+        //   this.hospitalizedBedName = ''
+        // }
+        if (val) {
+          if (val.sexMsg && val.sexMsg.length > 0) {
+            if (this.data.patient.age > 6 && this.data.patient.sex === '1' && val.sexMsg.join(',').indexOf('2') > -1) {
+              this.$notify({
+                type: 'info',
+                message: '此患者与病房中的患者性别不同'
+              })
+            }
+            if (this.data.patient.age > 6 && this.data.patient.sex === '2' && val.sexMsg.join(',').indexOf('1') > -1) {
+              this.$notify({
+                type: 'info',
+                message: '此患者与病房中的患者性别不同'
+              })
+            }
+          }
+          console.log(val)
+          this.getBedlist(val)
+        } else {
+          this.hospitalizedBedOptionsFull = []
+          this.hospitalizedBedOptions = []
+        }
+      },
+      'flag' (val) {
+        this.$emit('update:visible', val)
+      }
+    },
+    methods: {
+      async getWristbandConfig (type) {
+        // const res = await wristbandApi.getConfig({isNewborn: type, visitType: 2})
+        // if (res && res.data && res.data.length) {
+        //   if (res.data[0] && res.data[0].content) {
+        //     this.wristbandConfig = JSON.parse(res.data[0].content)
+        //   }
+        // }
+      },
+      // async createWristband (done) {
+      //   let hosRecDiagnosis = this.inpatientInfo.diagnosis
+      //   if (this.inpatientInfo.position) hosRecDiagnosis = `${hosRecDiagnosis}（${this.inpatientInfo.position}）`
+      //   let data = {
+      //     visitType: 2,
+      //     patientId: this.data.patient ? this.data.patient.id : '',
+      //     patientName: this.data.patient ? this.data.patient.name : '',
+      //     patientSex: this.data.patient ? this.data.patient.sex : '',
+      //     birthday: this.data.patient ? this.data.patient.birthday : '',
+      //     outDoctorName: this.data.applianceDoctorName,
+      //     outDoctorId: this.data.applianceDoctorId,
+      //     providerId: this.data.providerId,
+      //     providerName: this.data.providerName,
+      //     hosRecDiagnosis: hosRecDiagnosis,
+      //     infectedPatchId: this.indepartFormObj.hospitalizedAreaObj.id,
+      //     infectedPatchName: this.indepartFormObj.hospitalizedAreaObj.name,
+      //     hospitalizedNumber: this.data.hospitalizedNumber,
+      //     hospitalNum: this.indepartFormObj.hospitalizedBedObj.bedCode,
+      //     beHospitalizedTime: this.data.hospitalizedTime,
+      //     status: 0
+      //   }
+      //   const res = await wristbandApi.createOrUpdate(data)
+      //   if (res && res.data && res.data.id) {
+      //     this.wristbandData = res.data
+      //     doPrint(this, 'wristbandPrint', false, false, false, _ => {
+      //       if (done) done()
+      //     })
+      //   }
+      // },
+      changeArea (val) {
+        this.indepartFormObj.hospitalizedWardsItem = ''
+        this.hospitalizedWardsOptions = []
+      },
+      changeWard (val) {
+        this.hospitalizedBedId = ''
+        this.hospitalizedBedName = ''
+        this.hospitalizedBedOptionsFull = []
+        this.hospitalizedBedOptions = []
+      },
+      close () {
+        this.flag = false
+      },
+      chooseBed (val) {
+        if (val) {
+          this.hospitalizedBedId = val.bedCode
+          this.indepartFormObj.hospitalizedBedObj = val
+          this.hospitalizedBedId = val.id
+          this.hospitalizedBedName = val.bedCode
+        }
+        this.isHidden = false
+      },
+      getAreaList () {
+        this.indepartapi.inpatientarea({providerId: this.query.providerId}).then(rs => {
+          if (rs && rs.data[0]) {
+            this.hospitalizedAreaOptions = rs.data
+          }
+        })
+      },
+      getWardsList (val) {
+        this.indepartapi.getWards({areaId: val.id}).then(rs => {
+          if (rs && rs.list && rs.list[0]) {
+            this.hospitalizedWardsOptions = rs.list
+          }
+        })
+      },
+      getBedlist (val) {
+        console.log(val, 'getBedlist')
+        this.indepartapi.hospitalizedBed({
+          hospitalizedWardId: val.id
+        }).then(rs => {
+          if (rs.head.errCode === 0) {
+            this.hospitalizedBedOptionsFull = rs.data
+            this.hospitalizedBedOptions = rs.data.filter(function (obj) {
+              if (!(obj.patient && obj.patient.id)) {
+                return obj
+              }
+            })
+          }
+        })
+      },
+      setData () {
+        let params = {
+          hospitalizedNumber: this.$route.query.hospitalizedNumber
+        }
+        this.api.getMessage(params).then(rs => {
+          if (rs.data) {
+            console.log(rs.data, 'ppp')
+            this.data = rs.data
+            this.indepartFormObj.hospitalizedAreaObj = {id: rs.data.hospitalizedAreaId, name: rs.data.hospitalizedAreaName}
+            this.indepartFormObj.hospitalizedWardsItem = {id: rs.data.hospitalizedWardId, name: rs.data.hospitalizedWardName}
+            this.indepartFormObj.hospitalizedBedObj = {id: rs.data.hospitalizedBedId, name: rs.data.hospitalizedBedName}
+            this.indepartFormObj.hospitalizedBedName = rs.data.hospitalizedBedName
+            this.hospitalizedBedId = rs.data.hospitalizedBedId
+            this.hospitalizedBedName = rs.data.hospitalizedBedName
+          }
+        })
+      },
+      clearBed () {
+        this.hospitalizedBedId = ''
+      },
+      submitForm () {
+        this.$refs.indepartForm.validate(valid => {
+          if (!valid) {
+            return false
+          }
+          let params = {
+            hospitalizedNumber: this.$route.query.hospitalizedNumber,
+            hospitalizedBedId: this.indepartFormObj.hospitalizedBedObj.id
+          }
+          this.api.changeBed(params).then(rs => {
+            if (rs.head.errCode) {
+              return false
+            }
+            this.$notify({
+              title: '成功',
+              type: 'success',
+              message: '换床成功'
+            })
+            this.close()
+            this.setData()
+            // if (this.wristbandConfig && this.wristbandConfig.length && this.$hasPermission('Auth_menu_clinic_wristband_settings')) {
+            // 资源id已经不存在了，永远都进不到这个逻辑里面了 toCheck 4.11.1 注释掉相关逻辑
+            // if (this.$hasPermission('Auth_menu_clinic_wristband_settings')) {
+            //   this.createWristband()
+            // }
+          })
+        })
+      },
+      showBed () {
+        this.isHidden = true
+      },
+      hiddenBed () {
+        this.isHidden = false
+      }
+    }
+  }
+</script>
+<style scoped>
+.dialog-oudepart .userinfo{border-radius: 4px; background: #f4f4f4;}
+.dialog-oudepart .userinfo > .el-row{margin-bottom: 20px;padding:10px;}
+.dialog-oudepart .userinfo .patientName{font-size:20px;font-weight:700;height:60px;line-height:60px;}
+.dialog-oudepart .userinfo .patientName span{margin-right:20px;display: inline-block;width:90%;height:30px;line-height:30px;border-right:1px solid #dddddd;}
+.baseinfo{line-height: 2}
+.dialog-oudepart .baseinfo .el-col{color:#999999;}
+.dialog-oudepart .baseinfo .el-col span{color:#000;}
+.dialog-oudepart .baseinfo .el-col label{display: inline-block; width: 80px;text-align: right; }
+.dialog-oudepart .userinfo .detail > .el-col{height:40px;line-height:40px;}
+.lineH { text-align: right;  vertical-align: middle;  float: left;  font-size: 14px;
+color: #48576a;  line-height: 1;  padding: 11px 12px 11px 0;  box-sizing: border-box;  }
+.cBlue{color: #1c78ef}
+.el-select-dropdown__item.selected .cBlue{color: #fff}
+.cBlue{color: #1c78ef}
+.cRed{color:#d00;}
+.bed_wrapper {width:860px;border: 1px solid #cccccc;padding:10px 0;
+position: fixed;z-index:999;border-radius: 4px;background-color: #fff;max-height:202px;overflow-y: auto;}
+.bed_wrapper li{float:left;list-style:none;width:12.5%;text-align: center;height:60px;}
+.bed_wrapper li div.cBlue{color: #409EFF;margin-top: 0px;}
+.bed_wrapper li div.cGray{color: #999999;}
+.bed_wrapper li div{font-size:14px;line-height:20px;font-weight:700;}
+.bed_wrapper li img{cursor: pointer;}
+.bed_wrapper li i{display: inline-block;height:28px;line-height:28px;font-size: 28px;color:#CCCCCC;cursor: pointer;}
+@media screen and (max-width: 1599px){
+  .bed_wrapper {width:550px;border: 1px solid #cccccc;padding:10px 0;position: fixed;z-index:999;border-radius: 4px;background-color: #fff;overflow-y: auto;}
+  .bed_wrapper li{float:left;list-style:none;width:20%;text-align: center;height:60px;max-height:202px;}
+}
+
+.el-select-dropdown__item span.cgBlue{font-size:12px;display: inline-block;min-width:14px;height:14px;text-align:center;line-height:14px!important;background: #49A0F3;vertical-align: middle;color:#fff;padding:0 2px;}
+.el-select-dropdown__item span.cGray{font-size:12px;display: inline-block;min-width:14px;height:14px;text-align:center;line-height:14px!important;background: #CCCCCC;vertical-align: middle;color:#fff;padding:0 2px;}
+.dialog-oudepart .el-select .el-input__inner{padding-right: 689px!important;}
+</style>
+

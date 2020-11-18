@@ -1,0 +1,238 @@
+<template>
+<div id="xht_print">
+  <div class="settlementitem" v-for="page in pages">
+    <h1 class="settletitle">{{printinfo.clinicName}}门诊收费明细</h1>
+    <div class="settlemessage">
+      <el-row>
+        <el-col :span="8" class="text-left">
+          门诊号码：{{printinfo.patientid}}
+        </el-col>
+        <el-col :span="8">
+          医保类型：自费
+        </el-col>
+        <el-col :span="8">
+          交易流水号：{{printinfo.details.settlementDetail.length && printinfo.details.settlementDetail[0].rootorderid}}
+        </el-col>
+      </el-row>
+    </div>
+    <div class="settledetail">
+      <div class="settledetailmessage">
+        <el-row>
+          <el-col :span="6" class="text-left">
+            患者姓名：{{printinfo.patientName}}
+          </el-col>
+          <el-col :span="6">
+            性别：<sys-value type="GBT.2261.1" :code="printinfo.patientSex"></sys-value>
+          </el-col>
+          <el-col :span="6">
+            年龄：{{printinfo.patientAge}}
+          </el-col>
+          <el-col :span="6">
+            出生年月：{{printinfo.birthday && printinfo.birthday.substring(0, 10).replace(/-/g, '/')}}
+          </el-col>
+        </el-row>
+      </div>
+
+      <div class="settlelistbox">
+        <el-row class="h100">
+          <el-col :span="12" class="border-right h100" v-for="col in [0, 1]" :key="col">
+            <div>
+              <el-row class="border-bottom">
+                <el-col :span="6">
+                  项目/规格
+                </el-col>
+                <el-col :span="3">
+                  单价
+                </el-col>
+                <el-col :span="4">
+                  数量/单位
+                </el-col>
+                <el-col :span="3">
+                  金额
+                </el-col>
+                <el-col :span="4">
+                  优惠金额
+                </el-col>
+                <el-col :span="4">
+                  实收金额
+                </el-col>
+              </el-row>
+              <template v-for="item,i in settleDetail.slice(page * 18 + col * 9, page * 18 + col * 9 +9)">
+                <el-row v-if="item.groupId">
+                  <el-col :span="13" class="text-left settleclasstitle">
+                    {{item.itemClassName}}
+                  </el-col>
+                  <el-col :span="4">
+                    {{item.totalFee && item.totalFee.toFixed(2)}}
+                  </el-col>
+                </el-row>
+                <el-row class="ever_row_01">
+                  <el-col :span="6">
+                    {{item.itemDisName || item.itemname}}
+                  </el-col>
+                  <el-col :span="3">
+                    {{item.price && item.price.toFixed(2)}}
+                  </el-col>
+                  <el-col :span="4">
+                    {{item.quantity}}/{{item.unit}}
+                  </el-col>
+                  <el-col :span="3">
+                    {{item.fee && item.fee.toFixed(2)}}
+                  </el-col>
+                  <el-col :span="4">
+                    {{(item.itemBenefitFee || 0) + (item.couponFee || 0) + (item.memberCardBenefitFee || 0) | formatToFinacial}}
+                  </el-col>
+                  <el-col :span="4">
+                    {{item.fee - ((item.itemBenefitFee || 0) + (item.couponFee || 0) + (item.memberCardBenefitFee || 0)) | formatToFinacial}}
+                  </el-col>
+                </el-row>
+              </template>
+            </div>
+          </el-col>
+        </el-row>
+      </div>
+    </div>
+    <div class="settlemoney nontopborder">
+      <el-row>
+        <el-col :span="12" class="text-left">
+          金额总额(大写) {{digitUppercase(printFee())}}
+        </el-col>
+        <el-col :span="12" class="text-right">
+          金额总额(小写)￥{{printFee()}}
+        </el-col>
+      </el-row>
+    </div>
+    <div class="nontopborder">
+      <el-row>
+        <el-col :span="12" class="text-left">
+          <span v-if="printinfo.comInsuranceDirectFee">商保应收：{{printinfo.comInsuranceDirectFee | formatToFinacial}}</span>
+          <span v-for="(v, k) in printinfo.payDetails" style="padding-right:10px;">
+            {{k}}: {{v && v.toFixed(2)}}
+          </span>
+        </el-col>
+        <el-col :span="12" class="text-right">
+          收款人: {{printinfo.createUserCode}}
+        </el-col>
+      </el-row>
+    </div>
+    <div class="settledate">日期: {{printinfo.createTime}}</div>
+  </div>
+</div>
+</template>
+
+<script>
+  export default {
+    props: ['printinfo'],
+    computed: {
+      settleDetail () {
+        // let sortArr = [].concat(this.printinfo.details.settlementDetail)
+        let sortArr = JSON.parse(JSON.stringify(this.printinfo.details.settlementDetail))
+        sortArr.sort(function (a, b) {
+          return Number(a.itemClass || 0) - Number(b.itemClass || 0)
+        })
+        let m = sortArr.reduce(function (total, curr) {
+          if (!total[curr.itemClass]) {
+            total[curr.itemClass] = []
+          }
+          total[curr.itemClass].push(curr)
+          return total
+        }, {})
+        let arr = []
+        for (let k in m) {
+          m[k][0].groupId = k
+          m[k][0].totalFee = this.totalFeeFn(m[k])
+          arr = arr.concat(m[k])
+        }
+        return arr
+      },
+      pages () {
+        let num = parseInt(this.settleDetail.length / 18) + 1
+        let arr = []
+        for (let i = 0; i < num; i++) {
+          arr.push(i)
+        }
+        return arr
+      }
+    },
+    methods: {
+      printFee () {
+        let that = this
+        let fee = 0
+        for (var v in that.printinfo.payDetails) {
+          if (v !== '会员卡') {
+            fee += that.printinfo.payDetails[v]
+          }
+        }
+        return fee.toFixed(2)
+      },
+      totalFeeFn (arr) {
+        let sum = 0
+        arr.forEach(function (v) {
+          sum += Number(v.fee)
+        })
+        return sum
+      },
+      digitUppercase (n) {
+        var fraction = ['角', '分']
+        var digit = [
+          '零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'
+        ]
+        var unit = [
+            ['元', '万', '亿'],
+            ['', '拾', '佰', '仟']
+        ]
+        var head = n < 0 ? '欠' : ''
+        n = Math.abs(n)
+        var s = ''
+        for (var i = 0; i < fraction.length; i++) {
+          s += (digit[Math.floor(n * 10 * Math.pow(10, i)) % 10] + fraction[i]).replace(/零./, '')
+        }
+        s = s || '整'
+        n = Math.floor(n)
+        for (var k = 0; k < unit[0].length && n > 0; k++) {
+          var p = ''
+          for (var j = 0; j < unit[1].length && n > 0; j++) {
+            p = digit[n % 10] + unit[1][j] + p
+            n = Math.floor(n / 10)
+          }
+          s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][k] + s
+        }
+        return head + s.replace(/(零.)*零元/, '元')
+            .replace(/(零.)+/g, '零')
+            .replace(/^整$/, '零元整')
+            .replace(/角$/, '角整')
+      }
+    }
+  }
+</script>
+<style scoped>
+.settlementitem { width: 860px; padding: 0 20px 0; margin: 0 auto; font-size: 14px; color: #000; line-height: 20px; text-align: center; white-space:nowrap;}
+.settlementitem .settletitle { font-size: 18px; line-height: 50px; height: 50px; width: 100%;  text-align: center; }
+.settlementitem .settledetail {
+  border: 1px solid #000;
+}
+.settlementitem .settledetailmessage {
+  height: 20px;
+  border-bottom: 1px solid #000;
+}
+.settlementitem .text-left {
+  text-align: left;
+}
+.settlementitem .settleclasstitle {
+  font-size: 15px;
+}
+.settlementitem .text-right {
+  text-align: right;
+  padding-right: 10px;
+}
+.settlementitem .border-right { border-right: 1px solid #000;}
+.settlementitem .border-bottom { border-bottom: 1px solid #000;}
+.settlementitem .settlelistbox { clear: both; height: 400px; }
+.settlementitem .settlelistbox .el-row.ever_row_01 .el-col{
+  white-space:normal;
+  word-break:break-all;
+}
+/* .settlementitem .h100 { height: 100%} */
+.settlementitem .nontopborder { border:1px solid #000; border-top: none;}
+.settlementitem .settledate { padding-right: 150px; text-align: right; padding-top: 10px; }
+</style>

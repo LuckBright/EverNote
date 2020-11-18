@@ -1,0 +1,163 @@
+<template>
+  <div>
+    <el-dialog :title="title" :visible.sync="dialogTableVisible" class="ui_dialog_02">
+      <div class="main-head">
+        <ever-query-form :schema="querySchema" v-model="queryObj" @query="query"></ever-query-form>
+      </div>
+      <el-table
+        :data="tableData"
+        border
+        tooltip-effect="dark"
+        style="width: 100%"
+        height="350"
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column
+          show-overflow-tooltip
+          prop="id"
+          label="id"
+          type="selection"
+          :selectable="checkSelectable"
+        ></el-table-column>
+        <el-table-column show-overflow-tooltip prop="staffType" label="类型">
+          <template slot-scope="scope">
+            <sys-value type="THC_WH_PERSON_CATEGORY" :code="scope.row.staffType"></sys-value>
+          </template>
+        </el-table-column>
+        <el-table-column show-overflow-tooltip prop="name" label="姓名"></el-table-column>
+        <el-table-column show-overflow-tooltip prop="code" label="员工编号"></el-table-column>
+        <el-table-column show-overflow-tooltip prop="sex" label="性别">
+          <template slot-scope="scope">
+            <sys-value type="GBT.2261.1" :code="scope.row.sex"></sys-value>
+          </template>
+        </el-table-column>
+        <el-table-column show-overflow-tooltip prop="administrativeTitle" label="行政职称">
+          <template slot-scope="scope">
+            <sys-value type="THC_WH_PERSON_ADMIN_TITLE" :code="scope.row.administrativeTitle"></sys-value>
+          </template>
+        </el-table-column>
+      </el-table>
+      <ever-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :totalCount="totalCount"
+        :current="current"
+      ></ever-pagination>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogTableVisible = false">
+          <i class="iconfont icon-quxiao"></i>取消
+        </el-button>
+        <el-button type="primary" @click="submitForm">
+          <i class="iconfont icon-tijiao"></i>确定
+        </el-button>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+import staff from '@/warehouse/store/staffapi'
+var querySchema = [
+  {
+    name: 'name',
+    label: '类型名称',
+    placeholder: '输入类型名'
+  }
+]
+export default {
+  name: 'searchdialog',
+  props: ['title', 'objId'],
+  data () {
+    var queryObj = this.$ever.createObjFromSchema(querySchema)
+    return {
+      dialogTableVisible: false,
+      insurs: [],
+      querySchema,
+      queryObj,
+      tableData: [],
+      offset: 0,
+      pagesize: this.$route.query.pagesize || 20,
+      totalCount: 0,
+      loading: true,
+      pageSizes: [10, 20, 30, 50, 100],
+      pageLayout: 'total, sizes, prev, pager, next, jumper',
+      current: Number(this.$route.query.page) || 1
+    }
+  },
+  methods: {
+    submitForm () {
+      if (this.presonIds && this.presonIds.length) {
+        const params = {
+          departmentId: this.objId,
+          staffId: this.presonIds
+        }
+        staff.updateStaffList(params).then(res => {
+          this.$emit('presonSave')
+        })
+        this.onDialogClose()
+      } else {
+        this.$messageTips(this, 'warning', '请选择您需要添加的人员')
+      }
+    },
+    checkSelectable (row) {
+      return !row.departmentId
+    },
+    getStaffList (refresh) {
+      this.loading = true
+      if (refresh) {
+        this.offset = 0
+      }
+      var params = Object.assign({}, this.queryObj, this.listParams)
+      for (let key in params) {
+        if (params[key] === '' || key === 'requestSwitch') {
+          delete params[key]
+        }
+      }
+      params.offset = this.offset
+      params.pagesize = this.pagesize
+      staff.list(params).then(res => {
+        this.tableData = res.list
+        this.totalCount = res.totalCount
+      })
+    },
+    onDialogClose () {
+      this.dialogTableVisible = false
+    },
+    onDialogOpen () {
+      this.chargingItemData = []
+      this.chargingItemForm = {
+        insuranceOrgID: '',
+        category: '',
+        itemCode: ''
+      }
+      this.queryObj.name = ''
+      this.getStaffList()
+      this.dialogTableVisible = true
+    },
+    handleSelectionChange (val) {
+      this.presonIds = []
+      val.forEach(item => {
+        this.presonIds.push(item.id)
+      })
+    },
+    handleSizeChange (val) {
+      this.pagesize = val
+      this.offset = (this.current - 1) * this.pagesize
+      this.getStaffList()
+    },
+    handleCurrentChange (val) {
+      this.current = val
+      this.offset = (val - 1) * this.pagesize
+      this.getStaffList()
+      return this.pageAfter && this.pageAfter(this.pagesize)
+    },
+    query: function (queryObject) {
+      this.queryObj = queryObject
+      this.handleCurrentChange(1)
+    }
+  }
+}
+</script>
+
+<style scoped>
+</style>

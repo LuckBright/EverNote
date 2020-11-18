@@ -1,0 +1,23 @@
+{
+  "categoryId": "af3bc6b3-02af-4f21-8736-decce395e883",
+  "categoryName": "医技",
+  "id": "0e50eafb-4b5e-45e0-9f5a-e13e1b6846a9",
+  "name": "国际门诊超声",
+  "nameEn": "EnglishName",
+  "sectionRecordId": "a31f40a9-af4d-4452-8a98-ffd46268ae40",
+  "isDelete": 0,
+  "statue": 0,
+  "clinicId": "5000001",
+  "createTime": "2019-01-16 17:20:01",
+  "supplyLocalSectionId": "c699a91a-5a79-4a75-abe4-d111ad141b16",
+  "supplyLocalSectionName": "超声科",
+  "clinicalTypeId": null,
+  "deptId": "0e50eafb-4b5e-45e0-9f5a-e13e1b6846a9",
+  "deptName": "国际门诊超声",
+  "deptType": "1",
+  "organId": "5000001",
+  "orderNum": 0,
+  "children": "",
+  "isSource": false,
+  "isAppoint": false
+}

@@ -1,0 +1,223 @@
+<template>
+  <div>
+    <ever-bread-crumb name="会计科目生成规则" path="/warehouse/derivationrules"></ever-bread-crumb>
+    <div class="layout_inner">
+      <div class="panel-body">
+        <h4>
+          机构信息
+        </h4>
+        <ever-query-form :schema="querySchema" v-model="queryObj" @query="query">
+        </ever-query-form>
+        <h4 class="panel-hr">
+          单据类型
+        </h4>
+        <el-table
+          :data="tableData"
+          style="width: 100%"
+          highlight-current-row
+          @current-change="handleRadioChange"
+          >
+          <el-table-column
+            prop=""
+            label="单选"
+            align="center">
+            <template slot-scope="scope">
+              <el-radio-group v-model="scope.row.selectRadio">
+                <el-radio class="radio" :label="true">选择</el-radio>
+              </el-radio-group>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="module"
+            label="模块"
+            align="center">
+            <template slot-scope="scope">
+              {{returnName(scope.row.module, api.module)}}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="bills"
+            label="单据"
+            align="center">
+            <template slot-scope="scope">
+              <sys-value type="THC_RCM_RULES_BILL" :code="scope.row.bills"></sys-value>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="tradeType"
+            label="类型"
+            align="center">
+            <template slot-scope="scope">
+              <sys-value type="THC_RCM_RULES_EXCHANGE" :code="scope.row.tradeType"></sys-value>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop=""
+            label="确认事件"
+            align="center">
+          </el-table-column>
+          <el-table-column
+            prop="relaWithOther"
+            label="和新建账单关系"
+            align="center">
+            <template slot-scope="scope">
+              {{api.relaWithOther[scope.row.relaWithOther] && api.relaWithOther[scope.row.relaWithOther].name}}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="remark"
+            label="备注"
+            align="center">
+          </el-table-column>
+          <el-table-column
+            prop="reverse"
+            label="冲销方式"
+            align="center">
+          </el-table-column>
+        </el-table>
+        <h4 class="panel-hr">
+          模版分录
+        </h4>
+        <derivationruleitem
+          :items="itemTableData"
+          :id="queryObj.id"
+          style="margin-bottom: 30px">
+        </derivationruleitem>
+      </div>
+      <div class="panel-footer">
+        <el-button type="primary" @click.native.prevent="createRules()">保存</el-button>
+        <upload-file v-if="queryObj.id && queryObj.module" @success="uploadSuccess" previewInline="true" uploadApiType="ucloud" maxNum="1" btnTxt="上传"></upload-file>
+        <doc-download @downFile="downFile" v-if="queryObj.id && queryObj.module" ref="downloadfile"></doc-download>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+import api from '../store/derivationruleapi'
+import apperiodmangeapi from '../store/apperiodmangeapi'
+import list from '../../util/list'
+import clinicApi from '@/warehouse/store/clinicapi'
+import derivationruleitem from './derivationruleitem'
+var schema = [
+  {
+    name: 'clinicid',
+    label: '医疗机构名称',
+    type: 'select',
+    options: []
+  },
+  {
+    name: 'id',
+    label: '账套名称',
+    type: 'select',
+    options: []
+  },
+  {
+    name: 'module',
+    label: '模块',
+    type: 'select',
+    options: api.module
+  }
+]
+export default {
+  mixins: [list],
+  data () {
+    var obj = this.$ever.createObjFromSchema(schema)
+    return {
+      querySchema: schema,
+      queryObj: obj,
+      api,
+      tableData: [],
+      itemTableData: [],
+      createObj: {}
+    }
+  },
+  methods: {
+    downFile () {
+      let that = this
+      api.exportAccountRule({
+        setOfBooksId: this.queryObj.id,
+        module: this.queryObj.module
+      }).then(response => {
+        that.$refs.downloadfile.downfile(response.key, response.bucketName)
+      })
+    },
+    uploadSuccess (result) {
+      api.importAccountRule({
+        setOfBooksId: this.queryObj.id,
+        module: this.queryObj.module,
+        key: result.name,
+        bucketName: result.bucket
+      }).then(response => {
+        // console.log(response, 9999999999)
+      })
+    },
+    returnName (id, arr) {
+      let name = ''
+      arr.forEach(function (item) {
+        if (id === item.id) {
+          name = item.name
+        }
+      })
+      return name
+    },
+    createRules () {
+      if (this.createObj.id) {
+        api.createOrUpdate(this.createObj).then(result => {
+          this.tableData.forEach(function (item) {
+            item.selectRadio = false
+          })
+          this.itemTableData = []
+        })
+      }
+    },
+    handleRadioChange (val) {
+      // this.itemTableData = []
+      // if (val) {
+      //   this.tableData.forEach(function (item) {
+      //     item.selectRadio = false
+      //   })
+      //   val.selectRadio = true
+      //   api.getById(val.id).then(result => {
+      //     this.createObj = result
+      //     result.details.forEach(function (item) {
+      //       if (item.value !== '') {
+      //         item.value = Number(item.value)
+      //       }
+      //     })
+      //     this.itemTableData = result.details
+      //   })
+      // }
+    }
+  },
+  created () {
+    clinicApi.list()
+      .then(result => {
+        this.$ever.getFieldFromSchema(this.querySchema, 'clinicid').options = result
+      })
+  },
+  components: {
+    derivationruleitem
+  },
+  watch: {
+    'queryObj.clinicid': {
+      handler (cur, old) {
+        if (cur !== old) {
+          this.queryObj.id = ''
+          apperiodmangeapi.getListByClinicId({
+            clinicId: this.queryObj.clinicid
+          })
+            .then(result => {
+              result.data.forEach(function (item, index) {
+                item.name = item.setOfBooksName
+              })
+              this.$ever.getFieldFromSchema(this.querySchema, 'id').options = result.data
+              if (result.data.length > 0) {
+                this.queryObj.id = this.$ever.getFieldFromSchema(this.querySchema, 'id').options[0].id
+              }
+            })
+        }
+      }
+    }
+  }
+}
+</script>

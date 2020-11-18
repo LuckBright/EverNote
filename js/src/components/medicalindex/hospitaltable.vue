@@ -1,0 +1,257 @@
+<template>
+  <div class="chuyuan">
+    <el-table class="noborder" :data="tableData" :span-method="arraySpanMethod">
+      <el-table-column label="出院诊断" width="292">
+        <template slot-scope="scope">
+          <label v-if="scope.$index === 0" class="el-form-item__label first"
+            >主要诊断</label
+          >
+          <label v-if="scope.$index === 1" class="el-form-item__label first"
+            >其他诊断</label
+          >
+          <!-- 其他诊断 -->
+          <div
+            class="inline"
+            v-if="scope.$index !== tableData.length - 1 && scope.$index !== 0"
+          >
+            <m-other
+              :index="scope.row.index1"
+              :value="diagnosis"
+              @change="changeOther"
+            ></m-other>
+          </div>
+          <!-- 主诊断 -->
+          <div class="inline" v-if="scope.$index === 0">
+            <el-diagnosis
+              :value="value"
+              :prop="ZHU_ZHEN_DUAN_NAME"
+              :index="scope.$index"
+              @change="changeZhuyao"
+            ></el-diagnosis>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="疾病编码" width="60">
+        <template slot-scope="scope">
+          <!-- 主诊断 -->
+          <div class="inline" v-if="scope.$index === 0">
+            <m-input
+              readonly
+              :value="value"
+              :prop="ZHU_ZHEN_DUAN_CODE"
+            ></m-input>
+          </div>
+          <div class="inline" v-else>
+            <el-input
+              readonly
+              v-model="diagnosis[scope.row.index1][QI_TA_CODE]"
+            ></el-input>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="入院病情" width="40">
+        <template slot-scope="scope">
+          <div v-if="scope.$index === tableData.length - 1">
+            <label class="el-form-item__label first">入院病情</label>
+            <span class="span">1.有 2.临床未确定 3.情况不明 4.无</span>
+          </div>
+          <m-state
+            v-if="scope.$index !== 0 && scope.$index !== tableData.length - 1"
+            :value="diagnosis"
+            :index="scope.row.index1"
+            @change="changeState"
+          ></m-state>
+          <m-state
+            v-if="scope.$index === 0"
+            :value="value"
+            :prop="ZHU_BING_QING_CODE"
+            @change="change"
+          ></m-state>
+        </template>
+      </el-table-column>
+      <el-table-column prop="date" label="出院诊断" width="294">
+        <template slot-scope="scope">
+          <label v-if="scope.$index === 0" class="el-form-item__label first"
+            >其他诊断</label
+          >
+          <div class="inline">
+            <m-other
+              :index="scope.row.index2"
+              :value="diagnosis"
+              @change="changeOther"
+            ></m-other>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column prop="name" label="疾病编码" width="60">
+        <template slot-scope="scope">
+          <el-input
+            v-if="scope.$index <= 20"
+            readonly
+            v-model="diagnosis[scope.row.index2][QI_TA_CODE]"
+          ></el-input>
+        </template>
+      </el-table-column>
+      <el-table-column width="40" label="入院病情">
+        <template slot-scope="scope">
+          <m-state
+            :value="diagnosis"
+            :index="scope.row.index2"
+            @change="changeState"
+          ></m-state>
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
+</template>
+
+<script>
+import elDiagnosis from './diagnosis'
+import { keyMap } from '@/components/medicalindex/keymap'
+import mInput from '@/components/medicalindex/minput'
+import mOther from '@/components/medicalindex/mother'
+import mState from '@/components/medicalindex/mstate'
+
+export default {
+  props: {
+    value: Object
+  },
+  data () {
+    return {
+      ...keyMap,
+      tableData: [
+        { index2: 0 },
+        { index1: 1, index2: 2 },
+        { index1: 3, index2: 4 },
+        { index1: 5, index2: 6 },
+        { index1: 7, index2: 8 },
+        { index1: 9, index2: 10 },
+        { index1: 11, index2: 12 },
+        { index1: 13, index2: 14 },
+        { index1: 15, index2: 16 },
+        { index1: 17, index2: 18 },
+        { index1: 19, index2: 20 },
+        { index1: 19, index2: 20 }
+      ],
+      dialogVisible: false,
+      name: '',
+      diagnosis: [] // 其它诊断
+    }
+  },
+  computed: {},
+  created () {
+    this.init()
+  },
+  mounted () {},
+  watch: {},
+  methods: {
+    init () {
+      // 初始化其它疾病数据
+      for (let i = 0; i < 21; i++) {
+        const obj = {
+          [this.QI_TA_CODE]: '',
+          [this.QI_TA_NAME]: '',
+          [this.QI_TA_BING_QING_CODE]: '',
+          index: i
+        }
+        this.diagnosis.push(obj)
+      }
+      // copy已有的数据
+      const arr = this.value.otherDiagnoses
+      if (Array.isArray(arr)) {
+        arr.map((item, index) => {
+          this.diagnosis[item.index] = item
+        })
+      }
+    },
+    changeState (key, val, index) {
+      this.diagnosis[index][key] = val
+      this.change('otherDiagnoses', this.diagnosis)
+    },
+    changeOther (val, index) {
+      this.diagnosis[index][this.QI_TA_NAME] = val.diseaseName
+      this.diagnosis[index][this.QI_TA_CODE] = val.diseaseCode
+      this.change('otherDiagnoses', this.diagnosis)
+    },
+    changeZhuyao (val, index, prop) {
+      this.change(keyMap.ZHU_ZHEN_DUAN_CODE, val.diseaseCode)
+      this.change(keyMap.ZHU_ZHEN_DUAN_NAME, val.diseaseName)
+    },
+    change (key, val) {
+      this.$emit('change', key, val)
+    },
+    arraySpanMethod ({ row, column, rowIndex, columnIndex }) {
+      if (rowIndex === this.tableData.length - 1 && columnIndex <= 2) {
+        if (columnIndex < 2) {
+          return {
+            rowspan: 1,
+            colspan: 0
+          }
+        } else if (columnIndex === 2) {
+          return {
+            rowspan: 1,
+            colspan: 6
+          }
+        }
+      } else {
+        return {
+          rowspan: 1,
+          colspan: 1
+        }
+      }
+    }
+  },
+  components: {
+    elDiagnosis,
+    mInput,
+    mOther,
+    mState
+  }
+}
+</script>
+<style scoped lang="scss">
+.inline {
+  display: inline-block;
+  width: 100%;
+}
+.chuyuan {
+  .span {
+    line-height: 30px;
+    display: inline-block;
+    height: 30px;
+  }
+  /deep/.el-table {
+    border: 1px solid #000;
+    border-right: 0px;
+  }
+  /deep/.el-table td,
+  /deep/.el-table th {
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+  }
+  /deep/.el-table th {
+    background: #fff;
+  }
+  /deep/.el-table:not(.no-hover) tr.hover-row td,
+  /deep/.el-table:not(.no-hover) tr:hover td {
+    background-color: #fff;
+  }
+  /deep/.el-table .cell {
+    padding: 0px;
+  }
+  .noborder {
+    /deep/ .el-table__body .el-input, /deep/ .el-table__body .el-input .el-input__inner {
+      padding: 0px;
+      -webkit-appearance: none;
+      background-color: #fff;
+      background-image: none;
+      border: none;
+      box-sizing: border-box;
+      color: #000;
+      display: inline-block;
+      outline: none;
+      width: 100%;
+    }
+  }
+}
+</style>

@@ -1,0 +1,725 @@
+<template>
+  <div>
+    <ever-bread-crumb name="出库" showTitle="true"></ever-bread-crumb>
+    <div class="layout_inner">
+      <div class="panel-body">
+        <h4>基本信息</h4>
+        <ever-form2 :class="[objId ? 'readform' : '']" :schema="schema" v-model="obj" ref="form" :span="12" :rules="rules" :nosubmit="true">
+          <template v-if="objId" slot="code">
+            <span>{{codeNum}}</span>
+            <span class="status">{{statusName}}</span>
+            <span v-if="!codeNum">无</span>
+          </template>
+          <template v-if="objId" slot="applyDepartment">
+            <span v-if="applyDepartmentName && departmentName">{{applyDepartmentName + '-' + departmentName}}</span>
+            <span v-else-if="applyDepartmentName && !departmentName">{{applyDepartmentName}}</span>
+            <span v-else-if="!applyDepartmentName && departmentName">{{departmentName}}</span>
+            <span v-else>无</span>
+          </template>
+        </ever-form2>
+        <!-- <div class="hr"></div> -->
+        <h4>商品出库明细</h4>
+        <div class="listinfo">
+          <div class="table" id="table_expand">
+            <el-table
+              v-if="obj.outStockItemList"
+              :data="obj.outStockItemList"
+              style="width: 100%"
+              ref="table"
+              :row-key="'localMaterialId' + parseInt(Math.random() * 1000)"
+              :expand-row-keys="entexpands"
+              @cell-mouse-enter="rowHover"
+              @row-click="rowExpand">
+              <el-table-column type="expand" width="1">
+                <template slot-scope="scope">
+                  <div class="custom_popover pos_re">
+                    <span class="pos_ab"></span>
+                    <ul v-if="scope.row.outStockItemDetailStockContainerList && scope.row.outStockItemDetailStockContainerList.length">
+                      <li v-for="(item, index) in scope.row.outStockItemDetailStockContainerList" :key="index">
+                        <span v-if="item.uniqueCode" style="padding-right: 20px">{{item.uniqueCode}}</span>
+                        <span v-if="item.ownUniqueCodes" style="padding-right: 20px">{{item.ownUniqueCodes}}</span>
+                        <span v-if="!$route.query.look ? true : false" class="btn-del"><el-button type="text" class="red" @click="handlePopoverDelRow(index, scope.$index, 0, item)">删除</el-button></span>
+                      </li>
+                    </ul>
+                    <ul v-else>
+                      <li><p class="alg_c">暂无数据</p></li>
+                    </ul>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="name"
+                label="商品名称">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.localSettingObject">
+                    <wh-code-to-name
+                      :isExt="true"
+                      :cType="3"
+                      :patchObj="{
+                        list: scope.row.localSettingObject.materialSkuObject.ext
+                      }"
+                    ></wh-code-to-name>
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column prop label="规格" width="120" align="center">
+                <template slot-scope="scope">
+                  <wh-code-to-name
+                    v-if="scope.row.localSettingObject"
+                    :isExt="true"
+                    :showIcon="false"
+                    :patchObj="{
+                      code: [[]],
+                      standard: true,
+                      list: scope.row.localSettingObject.materialSkuObject.ext
+                    }"
+                  ></wh-code-to-name>
+                </template>
+              </el-table-column>
+              <el-table-column
+                v-if="$hasPermission('Auth_menu_treasury_businessmanagement_commoditylocation')"
+                align="center"
+                width="120"
+                label="货位号">
+                <template slot-scope="scope">
+                  <span>{{scope.row.freight && scope.row.freight.code ? scope.row.freight.code : '无货位号'}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column show-overflow-tooltip
+                v-else
+                prop=""
+                width="80"
+                align="center"
+                label="单位">
+                  <template slot-scope="scope">
+                    <span v-if="scope.row.localSettingObject.materialSkuObject">
+                      <wh-single-code-to-name
+                        v-if="scope.row.localSettingObject && scope.row.localSettingObject.materialSkuObject"
+                        :isExt="true"
+                        :isUnit="true"
+                        :patchObj="{
+                          list: scope.row.localSettingObject.materialSkuObject.ext,
+                          code: PACKAGE_CODE
+                        }">
+                      </wh-single-code-to-name>
+                    </span>
+                  </template>
+              </el-table-column>
+              <el-table-column show-overflow-tooltip
+                prop="expectNum"
+                align="right"
+                label="预期数量"
+                width="100">
+                <template slot-scope="scope">
+                  {{scope.row.expectNum}}
+                  <span v-if="scope.row.localSettingObject">
+                    <wh-single-code-to-name
+                      v-if="scope.row.localSettingObject && scope.row.localSettingObject.materialSkuObject"
+                      :isExt="true"
+                      :patchObj="{
+                        list: scope.row.localSettingObject.materialSkuObject.ext,
+                        code: PACKAGE_CODE
+                      }">
+                    </wh-single-code-to-name>
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                align="center"
+                prop="batchNum"
+                width="210"
+                label="生产批号">
+                <template slot-scope="scope">
+                  <span class="aligin-items-center" v-if="!$route.query.look && scope.row.localSettingObject && scope.row.localSettingObject.isExpiryDate && !scope.row.localSettingObject.isManageAlone && obj.type != 14 && obj.type != 15 && obj.type != 20">
+                    <ever-select
+                      filterable
+                      v-model="scope.row.batchNum"
+                      customValue="batchNum"
+                      :options="scope.row.batchNumList"
+                      clearable="true"
+                      @change="selectBatchNumList"
+                      @clear="clearBatchNumList"
+                      @visibleChange="queryBatchNumList"
+                      :index="scope.$index"
+                      style="width: 120px; float: left; margin-right: 5px"
+                      placeholder="生产批号">
+                    </ever-select>
+                    <el-button v-if="(scope.row.addFlag == undefined || scope.row.addFlag)" type="text" @click="handleAddBatch(scope.row, scope.$index)">新增</el-button>
+                  </span>
+                  <span v-else-if="$route.query.look && scope.row.localSettingObject && scope.row.localSettingObject.isExpiryDate && !scope.row.localSettingObject.isManageAlone">{{scope.row.batchNum || '-'}}</span>
+                  <span v-else-if="!$route.query.look && (obj.type == 14 || obj.type == 15 || obj.type == 20)">{{scope.row.batchNum || '-'}}</span>
+                  <span v-else>-</span>
+                </template>
+              </el-table-column>
+              <el-table-column show-overflow-tooltip
+                align="center"
+                prop=""
+                width="100"
+                label="生产日期">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.batchNum && scope.row.produceDate">{{scope.row.produceDate | formatDateByExp('YYYY-MM-DD')}}</span>
+                  <span v-else>-</span>
+                </template>
+              </el-table-column>
+              <el-table-column show-overflow-tooltip
+                align="center"
+                prop=""
+                width="100"
+                label="有效期">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.batchNum && scope.row.validityDate">{{scope.row.validityDate | formatDateByExp('YYYY-MM-DD')}}</span>
+                  <span v-else>-</span>
+                </template>
+              </el-table-column>
+              <el-table-column show-overflow-tooltip
+                prop="storageNum"
+                width="100"
+                align="right"
+                v-if="(obj.type != 14 && obj.type != 15 && obj.type != 20 && obj.type != 22)"
+                label="库存">
+                <template slot-scope="scope">
+                  {{scope.row.storageNum || '-'}}
+                </template>
+              </el-table-column>
+              <el-table-column show-overflow-tooltip
+                prop="num"
+                align="right"
+                class="pos_re"
+                label="出库数量"
+                width="150">
+                <template slot-scope="scope">
+                  <div class="quantity_input" v-if="!$route.query.look && scope.row.localSettingObject && !scope.row.localSettingObject.isManageAlone">
+                    <el-input size="small" @blur="handleCheckNum(scope.row, scope.$index)" v-model="scope.row.num" type="number" placeholder="出库数量"></el-input>
+                  </div>
+                  <ever-popover v-if="scope.row.localSettingObject && scope.row.localSettingObject.isManageAlone" :data="scope.row.outStockItemDetailStockContainerList" :index="scope.$index" :i="0" @handleDelRow="handlePopoverDelRow"></ever-popover>
+                  <span v-if="scope.row.localSettingObject">
+                    <wh-single-code-to-name
+                      v-if="scope.row.localSettingObject && scope.row.localSettingObject.materialSkuObject"
+                      :isExt="true"
+                      :patchObj="{
+                        list: scope.row.localSettingObject.materialSkuObject.ext,
+                        code: PACKAGE_CODE
+                      }">
+                    </wh-single-code-to-name>
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                width="80"
+                align="center"
+                v-if="!$route.query.look && obj.type != 14 && obj.type != 15 && obj.type != 20"
+                label="">
+                <template slot-scope="scope">
+                  <el-button
+                    v-if="!scope.row.id"
+                    size="small"
+                    type="danger"
+                    @click.native.prevent="handleDeleteRow(scope.row, scope.$index)">删除</el-button>
+                </template>
+              </el-table-column>
+              <el-table-column
+                width="80"
+                v-else
+                align="center"
+                label="">
+              </el-table-column>
+            </el-table>
+          </div>
+        </div>
+        <unique-output v-if="addProduct" @deleteAfter="handleDeleteAfter" @queryCodeAfter="handleQueryCodeAfter" :tableData="obj.outStockItemList" :popDeleteCode="popDeleteCode" :storageRoomId="storageId" :billCode="obj.type == 20 ? obj.billCode : ''"></unique-output>
+      </div>
+      <div class="panel-footer" v-if="storageFlag">
+        <el-button v-if="obj.status < 21 && obj.type !== 16" type="primary" @click="submitForm('form', 21)" :loading="unRepeatedBtn">确认出库</el-button>
+        <el-button v-if="$route.query.look" class="print_btn_01" type="primary" @click="printTable"><i class="iconfont icon-dayinji-"></i> 打印</el-button>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+import api from '../store/outputapi'
+import remoteSelect from '../../joinstorage/remoteselect'
+import uniqueOutput from '@/warehouse/page/components/uniqueoutput'
+import getMaterialInfoApi from '@/warehouse/store/getmaterialinfoapi'
+import sysvalue from '@/warehouse/store/sysvalueapi'
+import { debounce, FULL_IN_OUT_TYPE, FULL_ORDER_NAME, FULL_STATE, GOLBAL_VAL_MATERIL_NAME, PACKAGE_CODE, parserJSON, parserComplex, doPrint, compare, floatTool, DRUGTYPE, MATERIALTYPE, EQUIPMENTTYPE, SPEC_CODE, patch } from '@/util/common'
+import setName from '@/util/setstatusname'
+import getstorage from '@/warehouse/page/storages/util/getstorage'
+import tableExpand from '@/warehouse/page/storages/util/tableexpand'
+import everPopover from '@/warehouse/page/components/popover'
+import addProductMethods from '@/warehouse/page/storages/util/addproduct'
+
+let schema = []
+let readSchema = [
+  {
+    name: 'code',
+    label: '出库单号:',
+    comp: 'custom',
+    span: 8
+  },
+  {
+    name: 'outStockTypeName',
+    label: '出库类型:',
+    comp: 'readonlyitem',
+    span: 8
+  },
+  {
+    name: 'createDate',
+    label: '创建时间:',
+    comp: 'readonlyitem',
+    span: 8
+  },
+  {
+    name: 'billCode',
+    label: '来源单号:',
+    comp: 'readonlyitem',
+    span: 8
+  },
+  {
+    name: 'applyStaff',
+    label: '申请人:',
+    comp: 'readonlyitem',
+    span: 8
+  },
+  {
+    name: 'recipient',
+    label: '接收方:',
+    comp: 'readonlyitem',
+    span: 8
+  },
+  {
+    name: 'staffName',
+    label: '出库人:',
+    comp: 'readonlyitem',
+    span: 8
+  },
+  {
+    name: 'outStockTime',
+    label: '出库时间:',
+    comp: 'readonlyitem',
+    span: 8
+  }
+]
+export default {
+  mixins: [setName, print, getstorage, addProductMethods, tableExpand],
+  data () {
+    schema = this.createObject().schema
+    let obj = this.createObject().obj
+    obj.outStockItemList = []
+    return {
+      schema,
+      obj,
+      api,
+      SPEC_CODE,
+      getMaterialInfoApi,
+      FULL_STATE,
+      FULL_IN_OUT_TYPE,
+      FULL_ORDER_NAME,
+      GOLBAL_VAL_MATERIL_NAME,
+      PACKAGE_CODE,
+      pathTo: false,
+      dosageFormArr: [],
+      objId: this.$route.params.id,
+      queryParams: { materialType: '', offset: 0, pagesize: 20, storageRoomId: '' },
+      rules: {},
+      codeNum: '',
+      statusName: '',
+      applyDepartmentName: '',
+      departmentName: '',
+      currentRows: 0,
+      storageFlag: false,
+      addProduct: false,
+      popDeleteCode: '',
+      delTotal: 0,
+      unRepeatedBtn: false // 控制重复提交
+    }
+  },
+  created () {
+    this._info()
+    if (this.objId) {
+      this.getDetail().then((res) => {
+        Object.assign(this.obj, res)
+      })
+    }
+    sysvalue.listOnce('THC_WH_DRUG_FORM').then(res => {
+      if (res) {
+        this.dosageFormArr = res
+      }
+    })
+  },
+  methods: {
+    handleQueryCodeAfter: debounce(function (data) {
+      let localMaterialId = data.stockContainerItemObject.localMaterialId
+      let uniqueCode = data.stockContainerItemObject.uniqueCode || data.stockContainerItemObject.ownUniqueCodes
+      for (let i = 0; i < this.obj.outStockItemList.length; i++) {
+        let item = this.obj.outStockItemList[i]
+        if ((item.localMaterialId === localMaterialId && !item.outStockItemDetailStockContainerList[0]) || (item.localMaterialId === localMaterialId && item.outStockItemDetailStockContainerList[0] && this._fieldCompare(item.outStockItemDetailStockContainerList, 'uniqueCode', uniqueCode) && this._fieldCompare(item.outStockItemDetailStockContainerList, 'ownUniqueCodes', uniqueCode))) {
+          item.outStockItemDetailStockContainerList.push(data.uniqueCodeAllDetailVoObject)
+          item.outStockItemDetailStockSysBatchList.push(data.uniqueCodeAllDetailVoObject)
+          item.num = item.outStockItemDetailStockContainerList.length
+        }
+      }
+      this.obj = Object.assign({}, this.obj)
+    }),
+    handleDeleteAfter: debounce(function (val) {
+      val = val + ''
+      this.obj.outStockItemList.forEach(item => {
+        for (let i = 0; i < item.outStockItemDetailStockContainerList.length; i++) {
+          let temp = item.outStockItemDetailStockContainerList[i]
+          if (temp.uniqueCode + '' === val || temp.ownUniqueCodes + '' === val) {
+            item.outStockItemDetailStockContainerList.splice(i, 1)
+            item.outStockItemDetailStockSysBatchList.splice(i, 1)
+            item.num = item.outStockItemDetailStockContainerList.length
+          }
+        }
+      })
+    }),
+    handlePopoverDelRow (i, n, m, val) {
+      // i,当前索引； n,父索引； m,祖父索引; val,需要删除code的对下岗
+      let item = this.obj.outStockItemList[n]
+      let resCode = val.uniqueCode + ',' + val.ownUniqueCodes
+      // 删除系统批次下对应的唯一码
+      if (item.outStockItemDetailStockSysBatchList.length) {
+        let index = item.outStockItemDetailStockSysBatchList.findIndex(data => {
+          return data.uniqueCode === val.uniqueCode
+        })
+        if (index > -1) item.outStockItemDetailStockSysBatchList.splice(index, 1)
+      }
+      item.outStockItemDetailStockContainerList.splice(i, 1)
+      item.num--
+      this.popDeleteCode = resCode + ',' + this.delTotal++
+      item.totalPrice = floatTool.multiply(item.price, item.num)
+    },
+    printTable () {
+      let pageObj = {
+        pagination: true,
+        fixedHeader: true,
+        fixedFooter: true,
+        size: 'P2',
+        margin: [1]
+      }
+      doPrint(this, 'record_print', pageObj, 'print_header', 'print_footer')
+    },
+    queryBatchNumList (v, i) {
+      if (v) {
+        this.currentRows = i
+        this.$set(this.obj.outStockItemList[i], 'batchNumList', [])
+        let params = {
+          localMaterialId: this.obj.outStockItemList[i].localMaterialId,
+          materialType: this.obj.outStockItemList[i].materialType,
+          storageRoomId: this.obj.outStorageRoomId
+        }
+        this.api.stocklist(params).then(res => {
+          this.obj.outStockItemList.forEach(item => {
+            if (!res[0]) return
+            res.forEach((items, index) => {
+              if (item.localMaterialId + '' === this.obj.outStockItemList[i].localMaterialId + '' && items.batchNum + '' === item.batchNum + '') {
+                res.splice(index, 1)
+              }
+            })
+          })
+          res[0] && this.$set(this.obj.outStockItemList[i], 'batchNumList', res)
+        })
+      }
+    },
+    clearBatchNumList (v, i) {
+      this.currentRows = i
+      this.$set(this.obj.outStockItemList[i], 'storageNum', '')
+      this.$set(this.obj.outStockItemList[i], 'produceDate', '')
+      this.$set(this.obj.outStockItemList[i], 'validityDate', '')
+    },
+    selectBatchNumList (v, i) {
+      if (i === undefined) i = this.currentRows
+      if (v === '') return
+      let num = 0
+      let produceDate = ''
+      let validityDate = ''
+      let index = this.obj.outStockItemList[i].batchNumList.findIndex(item => {
+        return item.batchNum === v
+      })
+      num = index > -1 ? this.obj.outStockItemList[i].batchNumList[index].num : ''
+      produceDate = index > -1 ? this.obj.outStockItemList[i].batchNumList[index].produceDate : ''
+      validityDate = index > -1 ? this.obj.outStockItemList[i].batchNumList[index].validityDate : ''
+      this.$set(this.obj.outStockItemList[i], 'storageNum', num)
+      this.$set(this.obj.outStockItemList[i], 'produceDate', produceDate)
+      this.$set(this.obj.outStockItemList[i], 'validityDate', validityDate)
+    },
+    handleCheckNum (data, i) {
+      const float = /^(\+)?\d+(\.\d+)?/
+      const parse = /^(\+)?\d*$/
+      if (data.num <= 0) {
+        this.$messageTips(this, 'warning', '出库数量为0或未输入，请重新录入')
+        return
+      }
+      let dataType = data.localSettingObject ? data.localSettingObject.classifyId : ''
+      if (dataType !== '303' && dataType !== '304') {
+        if (!parse.test(data.num)) {
+          this.obj.outStockItemList[i].num = ''
+          this.$messageTips(this, 'warning', '出库数量不能小于0并且不能有小数，请重新录入')
+          this.obj = JSON.parse(JSON.stringify(this.obj))
+          return
+        }
+      } else {
+        if (!float.test(data.num)) {
+          this.obj.outStockItemList[i].num = ''
+          this.$messageTips(this, 'warning', '出库数量不能小于0，请重新录入')
+          this.obj = JSON.parse(JSON.stringify(this.obj))
+          return
+        }
+      }
+      if (data.expectNum && Number(data.expectNum) < Number(data.num)) {
+        this.obj.outStockItemList[i].num = ''
+        this.$messageTips(this, 'warning', '出库数量不能大于预期数量')
+        this.obj = JSON.parse(JSON.stringify(this.obj))
+        return
+      }
+      if (this.obj.outStockItemList[i].storageNum && Number(this.obj.outStockItemList[i].storageNum) < Number(data.num)) {
+        this.obj.outStockItemList[i].num = ''
+        this.$messageTips(this, 'warning', '出库数量不能大于库存数量')
+        this.obj = JSON.parse(JSON.stringify(this.obj))
+        return
+      }
+      if ((this.obj.type === '2' || this.obj.type === '13')) {
+        this.obj.outStockItemList.forEach(item => {
+          let expectNum = 0
+          this.obj.outStockItemList.forEach(items => {
+            if (item.localMaterialId === items.localMaterialId && items.localSettingObject && !items.localSettingObject.isManageAlone) {
+              if (items.num) expectNum += items.num
+              if (item.expectNum && item.expectNum < expectNum) {
+                this.$messageTips(this, 'warning', '同一个商品出库数量不能大于预期数量')
+                this.obj.outStockItemList[i].num = ''
+                return
+              }
+            }
+          })
+        })
+      }
+      this.obj = JSON.parse(JSON.stringify(this.obj))
+    },
+    createObject () {
+      this.$route.params.id ? schema = readSchema : schema = []
+      return {
+        schema,
+        obj: this.$ever.createObjFromSchema(schema)
+      }
+    },
+    getDetail (id) {
+      // 数组去重
+      function unique (arr) {
+        if (arr.length === 1) return arr
+        let res = []
+        for (var i = 0; i < arr.length; i++) {
+          for (let name in arr[i]) {
+            if (name === 'localMaterialId') {
+              if (!unique1(res, arr[i][name])) {
+                res.push(arr[i])
+              }
+            }
+          }
+        }
+        return res
+      }
+      function unique1 (arr, id) {
+        for (let i = 0; i < arr.length; i++) {
+          if (arr[i].localMaterialId === id) {
+            return true
+          }
+        }
+        return false
+      }
+      let printModel = this.$ever.getClinicConfig().printModel
+      return new Promise((resolve, reject) => {
+        api.getById(id || this.$route.params.id).then(res => {
+          let result = JSON.parse(JSON.stringify(res))
+          let resultPrint = JSON.parse(JSON.stringify(res))
+          let print = []
+          for (let i = 0; i < resultPrint.outStockItemList.length; i++) {
+            let item = resultPrint.outStockItemList[i]
+            this.printData.push(Object.assign({
+              name: item.localSettingObject ? parserComplex({ data: item.localSettingObject.materialSkuObject.ext, propertys: GOLBAL_VAL_MATERIL_NAME.NAME_ONE }) : '',
+              unitId: item.localSettingObject ? parserJSON({ data: item.localSettingObject.materialSkuObject.ext, property: PACKAGE_CODE }).trim() : '',
+              spec: item.localSettingObject ? parserComplex({ propertys: [SPEC_CODE], data: item.localSettingObject.materialSkuObject.ext }) : ''
+            }, item))
+          }
+          // if (result.type === 16) result.outStockItemList = result.outStockItemDetailList || []
+          result.createDate = result.createTime
+          result.outStockTime = result.outDate || ''
+          this.codeNum = result.code
+          this.statusName = this.setName(FULL_STATE.outstock, result.status, true)
+          this.applyDepartmentName = result.applyStaffObject && result.applyStaffObject.localDepartmentObject ? result.applyStaffObject.localDepartmentObject.name : ''
+          this.departmentName = result.sectionName ? result.sectionName : ''
+          result.recipient = result.type === '15' && result.supplierObject ? result.supplierObject.name : (result.type === '2' || result.type === '16') && result.sectionName ? result.sectionName : result.inStorageRoomObject ? result.inStorageRoomObject.name : ''
+          result.applyStaff = result.applyByName ? result.applyByName : ''
+          // result.typeName = this.setName(FULL_ORDER_NAME.outtype, result.type, true)
+          result.outStockTypeName = this.setName(FULL_IN_OUT_TYPE.outtype, result.type, true)
+          result.staffName = result.status === 21 && result.staffObject ? result.staffObject.name : ''
+          this.printData = []
+          this.pHeader[0].data = result.inLocalDepartmentObject ? result.inLocalDepartmentObject.name : ''
+          // this.pHeader[1].data = result.staffObject && result.staffObject ? result.staffObject.name : ''
+          this.pHeader[1].data = result.createDate
+          this.recordData.head.patientId = result.code
+          result.outStockItemList.sort(compare('localMaterialId'))
+          for (let i = 0; i < res.outStockItemList.length; i++) {
+            let item = res.outStockItemList[i]
+            if (result.outStockItemList[i].localSettingObject && result.outStockItemList[i].localSettingObject.isManageAlone) result.outStockItemList[i].num = result.outStockItemList[i].outStockItemDetailStockContainerList.length
+            if ((result.type === '14') && !this.$route.query.look) result.outStockItemList[i].num = ''
+            if (!item.batchNum) {
+              item.batchNum = ''
+            }
+            if (!item.batchNumList) {
+              item.batchNumList = []
+            }
+            if (printModel !== 2) {
+              this.printData.push(Object.assign({
+                name: item.localSettingObject ? parserComplex({ data: item.localSettingObject.materialSkuObject.ext, propertys: GOLBAL_VAL_MATERIL_NAME.NAME_ONE }) : '',
+                unitId: item.localSettingObject ? parserJSON({ data: item.localSettingObject.materialSkuObject.ext, property: PACKAGE_CODE }).trim() : '',
+                spec: item.localSettingObject ? parserComplex({ propertys: [SPEC_CODE], data: item.localSettingObject.materialSkuObject.ext }) : ''
+              }, item))
+            }
+            if (result.outStockItemList[i].localSettingObject && result.outStockItemList[i].localSettingObject.isManageAlone) this.addProduct = true
+            for (let j = i + 1; j < result.outStockItemList.length; j++) {
+              if (result.outStockItemList[i].localMaterialId === result.outStockItemList[j].localMaterialId) {
+                if (res.type !== '15' && res.type !== '14' && res.type !== '20') {
+                  delete result.outStockItemList[j].unitGroupItemObject
+                  delete result.outStockItemList[j].expectNum
+                }
+              }
+            }
+          }
+          if (printModel === 2) {
+            for (let i = 0; i < print.length; i++) {
+              let item = print[i]
+              for (let j = i + 1; j < print.length; j++) {
+                let items = print[j]
+                if (item.localMaterialId === items.localMaterialId) {
+                  item.num += items.num
+                }
+              }
+            }
+            let arr = unique(print)
+            this.printData = arr
+          }
+          if (result.outStorageRoomObject && this.storageId === result.outStorageRoomObject.id) {
+            this.storageFlag = true
+          }
+          // this.printData.push({name: '总计', totalPirce: this.totalPirce, stotalPirce: this.stotalPirce})
+          // result.address = result.inStorageRoomObject ? result.inStorageRoomObject.name : (result.inLocalDepartmentObject ? result.inLocalDepartmentObject.name : '' + result.staffObject ? result.staffObject.name : '')
+          resolve(result)
+        })
+      })
+    },
+    submitCancel: debounce(function () {
+      this.api.cancle(this.objId).then(res => {
+        this.getDetail().then((res) => {
+          this.obj = Object.assign({}, this.obj, res)
+        })
+      })
+    }),
+    submitForm: debounce(function (form, status) {
+      this.$refs.form.$refs.form.validate(valid => {
+        if (valid) {
+          if (!this.obj.outStockItemList.length) {
+            this.$messageTips(this, 'warning', '出库单中还未添加商品，请先添加商品再提交')
+            return
+          }
+          let params = JSON.parse(JSON.stringify(Object.assign({}, params, this.obj)))
+          params.status = status
+          params.outStockItemList = []
+          params.materialType = this.materialType
+          for (let n = 0; n < this.obj.outStockItemList.length; n++) {
+            let item = this.obj.outStockItemList[n]
+            if (!item.num) {
+              this.$messageTips(this, 'warning', '请填写出库数量后再提交')
+              return
+            }
+            if (item.num > item.storageNum) {
+              this.$messageTips(this, 'warning', '出库数量不能大于库存数量，请修改后再提交')
+              return
+            }
+            if (item.num < 0) {
+              this.$messageTips(this, 'warning', '出库数量不允许为负数')
+              return
+            }
+            params.outStockItemList.push(Object.assign({
+              materialType: this.materialType
+            }, item))
+            delete params.outStockItemList[n].unitGroupItemObject
+            delete params.outStockItemList[n].batchNumList
+            if (this.materialType === DRUGTYPE) {
+              delete params.outStockItemList[n].drugObject
+            } else if (this.materialType === MATERIALTYPE) {
+              delete params.outStockItemList[n].consumptiveMaterialObject
+            } else if (this.materialType === EQUIPMENTTYPE) {
+              delete params.outStockItemList[n].equipmentObject
+            }
+            delete params.outStockItemList[n].localSettingObject
+          }
+          params.localSettingObject && delete params.localSettingObject
+          params.inStorageRoomObject && delete params.inStorageRoomObject
+          params.outStorageRoomObject && delete params.outStorageRoomObject
+          params.staffObject && delete params.staffObject
+          params.applyStaffObject && delete params.applyStaffObject
+          this.unRepeatedBtn = true
+          this.api.createOrUpdate(params).then(res => {
+            if (res) this.$router.push('/storages/output/outputedit/' + this.objId + '?look=' + this.objId)
+            this.unRepeatedBtn = false
+          })
+        }
+      })
+    }),
+    handleDeleteRow (data, index) {
+      if (data.addFlag) {
+        this.obj.outStockItemList[index - 1] = Object.assign({}, this.obj.outStockItemList[index - 1], { addFlag: true })
+      }
+      this.obj.outStockItemList.splice(index, 1)
+      this.obj = JSON.parse(JSON.stringify(this.obj))
+    },
+    handleAddBatch (data, i) {
+      let tempData = Object.assign({}, data)
+      if (data.id || data.addFlag) {
+        this.obj.outStockItemList[i] = Object.assign({}, this.obj.outStockItemList[i], { addFlag: false })
+      }
+      delete tempData.id
+      delete tempData.drugObject
+      delete tempData.unitGroupItemObject
+      delete tempData.batchNumList
+      tempData.addFlag = true
+      tempData.storageNum = ''
+      tempData.batchNum = ''
+      tempData.produceDate = ''
+      tempData.validityDate = ''
+      tempData.num = ''
+      tempData.expectNum = ''
+      this.obj.outStockItemList.splice(i + 1, 0, tempData)
+    },
+    _info () {
+      this.queryParams.materialType = this.materialType
+      this.queryParams.storageRoomId = this.storageId
+    },
+    ...patch
+  },
+  watch: {
+    '$route' (val) {
+      this.objId = val.params.id
+      if (this.objId) {
+        this.schema = this.createObject().schema
+        this.obj = this.createObject().obj
+        this.getDetail().then((res) => {
+          this.$nextTick(() => {
+            this.obj = JSON.parse(JSON.stringify(Object.assign(this.obj, res)))
+            this.pathTo = true
+          })
+        })
+      }
+    }
+  },
+  components: {
+    uniqueOutput,
+    everPopover,
+    remoteSelect
+  }
+}
+</script>
+<style lang="scss" scoped>
+.status{color: red; margin: 0 0 0 10px;}
+#table_expand /deep/ .el-table__expanded-cell .custom_popover span.pos_ab { left: 400px}
+</style>

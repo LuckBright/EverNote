@@ -1,0 +1,517 @@
+<template>
+  <div v-loading="tableLoading">
+    <ever-bread-crumb
+      name="采购发票管理"
+      path="/financial/payableinvoices"
+      :pathTo="'/financial/payableinvoices'"
+    ></ever-bread-crumb>
+    <div class="layout_inner">
+      <ever-form-model
+        :schema="querySchema"
+        v-model="queryObj"
+        :api="api"
+        ref="form"
+        :rules="rules"
+        labelWidth="140px"
+        label-position="right"
+        size="mini"
+      ></ever-form-model>
+      <div class="main-foot alg_label_140">
+        <el-button
+          type="primary"
+          @click.native.prevent="createOrUpdate(false)"
+          :disabled="(queryObj.status==='2'&&!taskId)|| queryObj.status==='6'"
+        >保存</el-button>
+        <el-button
+          type="info"
+          @click.native.prevent="addPayItem"
+          :disabled="(queryObj.status==='2'&&!taskId) || queryObj.status==='6'"
+        >收货匹配</el-button>
+        <!-- <el-button type="info" @click.native.prevent="invoiceVerify(1)" v-if="queryObj.status==='2'">审批</el-button> -->
+        <!-- <el-button type="danger" @click.native.prevent="invoiceVerify(2)" v-if="queryObj.status==='2'">拒绝</el-button> -->
+        <el-button
+          type="info"
+          @click.native.prevent="invoiceVerify()"
+          v-if="(queryObj.invoiceCode && queryObj.status==='0') || taskId"
+        >提交审批</el-button>
+        <!-- <el-button v-if="!orderCode" @click.native.prevent="cannelpayableinvoice" :disabled="queryObj.editBtn">取消</el-button> -->
+        <el-button
+          type="danger"
+          @click.native.prevent="deletepayableinvoice"
+          :disabled="queryObj.createBtn"
+          v-if="queryObj.status==='0' && !!orderCode"
+        >删除</el-button>
+      </div>
+      <el-table
+        :data="queryObj.details"
+        style="width: 100%;"
+        :row-class-name="tableRowClassName"
+      >
+        <el-table-column type="index" label="序号" width="80" align="center"></el-table-column>
+        <el-table-column prop="invItemType" label="项目类型" align="center">
+          <template
+            slot-scope="scope"
+          >{{drugOrMaterialType[scope.row.invItemType] && drugOrMaterialType[scope.row.invItemType].name}}</template>
+        </el-table-column>
+        <el-table-column prop="invItemCode" label="项目编码" align="center"></el-table-column>
+        <el-table-column prop="invItemName" label="项目名称" align="center"></el-table-column>
+        <el-table-column prop="invItemDesp" label="摘要描述" align="center"></el-table-column>
+        <el-table-column prop="quantity" label="数量" align="right">
+          <template slot-scope="scope">
+            <span>{{scope.row.quantity}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="price" label="单价" align="right">
+          <template slot-scope="scope">
+            <span>{{scope.row.price | formatToFinacial}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="qtyUnit" label="单位" align="center"></el-table-column>
+        <el-table-column prop="fee" label="合计" align="right">
+          <template slot-scope="scope">
+            <span>{{scope.row.fee | formatToFinacial}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="fee" label="行金额" align="right">
+          <template slot-scope="scope">
+            <span>{{scope.row.fee | formatToFinacial}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="purchaseOrderCode" label="采购订单编号" align="center"></el-table-column>
+        <!-- <el-table-column
+          prop="poDetailID"
+          label="采购订单行号"
+          align="center">
+        </el-table-column>
+        <el-table-column
+          prop="poRcvDetailID"
+          label="订单收货行号"
+          align="center">
+        </el-table-column>-->
+        <el-table-column prop="batchCode" label="批次号" align="center"></el-table-column>
+        <el-table-column prop label="操作" align="center">
+          <template slot-scope="scope">
+            <el-button-group>
+              <el-button
+                size="small"
+                type="danger"
+                v-if="queryObj.status==='0'"
+                @click="handleDelete(scope.$index, scope.row)"
+              >删除</el-button>
+              <el-button
+                size="small"
+                type="danger"
+                v-if="queryObj.status==='6' && queryObj.payStatus==='0' && !scope.row.writeOff"
+                @click="sterilization(scope.$index, scope.row)"
+              >冲销</el-button>
+            </el-button-group>
+          </template>
+        </el-table-column>
+      </el-table>
+      <payableinvoiceadd
+        title="收货匹配管理"
+        ref="addpay"
+        :listItem="queryObj.details"
+        :supplierArr="supplierArr"
+        :supplierId="queryObj.supplierId"
+      ></payableinvoiceadd>
+    </div>
+    <!-- <el-row type="flex" justify="end">
+      <ever-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :totalCount="totalCount" :current="current">
+      </ever-pagination>
+    </el-row>-->
+  </div>
+</template>
+<script>
+import api from '../store/payableinvoiceapi'
+// import clinicApi from '@/warehouse/store/clinicapi'
+import payableinvoiceadd from './payableinvoiceadd'
+import { drugOrMaterialType } from '../../util/common'
+
+export default {
+  data () {
+    let schema = [
+      // {
+      //   name: 'clinicid',
+      //   label: '机构名称',
+      //   type: 'select',
+      //   options: []
+      // },
+      {
+        name: 'supplierId',
+        label: '供应商名称',
+        type: 'select',
+        options: [],
+        disabled: !!this.$route.params.code
+      },
+      {
+        name: 'supplierType',
+        label: '供应商类型',
+        type: 'systype',
+        code: 'THC_WH_VENDOR_TYPE',
+        disabled: !!this.$route.params.code
+      },
+      {
+        name: 'invoiceType',
+        label: '发票类型',
+        type: 'select',
+        options: api.invoiceType,
+        disabled: !!this.$route.params.code
+      },
+      {
+        name: 'invoiceCode',
+        label: '发票编号',
+        disabled: true
+      },
+      {
+        name: 'totalFee',
+        label: '发票金额',
+        disabled: true
+      },
+      {
+        name: 'taxRatio',
+        label: '税率',
+        type: 'systype',
+        code: 'THC_RCM_TAX_RATIO',
+        useValue: true,
+        disabled: !!this.$route.params.code
+      },
+      {
+        name: 'taxFee',
+        label: '税额',
+        disabled: true
+      },
+      {
+        name: 'invoiceDate',
+        label: '发票日期',
+        type: 'date',
+        outformat: 'yyyy-MM-dd',
+        disabled: !!this.$route.params.code
+      },
+      {
+        name: 'invoiceDes',
+        label: '发票说明',
+        disabled: !!this.$route.params.code
+      },
+      {
+        name: 'accountPeriod',
+        label: '财务期间',
+        type: 'select',
+        options: [],
+        disabled: !!this.$route.params.code
+      },
+      {
+        name: 'payCondition',
+        label: '付款说明',
+        placeholder: '请输入合同名称或维修单名称',
+        disabled: !!this.$route.params.code
+      },
+      {
+        name: 'basisDate',
+        label: '付款日期依据',
+        type: 'select',
+        options: api.basisDate,
+        disabled: !!this.$route.params.code
+      },
+      {
+        name: 'planPayDate',
+        label: '预计支付日期',
+        type: 'date',
+        outformat: 'yyyy-MM-dd',
+        disabled: !!this.$route.params.code
+      },
+      {
+        name: 'status',
+        label: '发票状态',
+        type: 'select',
+        options: api.status,
+        disabled: true
+      },
+      {
+        name: 'payStatus',
+        label: '支付状态',
+        type: 'select',
+        options: api.payStatus,
+        disabled: true
+      },
+      {
+        name: 'payedFee',
+        label: '已支付金额',
+        disabled: true
+      }
+    ]
+    var obj = this.$ever.createObjFromSchema(schema)
+    obj.taxRatio = '0.03'
+    obj.payStatus = '0'
+    obj.payedFee = 0
+    obj.status = '0'
+    obj.details = []
+    obj.createBtn = true
+    obj.editBtn = true
+    obj.saveBtn = false
+    // let arr = ['clinicid']
+    if (this.$route.params.code) {
+      obj.createBtn = false
+      obj.editBtn = true
+      // arr.forEach(function (item) {
+      //   schema.filter(function (v, i) {
+      //     return v.name === item
+      //   })[0].disabled = true
+      // })
+    } else {
+      obj.createBtn = true
+      obj.editBtn = false
+      // arr.forEach(function (item) {
+      //   schema.filter(function (v, i) {
+      //     return v.name === item
+      //   })[0].disabled = false
+      // })
+    }
+    return {
+      querySchema: schema,
+      queryObj: obj,
+      api,
+      tableLoading: false,
+      drugOrMaterialType: drugOrMaterialType,
+      supplierArr: [],
+      orderCode: null,
+      taskId: this.$route.query.taskId,
+      rules: {
+        // clinicid: [
+        //   { required: true, message: '必填项', trigger: 'blur', type: 'number' }
+        // ],
+        supplierId: [
+          { required: true, message: '必填项', trigger: 'blur' }
+        ],
+        supplierType: [
+          { required: true, message: '必填项', trigger: 'blur' }
+        ],
+        invoiceType: [
+          { required: true, message: '必填项', trigger: 'blur' }
+        ],
+        // totalFee: [
+        //   { required: true, message: '必填项', trigger: 'blur' }
+        // ],
+        taxRatio: [
+          { required: true, message: '必填项', trigger: 'blur' }
+        ],
+        // taxFee: [
+        //   { required: true, message: '必填项', trigger: 'blur' }
+        // ],
+        invoiceDate: [
+          { required: true, message: '必填项', trigger: 'blur' }
+        ],
+        accountPeriod: [
+          { required: true, message: '必填项', trigger: 'blur' }
+        ],
+        payStatus: [
+          { required: true, message: '必填项', trigger: 'blur' }
+        ],
+        status: [
+          { required: true, message: '必填项', trigger: 'blur' }
+        ]
+      },
+      // 发票是否需要审批
+      isApprove: 1
+    }
+  },
+  created () {
+    if (this.$route.params.code) {
+      this.orderCode = this.$route.params.code
+      api.getByCode(this.$route.params.code)
+        .then(result => {
+          Object.assign(this.queryObj, result.data)
+        })
+    }
+    // 获取发票是否需要审批字段
+    api.getValueByCode({ code: 'purchase_approval' }).then(result => {
+      // console.log(typeof result.data, '返回审批字段类型')
+      if (result.data === '0') {
+        this.isApprove = 0
+      }
+    })
+    // clinicApi.list()
+    //   .then(result => {
+    //     this.$ever.getFieldFromSchema(this.querySchema, 'clinicid').options = result
+    //   })
+    api.getPeriod()
+      .then(result => {
+        result.forEach(function (item) {
+          item.name = item.periodName
+        })
+        this.$ever.getFieldFromSchema(this.querySchema, 'accountPeriod').options = result
+      })
+    api.getSupplierLocalByClinic()
+      .then(result => {
+        this.$ever.getFieldFromSchema(this.querySchema, 'supplierId').options = result.clinicArr
+        this.supplierArr = result.clinicArr
+      })
+  },
+  components: {
+    payableinvoiceadd
+  },
+  watch: {
+    'queryObj.taxRatio': {
+      handler (newValue) {
+        if (this.queryObj.totalFee) {
+          this.queryObj.taxFee = (this.queryObj.totalFee * Number(newValue)).toFixed(2)
+        } else {
+          this.queryObj.taxFee = (0 * Number(newValue)).toFixed(2)
+        }
+      }
+    },
+    'queryObj.totalFee': {
+      handler (newValue) {
+        this.queryObj.taxFee = (newValue * Number(this.queryObj.taxRatio)).toFixed(2)
+      }
+    },
+    'queryObj.details': {
+      handler (newValue) {
+        this.queryObj.totalFee = ''
+        let total = 0
+        if (newValue.length > 0) {
+          newValue.forEach(v => {
+            total += Number(v.fee)
+          })
+          this.queryObj.totalFee = total.toFixed(2)
+        } else {
+
+        }
+      }
+    }
+  },
+  methods: {
+    deletepayableinvoice () {
+      let id = this.$route.params.id
+      api.del(id)
+        .then(result => {
+          history.go(-1)
+        })
+    },
+    handleDelete (index, row) {
+      this.queryObj.details.splice(index, 1)
+    },
+    sterilization (index, row) {
+      if (row.fee === Math.abs(row.fee) && !row.writeOff) {
+        row.writeOff = row.id
+        let obj = {}
+        Object.assign(obj, row)
+        obj.fee = -row.fee
+        obj.id = null
+        this.queryObj.details.push(obj)
+        this.createOrUpdate(true)
+      }
+    },
+    tableRowClassName (scope, index) {
+      if (scope.row.fee !== Math.abs(scope.row.fee)) {
+        return 'cRed'
+      } else {
+        return ''
+      }
+    },
+    invoiceVerify (isAgree) {
+      if (!this.taskId) {
+        this.tableLoading = true
+        api.invoiceVerify({ id: this.queryObj.id, isAgree: isAgree })
+          .then(result => {
+            if (result.head.errCode === 0) {
+              if (isAgree === 1) {
+                this.queryObj.status = '6'
+                this.$notify({
+                  message: result.head.errMsg || '提交成功',
+                  type: 'success'
+                })
+              } else if (isAgree === 2) {
+                this.queryObj.status = '0'
+                this.$notify({
+                  message: result.head.errMsg || '提交成功',
+                  type: 'success'
+                })
+              } else {
+                this.queryObj.status = '2'
+                this.$notify({
+                  message: result.head.errMsg || '提交成功',
+                  type: 'success'
+                })
+              }
+            }
+            this.tableLoading = false
+          }).catch(v => {
+            this.tableLoading = false
+          })
+      } else {
+        this.tableLoading = true
+        api.finish({
+          processData: {
+            taskId: this.$route.query.taskId
+          }
+        }).then(result => {
+          if (result && result.head && result.head.errCode === 0) {
+            this.$notify({
+              message: result.head.errMsg || '成功',
+              type: 'success'
+            })
+            this.$router.push('/financial/payableinvoices')
+          } else {
+            this.$notify({
+              message: '审批失败',
+              type: 'error'
+            })
+          }
+          this.tableLoading = false
+        }).catch(v => {
+          this.tableLoading = false
+        })
+      }
+    },
+    createOrUpdate (val) {
+      this.$refs.form.$refs.form.validate((valid) => {
+        if (valid) {
+          this.tableLoading = true
+          if (this.isApprove === 0) {
+            this.queryObj.isApprove = 0
+          }
+          api.createOrUpdate(this.queryObj)
+            .then(result => {
+              if (!this.queryObj.id) {
+                let arr = result.data.json
+                this.queryObj.invoiceCode = arr.invoiceCode
+                this.queryObj.id = arr.id
+              }
+              if (this.isApprove === 0) {
+                  // 将状态更改为6，不再显示提交审批按钮
+                this.queryObj.status = '6'
+              }
+              this.$notify({
+                message: result.head.errMsg || '成功',
+                type: 'success'
+              })
+              if (!val) {
+                this.$router.go(-1)
+              }
+
+              this.tableLoading = false
+            }).catch(v => {
+              console.log(v, 'catch')
+              this.tableLoading = false
+            })
+        }
+      })
+    },
+    cannelpayableinvoice () {
+      history.go(-1)
+    },
+    addPayItem () {
+      if (this.queryObj.supplierId) {
+        this.$refs.addpay.onDialogOpen()
+      } else {
+        this.$messageTips(this, 'error', '请选择供应商')
+      }
+    }
+  }
+}
+</script>
+

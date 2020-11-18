@@ -1,0 +1,135 @@
+<template>
+  <div id="print_reg">
+    <div class="print_reg">
+      <div class="hf">{{appointInfo ? appointInfo.name : ''}}</div>
+      <div class="hf">挂号单</div>
+      <div class="num"><span>就诊编号</span> <span class="patient_code">{{appointInfo.num}}</span></div>
+      <div class="regis">
+        <p>
+          <span>预约时间 : {{$moment(appointInfo.appointmentDate).format('YYYY-MM-DD')}}</span>
+          <!-- <br /> -->
+          <span style="padding-left:10px;">{{appointInfo.appointmentStarttime}} -{{appointInfo.appointmentEndtime}}</span>
+        </p>
+        <p><span>科  室 : {{appointInfo ? appointInfo.providerName : ''}}</span></p>
+        <p><span>诊  室 : {{appointInfo ? appointInfo.stationName : ''}}</span></p>
+        <p><span>医  生 : {{appointInfo ? appointInfo.doctorName : ''}}</span></p>
+        <p><span>患者名称 : {{appointInfo ? appointInfo.patientName : ''}}<template v-if="appointInfo && appointInfo.patient && appointInfo.patient.sex">/</template><template v-if="appointInfo && appointInfo.patient && appointInfo.patient.sex"><sys-value type="GBT.2261.1" :code="appointInfo && appointInfo.patient && appointInfo.patient.sex"></sys-value></template></span></p>
+        <template v-for="item in printinfo.details.settlementDetail">
+          <p><span>{{item.itemname}} : {{item.preFee | formatToFinacial}}</span></p>
+        </template>
+        <!-- <p><span>医师服务费 : {{printinfo.totalFee | formatToFinacial}}</span></p> -->
+        <template v-if="printinfo.details && printinfo.details.medPayInfo && printinfo.details.medPayInfo.length > 0">
+          <p><span>医保内金额 : {{printinfo.details.medPayInfo && printinfo.details.medPayInfo.length && printinfo.details.medPayInfo[0].mzfeein | formatToFinacial}}</span></p>
+          <p><span>医保外金额 : {{printinfo.details.medPayInfo && printinfo.details.medPayInfo.length && printinfo.details.medPayInfo[0].mzfeeout | formatToFinacial}}</span></p>
+        </template>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <!-- 合计 -->
+        <p><span>总 计 : {{printinfo.totalFee | formatToFinacial}}</span></p>
+        <p><span>金额大写 : {{digitUppercase(printinfo.totalFee)}}</span></p>
+        <p>
+          <span v-if="printinfo.comInsuranceDirectFee">商保应收：{{printinfo.comInsuranceDirectFee | formatToFinacial}}</span>
+          <span v-for="(v, k) in printinfo.payDetails" style="padding-right:10px;">
+            {{k}}: {{v && v | formatToFinacial}}
+          </span>
+        </p>
+        <!-- 优惠金额 -->
+        <!-- <p v-if="printinfo.memberCardFee && Number(printinfo.memberCardFee) !== 0"><span>储值卡消费: {{printinfo.memberCardFee | formatToFinacial}}</span></p> -->
+        <p v-if="printinfo.membergradecutfee && Number(printinfo.membergradecutfee) !== 0"><span>储值卡优惠: {{printinfo.membergradecutfee | formatToFinacial}}</span></p>
+        <p v-if="printinfo.benefitFee && Number(printinfo.benefitFee) !== 0"><span>身份卡优惠: {{printinfo.benefitFee | formatToFinacial}}</span></p>
+        <p v-if="printinfo.memberactcutfee && Number(printinfo.memberactcutfee) !== 0"><span>优惠券: {{printinfo.memberactcutfee | formatToFinacial}}</span></p>
+        <p v-if="printinfo.promotionFee && Number(printinfo.promotionFee) !== 0"><span>活动优惠: {{printinfo.promotionFee | formatToFinacial}}</span></p>
+        <!-- <p v-if="printinfo.comInsuranceDirectFee && Number(printinfo.comInsuranceDirectFee) !== 0"><span>商保支付: {{printinfo.comInsuranceDirectFee | formatToFinacial}}</span></p> -->
+        <p v-if="printinfo.comInsurancePlanFee && Number(printinfo.comInsurancePlanFee) !== 0"><span>商保理赔: {{printinfo.comInsurancePlanFee | formatToFinacial}}</span></p>
+        <p v-if="printinfo.comInsuranceBenefitFee && Number(printinfo.comInsuranceBenefitFee) !== 0"><span>商保优惠: {{printinfo.comInsuranceBenefitFee | formatToFinacial}}</span></p>
+        <p v-if="printinfo.medInsurPubPayFee && Number(printinfo.medInsurPubPayFee) !== 0"><span>医保基金支付金额: {{printinfo.medInsurPubPayFee | formatToFinacial}}</span></p>
+        <p v-if="printinfo.medInsurOwnPayFee && Number(printinfo.medInsurOwnPayFee) !== 0"><span>个人账户支付金额: {{printinfo.medInsurOwnPayFee | formatToFinacial}}</span></p>
+        <p v-if="(printinfo.medInsurOwnPayFee && Number(printinfo.medInsurOwnPayFee) !== 0) || (printinfo.medInsurPubPayFee && Number(printinfo.medInsurPubPayFee) !== 0)"><span>医疗保险支付总计: {{(printinfo.medInsurPubPayFee + printinfo.medInsurOwnPayFee) | formatToFinacial}}</span></p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p><span style="padding-right:20px;">操作员 : {{printinfo.createUserCode}}</span> <span>{{printinfo.createTime}}</span></p>
+      </div>
+      <div class="code">
+        <barcode v-if="printinfo.outpatientNumber" :value=String(printinfo.outpatientNumber) :options="{ displayValue: false, width: 3, height: 60, fontSize: 20, margin: 0, textMargin: 4, lineColor: '#000'}" tag="img"></barcode>
+      </div>
+      <div class="printinfo_id">{{printinfo.outpatientNumber}}</div>
+      <div class="hf">祝您早日康复！</div>
+    </div>
+  </div>
+</template>
+
+<script>
+  import moment from 'moment'
+  import medicalapi from '../store/medicalapi'
+  import {doPrint} from '@/util/common'
+  export default {
+    props: ['printinfo'],
+    data () {
+      return {
+        moment,
+        appointInfo: {}
+      }
+    },
+    methods: {
+      async print () {
+        const res = await medicalapi.getByVisitNumber(this.printinfo.visitSn)
+        if (res && res.data) {
+          this.appointInfo = res.data
+          doPrint(this, 'print_reg')
+        }
+      },
+      digitUppercase (n) {
+        var fraction = ['角', '分']
+        var digit = [
+          '零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'
+        ]
+        var unit = [
+            ['元', '万', '亿'],
+            ['', '拾', '佰', '仟']
+        ]
+        var head = n < 0 ? '欠' : ''
+        n = Math.abs(n)
+        var s = ''
+        for (var i = 0; i < fraction.length; i++) {
+          s += (digit[Math.floor(n * 10 * Math.pow(10, i)) % 10] + fraction[i]).replace(/零./, '')
+        }
+        s = s || '整'
+        n = Math.floor(n)
+        for (var k = 0; k < unit[0].length && n > 0; k++) {
+          var p = ''
+          for (var j = 0; j < unit[1].length && n > 0; j++) {
+            p = digit[n % 10] + unit[1][j] + p
+            n = Math.floor(n / 10)
+          }
+          s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][k] + s
+        }
+        return head + s.replace(/(零.)*零元/, '元')
+            .replace(/(零.)+/g, '零')
+            .replace(/^整$/, '零元整')
+            .replace(/角$/, '角整')
+      }
+    }
+//    watch: {
+//      'printinfo.visitSn': {
+//        async handler (v) {
+//          await this.print()
+//        }
+//      }
+//    }
+  }
+</script>
+
+<style scoped>
+  /*@page {
+    size: A5 portrait;
+  }*/
+  .print_reg { width: 325px; padding: 0 10px 0 5px; margin: 0 auto; }
+  .print_reg .code { text-align: center; }
+  .print_reg .code img { width: 100%; height:60px; }
+  .print_reg .hf { font-size: 28px; line-height: 40px; font-family: PingFangSC-Semibold; text-align: center; }
+  .print_reg .num { font-weight: bold; font-size: 30px; min-height: 50px; line-height: 50px; font-family: PingFangSC-Semibold; margin-bottom: 20px; text-align: center; }
+  .print_reg .num .patient_code { font-size: 50px; vertical-align: top; }
+  .print_reg .regis p { line-height: 24px; font-size: 18px; margin:0; }
+  .printinfo_id { font-size: 18px; line-height: 20px; text-align: center; }
+  /*.print_reg .regis p span { -webkit-transform:scale(0.9); -webkit-transform-origin: 0 0; }*/
+</style>

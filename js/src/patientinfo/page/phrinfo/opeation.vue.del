@@ -1,0 +1,205 @@
+<template>
+  <div class="opea">
+    <div v-if="opeadata.length > 0" v-for="(item, index) in opeadata" :key="index" class="opeacontent">
+      <el-row>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">手术编号:</span>
+          <span class="el-form-item__label">{{item.surgeryNumber}}</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">手术名称: </span>
+          <span class="el-form-item__label">{{item.surgeryName}}</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">手术来源:</span>
+          <span class="el-form-item__label" v-if="item.surgerySource === 1">门诊</span>
+          <span class="el-form-item__label" v-if="item.surgerySource === 2">急诊</span>
+          <span class="el-form-item__label" v-if="item.surgerySource === 3">住院</span>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">申请医生:</span>
+          <span class="el-form-item__label">{{item.applianceDoctorName}}</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">手术医生:</span>
+          <span class="el-form-item__label">{{item.operatorDoctorName}}</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">助理医生:</span>
+          <span class="el-form-item__label">{{item.assistantItem1}}</span>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">麻醉医生:</span>
+          <span class="el-form-item__label">{{item.anaesthesiaDoctorName}}</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">助理麻醉医师:</span>
+          <span class="el-form-item__label">{{item.anaesthesiaAssistantName1}}</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">麻醉要求:</span>
+          <span class="el-form-item__label">{{item.anaesthesiaRequire}}</span>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">麻醉方式:</span>
+          <span class="el-form-item__label" v-if="item.anaesthesiaType === 1">全身麻醉</span>
+          <span class="el-form-item__label" v-if="item.anaesthesiaType === 2">局部麻醉</span>
+          <span class="el-form-item__label" v-if="item.anaesthesiaType === 3">复合麻醉</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">器械护士:</span>
+          <span class="el-form-item__label">{{item.apparatusNurseName1}}</span>
+        </el-col>
+        <el-col>
+          <span class="el-form-item__label" style="margin-left: 120px;">巡回护士:</span>
+          <span class="el-form-item__label">{{item.tourNurseName1}}</span>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">上台护士:</span>
+          <span class="el-form-item__label">{{item.stageNurseName1}}</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">手术室:</span>
+          <span class="el-form-item__label">{{item.surgeryRoomName}}</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">手术台次:</span>
+          <span class="el-form-item__label">{{item.surgeryStage}}</span>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">切口等级:</span>
+          <span class="el-form-item__label" v-if="item.incisionLevel === 1">Ⅰ类</span>
+          <span class="el-form-item__label" v-else-if="item.incisionLevel === 2">Ⅱ类</span>
+          <span class="el-form-item__label" v-else-if="item.incisionLevel === 3">Ⅲ类</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">手术等级:</span>
+          <span class="el-form-item__label" v-if="item.surgeryLevel === 1">一级手术</span>
+          <span class="el-form-item__label" v-if="item.surgeryLevel === 2">二级手术</span>
+          <span class="el-form-item__label" v-if="item.surgeryLevel === 3">三级手术</span>
+          <span class="el-form-item__label" v-if="item.surgeryLevel === 4">四级手术</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">是否传染:</span>
+          <span class="el-form-item__label" v-if="item.isInfected === 1">传染</span>
+          <span class="el-form-item__label" v-else>非传染</span>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <span class="el-form-item__label" style="margin-left: 120px;">手术部位:</span>
+          <span class="el-form-item__label">{{item.position}}</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label"  style="margin-left: 120px;">术前诊断:</span>
+          <span class="el-form-item__label">{{item.preoperativeDiagnosis}}</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label"  style="margin-left: 120px;">嘱托</span>
+          <span class="el-form-item__label" >{{item.entrust}}</span>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <span class="el-form-item__label"  style="margin-left: 120px;">预约手术日期:</span>
+          <span class="el-form-item__label">{{item.expectSurgTime}}</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label"  style="margin-left: 120px;">紧急级别:</span>
+          <span class="el-form-item__label" v-if="item.surgeryType === 1"> 择期手术</span>
+          <span class="el-form-item__label" v-if="item.surgeryType === 2">急诊手术</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label"  style="margin-left: 120px;">申请科室:</span>
+          <span class="el-form-item__label" >{{item.applianceProviderName}}</span>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <span class="el-form-item__label"  style="margin-left: 120px;">手术开始时间:</span>
+          <span class="el-form-item__label" >{{item.surgStartTime}}</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="el-form-item__label"  style="margin-left: 120px;">手术结束时间:</span>
+          <span class="el-form-item__label" >{{item.surgEndTime}}</span>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col>
+          <span class="el-form-item__label"  style="margin-left: 120px;">备注事项:</span>
+          <span class="el-form-item__label" >{{item.remarks}}</span>
+        </el-col>
+      </el-row>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  props: ['opeadata'],
+  data () {
+    return {
+    }
+  },
+  watch: {
+    'opeadata': {
+      handler (val) {
+        val.forEach(item => {
+          if (item.assistantItem) {
+            let list0 = []
+            JSON.parse(item.assistantItem).forEach(value => {
+              list0.push(value.name)
+            })
+            item.assistantItem1 = list0.join(',')
+          }
+          if (item.anaesthesiaAssistantName) {
+            let list1 = []
+            JSON.parse(item.anaesthesiaAssistantName).forEach(value => {
+              list1.push(value.name)
+            })
+            item.anaesthesiaAssistantName1 = list1.join(',')
+          }
+          if (item.tourNurseName) {
+            let list2 = []
+            JSON.parse(item.tourNurseName).forEach(value => {
+              list2.push(value.name)
+            })
+            item.tourNurseName1 = list2.join(',')
+          }
+          if (item.apparatusNurseName) {
+            let list3 = []
+            console.log(JSON.parse(item.apparatusNurseName))
+            JSON.parse(item.apparatusNurseName).forEach(value => {
+              list3.push(value.name)
+            })
+            item.apparatusNurseName1 = list3.join(',')
+          }
+          if (item.stageNurseName) {
+            let list4 = []
+            JSON.parse(item.stageNurseName).forEach(value => {
+              list4.push(value.name)
+            })
+            item.stageNurseName1 = list4.join(',')
+          }
+          return item
+        })
+      },
+      deep: true,
+      immediate: true
+    }
+  }
+}
+</script>
+<style scoped>
+  .opeacontent{border: 1px solid #999999;}
+  .opea span{color: #000;}
+</style>

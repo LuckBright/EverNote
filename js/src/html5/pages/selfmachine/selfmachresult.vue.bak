@@ -1,0 +1,527 @@
+<template>
+  <div class="selfMachCon">
+    <sl-timer :mark="marks" @time-out="quit" :delay="delayTime"></sl-timer>
+    <div class="topMes">
+      <el-row>
+        <el-col :span="10" class="mainMes">{{patientInfo.name}} {{sexInfo[patientInfo.sex]}} {{patientInfo.birthday}}</el-col>
+        <el-col :span="10">
+          <el-date-picker
+            v-model="daterange"
+            type="daterange"
+            value-format="yyyy-MM-dd"
+            range-separator="至"
+            start-placeholder="选择开始日期"
+            end-placeholder="选择结束日期">
+          </el-date-picker>
+        </el-col>
+        <el-col :span="4" align="right">
+          <sl-button message="查询" type="small" @click="search"></sl-button>
+        </el-col>
+      </el-row>
+    </div>
+    <div class="tableMes">
+      <el-table
+        ref="multipleTable"
+        :data="tableData"
+        tooltip-effect="dark"
+        style="width: 100%"
+        border
+        :row-style="rowStyle"
+        :cell-style="cellStyle"
+        @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="80" :selectable="selectable"></el-table-column>
+        <el-table-column prop="name" label="检验项目" show-overflow-tooltip></el-table-column>
+        <el-table-column label="报告日期">
+          <template slot-scope="scope">
+            <span v-if="scope.row.status === '1'">{{scope.row.reportTime}}</span>
+            <span v-else>{{scope.row.reportTime}} (预)</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="200">
+          <template slot-scope="scope">
+            {{getStatus[scope.row.status]}}
+          </template>
+        </el-table-column>
+        <el-table-column prop="paperType" label="纸张类型"  width="200"></el-table-column>
+      </el-table>
+      <el-pagination
+        background
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page.sync="current"
+        :page-size="pageSize"
+        layout="total, prev, pager, next"
+        :total="totalCount">
+      </el-pagination>
+    </div>
+    <div class="operate">
+      <sl-button message="帮助" type="normal"  @click="help"></sl-button>
+      <sl-button message="打印报告" type="large"  @click="printReport" :disabled="handled"></sl-button>
+      <sl-button message="关闭" type="normal"  @click="close"></sl-button>
+    </div>
+    <p class="tips">提示：本机只支持{{selfMachCurt && selfMachCurt.paperType}}纸打印，其他纸张类型打印请点“帮助”查看</p>
+    <sl-dialog v-if="showHelpDialog" class="helpDialog">
+      <div slot="content">
+        <div v-for="(item, index) in helpInfo" :key="index" class="contentItem">
+          <p class="title">{{item.paper}}：</p>
+          <p class="desc" v-for="(desc, dindex) in item.suitroom" :key="dindex">{{desc.roomname}}</p>
+        </div>
+        <div class="operate">
+          <sl-button message="关闭" type="normal"  @click="closeHelp"></sl-button>
+        </div>
+      </div>
+    </sl-dialog>
+    <sl-dialog v-if="showPrintDialog" class="printDialog">
+      <div slot="content">
+        <div class="printTips">
+          <p class="count">本次共打印{{printList.length}}份报告</p>
+          <h1 class="printing">正在打印中</h1>
+        </div>
+        <div class="operate">
+          <sl-button message="关闭" type="normal"  @click="closePrint"></sl-button>
+        </div>
+      </div>
+    </sl-dialog>
+  </div>
+</template>
+
+<script>
+import api from '../../store/selfmachapi.js'
+import slDialog from '../../components/dialog'
+import slButton from '../../components/button'
+import slTimer from '../../components/timer'
+import {dateFormat} from '@/util/common'
+export default {
+  data () {
+    return {
+      dateFormat,
+      daterange: [],
+      tableData: [],
+      getStatus: {
+        '1': '已出',
+        '2': '未出'
+      },
+      sexInfo: {
+        '1': '男',
+        '2': '女'
+      },
+      current: 1,
+      offset: 0,
+      pageSize: 20,
+      totalCount: 0,
+      showHelpDialog: false,
+      showPrintDialog: false,
+      helpInfo: [],
+      printList: [],
+      handled: false,
+      marks: 0    // 记录页面操作,初始值 0，退出及不显示计时器 0，有操作 > 0
+    }
+  },
+  computed: {
+    selfMachCurt () {
+      if (window.localStorage.getItem('currentinfo')) {
+        return JSON.parse(window.localStorage.getItem('currentinfo'))
+      } else {
+        this.$messageTips(this, 'warning', '未获取到当前自助机信息，请重新设置！', '提示')
+        setTimeout(() => {
+          this.$router.push('/html5/selfmachlogin')
+        }, 1000)
+        return {}
+      }
+    },
+    delayTime () {
+      if (window.localStorage.getItem('currentinfo')) {
+        return JSON.parse(window.localStorage.getItem('currentinfo')).screensaverTime
+      } else {
+        setTimeout(() => {
+          this.$router.push('/html5/selfmachlogin')
+        }, 1000)
+        return 20
+      }
+    },
+    patientInfo () {
+      return window.sessionStorage.getItem('patientInfo') ? JSON.parse(window.sessionStorage.getItem('patientInfo')) : {}
+    },
+    patientCardNo () {
+      return window.sessionStorage.getItem('patientCardNo')
+    }
+  },
+  created () {
+    let today = this.dateFormat(new Date(), 'YYYY-MM-DD')
+    let date = this.getTimes(today, -30)
+    this.daterange.push(date)
+    this.daterange.push(today)
+    this.getReportList()
+    this.getPrintType()
+  },
+  mounted () {
+    this.marks++
+  },
+  methods: {
+    // 获取并配置帮助提示信息
+    getPrintType () {
+      api.getSelfMach({orgId: JSON.parse(window.localStorage.getItem('currentOrigin')).id}).then(res => {
+        if (res.head.errCode === 0 && res.data && res.data.resultList.length) {
+          res.data.resultList.filter(item => {
+            let flag1 = false
+            if (this.helpInfo.length && item.paperType) {
+              let flag3 = false
+              this.helpInfo.filter(value => {
+                if (item.paperType && value && value.paper === item.paperType) {
+                  flag3 = true
+                  if (value.suitroom && !value.suitroom.length) {
+                    value.suitroom.push({roomid: item.drawBloodRoomId, roomname: item.drawBloodRoom})
+                  } else {
+                    let flag2 = false
+                    value.suitroom.filter(room => {
+                      if (item.drawBloodRoomId === room.drawBloodRoomId) {
+                        flag2 = true
+                      }
+                    })
+                    if (!flag2) {
+                      value.suitroom.push({roomid: item.drawBloodRoomId, roomname: item.drawBloodRoom})
+                    }
+                  }
+                }
+              })
+              if (!flag3) {
+                flag1 = true
+              }
+            } else if (!this.helpInfo.length && item.paperType) {
+              flag1 = true
+            }
+            if (flag1) {
+              this.helpInfo.push({paper: item.paperType, suitroom: [{roomid: item.drawBloodRoomId, roomname: item.drawBloodRoom}]})
+            }
+          })
+          this.helpInfo.filter(item => {
+            item.paper = item.paper + '纸张类型'
+            item.suitroom.filter(value => {
+              value.roomname = '请到' + value.roomname + '打印'
+            })
+          })
+        }
+      })
+    },
+    // 获取30天前日期方法 todo
+    getTimes (times, addDayCount) {
+      var dd = new Date(times)
+      dd.setDate(dd.getDate() + addDayCount)
+      var y = dd.getFullYear()
+      var m = (dd.getMonth() + 1) < 10 ? '0' + (dd.getMonth() + 1) : (dd.getMonth() + 1)
+      var d = dd.getDate() < 10 ? '0' + dd.getDate() : dd.getDate()
+      return y + '-' + m + '-' + d
+    },
+    // 获取报告列表
+    getReportList () {
+      let params = {
+        offset: this.offset,
+        pagesize: this.pageSize,
+        patientId: this.patientInfo.id,
+        startTime: this.daterange && this.daterange.length ? this.daterange[0] : '',
+        endTime: this.daterange && this.daterange.length ? this.daterange[1] : ''
+      }
+      // let params = {
+      //   offset: 0,
+      //   pagesize: 20,
+      //   patientId: '3ENbXb6oyAGfTrbwouO',
+      //   startTime: '2018-08-28',
+      //   endTime: '2018-11-5'
+      // }
+      api.getReportList(params).then(res => {
+        if (res.head.errCode === 0 && res.data && res.data.resultList.length > 0) {
+          this.tableData = res.data.resultList
+          this.totalCount = res.data.totalCount
+        } else {
+          this.tableData = []
+          // this.$messageTips(this, 'warning', '当前患者没有可取的检验报告！', '提示')
+        }
+      })
+    },
+    // 分页
+    handleSizeChange (val) {
+      this.marks++
+      this.pageSize = val
+      this.offset = (this.current - 1) * this.pagesize
+      this.getReportList()
+    },
+    // 分页
+    handleCurrentChange (val) {
+      this.marks++
+      this.current = val - 1
+      this.offset = (val - 1) * this.pagesize || 0
+      this.getReportList()
+    },
+    // 查询
+    search () {
+      this.marks++
+      this.offset = 0
+      this.getReportList()
+    },
+    // table选择
+    handleSelectionChange (data) {
+      this.marks++
+      this.printList = data
+    },
+    // 设置如果纸张类型不同文字置灰
+    rowStyle (row) {
+      if (row.row.paperType !== (this.selfMachCurt && this.selfMachCurt.paperType)) {
+        return {color: '#cccccc'}
+      }
+    },
+    // 设置未出报告状态单元格文字红色
+    cellStyle (data) {
+      if (data.row.status === '2' && data.columnIndex === 3) {
+        return {color: '#EE4433'}
+      }
+    },
+    // table选择返回禁用
+    selectable (data) {
+      if (data.status === '2' || data.paperType !== (this.selfMachCurt && this.selfMachCurt.paperType)) {
+        return false
+      } else {
+        return true
+      }
+    },
+    // 帮助
+    help () {
+      this.marks++
+      this.showHelpDialog = true
+    },
+    // 打印报告
+    printReport () {
+      this.marks++
+      if (!this.printList.length) {
+        this.$messageTips(this, 'warning', '请先选择需要打印的检验报告！', '提示')
+        return false
+      }
+      this.handled = true
+      this.showPrintDialog = true
+      let reportIdList = []
+      let adviceIdList = []
+      this.printList.filter((item) => {
+        reportIdList.push(item.id)
+        adviceIdList.push(item.barcode)
+      })
+      let params = {
+        id: reportIdList.join(',')
+      }
+      api.printReport(params).then(res => {
+        window.location.href = 'lisprint://' + adviceIdList.join(',')
+        setTimeout(() => {
+          this.showPrintDialog = false
+          this.handled = false
+          this.getReportList()
+        }, 5000)
+      })
+    },
+    // 关闭
+    close () {
+      this.marks = 0
+      this.$router.back()
+    },
+    // 关闭帮助
+    closeHelp () {
+      this.marks++
+      this.showHelpDialog = false
+    },
+    // 关闭打印
+    closePrint () {
+      this.marks++
+      this.showPrintDialog = false
+      this.handled = false
+    },
+    // 退出
+    quit () {
+      this.marks = 0
+      this.$router.back()
+      window.sessionStorage.removeItem('patientCardNo')
+      window.sessionStorage.removeItem('patientInfo')
+    }
+  },
+  components: {
+    slDialog,
+    slButton,
+    slTimer
+  }
+}
+</script>
+<style lang="scss" scoped>
+.selfMachCon {
+  padding: 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  font-family: PingFangSC-Semibold;
+  background: url('../../../../static/assets/html5/img/selfmachbg.png') no-repeat;
+  background-size: cover;
+  .timers {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+    text-align: center;
+    border: 2px solid #ee4534;
+    background: rgba(238,68,51,0.10);
+    color: #EE4433;
+    border-radius: 50%;
+    font-size: 36px;
+  }
+  .topMes {
+    margin-top: 120px;
+    .mainMes {
+      font-size: 42px;
+      color: #000;
+      line-height: 80px;
+    }
+    /deep/ .el-range-editor.el-input__inner {
+      padding: 0;
+      width: 100%;
+      height: 80px;
+      line-height: 80px;
+      font-size: 28px;
+      display: flex;
+      justify-content: space-around;
+      .el-range__icon {
+        line-height: 80px;
+        font-size: 25px;
+        margin-left: 5px;
+      }
+      .el-range-input, .el-range-separator {
+        font-size: 28px;
+        line-height: 80px;
+      }
+    }
+  }
+  .tableMes {
+    /deep/ .el-table {
+      font-size: 32px;
+      .cell {
+        line-height: 40px;
+        .el-checkbox__inner {
+          width: 36px;
+          height: 36px;
+          line-height: 36px;
+          &:after {
+            top: 2px;
+            left: 12px;
+            width: 10px;
+            height: 20px;
+          }
+          &:before {
+            top: 16px;
+          }
+        }
+      }
+      th {
+        background: #eee;
+      }
+      tr {
+        height: 80px;
+      }
+    }
+    /deep/ .el-pagination {
+      text-align: center;
+      margin: 35px 0;
+      .el-pagination__total {
+        font-size: 28px;
+      }
+      .btn-prev, .btn-next, .el-pager li {
+        min-width: 48px;
+      }
+      span:not([class*=suffix]), button, .el-pager li, .el-pager li.btn-quicknext, .el-pager li.btn-quickprev {
+        height: 48px;
+        line-height: 48px;
+        font-size: 28px;
+        .el-icon {
+          font-size: 32px;
+        }
+      }
+    }
+  }
+  .operate {
+    text-align: center;
+    margin: 40px 0;
+    .buttonCon {
+      margin: 0 15px;
+    }
+  }
+  .tips {
+    font-size: 38px;
+    color: #EE4433;
+    margin: 0;
+    text-align: center;
+    margin-top: 20px;
+  }
+}
+.helpDialog {
+  .content {
+    .contentItem {
+      overflow: auto;
+      margin: 20px 0 50px 0;
+      max-height: 400px;
+      p {
+        font-size: 42px;
+        margin: 0;
+        line-height: 65px;
+        color: #000;
+      }
+      .title {
+        float: left;
+        width: 35%;
+      }
+      .desc {
+        float: right;
+        text-align: left;
+        width: 65%;
+      }
+    }
+    .operate {
+      margin: 60px 0 20px 0;
+    }
+  }
+}
+.printDialog {
+  .content {
+    .printTips {
+      .count {
+        font-size: 42px;
+        margin: 0;
+        line-height: 65px;
+        color: #000;
+      }
+      .printing {
+        font-size: 70px;
+        color: #1C7BEF;
+        line-height: 70px;
+      }
+    }
+    .operate {
+      margin: 60px 0 20px 0;
+    }
+  }
+}
+</style>
+<style lang="scss">
+.el-picker-panel {
+  width: 800px;
+  line-height: 40px;
+  .el-date-range-picker__header {
+    .el-picker-panel__icon-btn {
+      margin-top: 8px;
+      font-size: 20px;
+    }
+    div {
+      font-size: 20px;
+    }
+  }
+  table th, table td {
+    font-size: 20px;
+    padding: 10px 0;
+  }
+}
+</style>
+

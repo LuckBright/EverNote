@@ -1,0 +1,32 @@
+<template>
+  <el-popover
+    :placement="placement || 'top'"
+    :width="width || '160'"
+    v-model="visible">
+    <p>{{title}}？</p>
+    <div style="text-align: right; margin: 0">
+      <el-button size="mini" type="text" @click="visible = false">取消</el-button>
+      <el-button type="primary" size="mini" @click="confirm">确定</el-button>
+    </div>
+    <el-button slot="reference" type="danger" size="small">删除</el-button>
+  </el-popover>
+</template>
+
+<script>
+export default {
+  props: ['title', 'width', 'placement', 'api', 'value'],
+  data () {
+    return {
+      visible: false
+    }
+  },
+  methods: {
+    confirm () {
+      this.api.del(this.value).then(res => {
+        this.visible = false
+      })
+    }
+  }
+}
+</script>
+

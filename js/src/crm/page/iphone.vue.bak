@@ -1,0 +1,842 @@
+<template>
+  <div id="iphone">
+    <transition enter-active-class="bounceIn" leave-active-class="zoomOutRight">
+      <div class="frame noselect" v-if="visible">
+        <i class="el-icon-minus" @click="closeIphone"></i>
+        <div class="status">
+          <div v-if="isShowStatus">
+            <sys-type
+              v-model="value"
+              :clearable="true"
+              :useValue="true"
+              code="THC_CC_SEAT_CHANGE_STATUS"
+            ></sys-type>
+          </div>
+          <div v-else>
+            <sys-type
+              v-model="value"
+              :clearable="true"
+              :useValue="true"
+              code="THC_CC_SEAT_CHANGE_STATUS_TWO_PHONE"
+            ></sys-type>
+          </div>
+        </div>
+        <el-tabs v-model="activeName" class="pd20">
+          <el-tab-pane label="呼入" name="second" :disabled="callState">
+            <el-row class="mb20">
+              <el-col :span="24" class="mobile">
+                <div class="userinfo">
+                  <p>
+                    <label v-if="!patientName" class="userName">客户姓名</label>
+                    <label v-else class="userName">{{patientName ? patientName : '新用户'}}</label>
+                    <label class="usermobile">
+                      {{patientPhone ? patientPhone : ''}}
+                      <span class="bluec">{{callinTime}}</span>
+                    </label>
+                    <label v-if="callId && isCallin" @click="mobileSelect()">
+                      <i class="transfer iconfont icon-zhuanjie"></i>
+                    </label>
+                    <label v-if="isCallin" @click="hangupCall()">
+                      <i class="hangup iconfont icon-guaduan"></i>
+                    </label>
+                    <label v-if="isHangup" @click="callin()">
+                      <i class="answer iconfont icon-jieting"></i>
+                    </label>
+                  </p>
+                  <p>
+                    <audio autoplay="autoplay" id="audioCall"></audio>
+                  </p>
+                </div>
+              </el-col>
+            </el-row>
+            <el-row class="keyboard">
+              <img src="../assets/phone.gif" class="icon-phone" v-if="receiveCode.length > 0">
+              <div class="btnContianer">
+                <el-button v-if="!isEdit" @click="addUser()">添加客户</el-button>
+                <el-button v-if="isEdit">客户资料</el-button>
+                <el-button v-if="!isAddConsult" @click="addConsult()">添加咨询</el-button>
+                <el-button v-if="isAddConsult">咨询详情</el-button>
+                <el-button>
+                  <a :href="$ever.yihuIndex + '/workspace/reservations'" target="_blank">添加预约</a>
+                </el-button>
+              </div>
+              <div class="content" v-if="isShowcontent === 'addUser'">
+                <div v-if="!isEdit">
+                  <user-baseadd :initdata="patientObj" ref="user" @save="userSave"></user-baseadd>
+                </div>
+                <div v-if="isEdit">
+                  <user-baseinfo :initdata="patientObj" ref="userbaseinfo"></user-baseinfo>
+                </div>
+              </div>
+              <div class="content" v-else>
+                <div v-if="!isAddConsult">
+                  <create-Consultsmall
+                    ref="consult"
+                    :initdata="patientObj.patientId"
+                    :consultId="consultId"
+                    @saveconsult="consultSave"
+                  ></create-Consultsmall>
+                </div>
+                <div v-if="isAddConsult">
+                  <consult-detail :initdata="consultId" ref="consultdetail"></consult-detail>
+                </div>
+              </div>
+            </el-row>
+            <el-row class="submitContainer" v-if="isShowcontent === 'addUser'">
+              <div v-if="!isEdit">
+                <el-button class="cancel-btn" @click="cancel()">取消</el-button>
+                <el-button type="primary" class="submit-btn" @click="submitCustomer()">确认</el-button>
+              </div>
+              <div v-if="isEdit">
+                <el-button type class="cancel-btn" @click="editUserDetail()">编辑</el-button>
+                <el-button class="submit-btn">
+                  <a
+                    :href="this.$ever.crmIndex + 'crm/memberinfo/userinfo/memberinfoedit/' + patientId"
+                    target="_blank"
+                  >补充信息</a>
+                </el-button>
+              </div>
+            </el-row>
+            <el-row class="submitContainer" v-else>
+              <div v-if="isAddConsult">
+                <el-button type class="cancel-btn" @click="editConsult()">编辑</el-button>
+                <el-button class="submit-btn">
+                  <a
+                    :href="this.$ever.crmIndex + 'crm/createconsult?id=' + consultId"
+                    target="_blank"
+                  >补充信息</a>
+                </el-button>
+              </div>
+              <div v-if="!isAddConsult">
+                <el-button type class="cancel-btn" @click="cancel()">取消</el-button>
+                <el-button type="primary" class="submit-btn" @click="submitCustomer()">确认</el-button>
+              </div>
+            </el-row>
+          </el-tab-pane>
+          <el-tab-pane label="呼出" name="first" :disabled="callState">
+            <el-row class="mb20">
+              <el-col :span="24" class="mobile">
+                <label
+                  v-if="this.transferObj.name"
+                >{{callCode.length > 0 ? this.transferObj.name + ' '+ outcall : '请输入手机号'}}</label>
+                <label v-else>{{callCode.length > 0 ? outcall : '请输入手机号'}}</label>
+              </el-col>
+              <el-col :span="24" class="username">
+                <label>{{patientName}}</label>
+              </el-col>
+            </el-row>
+            <el-row class="keyboard">
+              <el-col :span="8" align="center">
+                <el-button :disabled="callState" @click="keyboardup('1')">1</el-button>
+              </el-col>
+              <el-col :span="8" align="center">
+                <el-button :disabled="callState" @click="keyboardup('2')">2</el-button>
+              </el-col>
+              <el-col :span="8" align="center">
+                <el-button :disabled="callState" @click="keyboardup('3')">3</el-button>
+              </el-col>
+              <el-col :span="8" align="center">
+                <el-button :disabled="callState" @click="keyboardup('4')">4</el-button>
+              </el-col>
+              <el-col :span="8" align="center">
+                <el-button :disabled="callState" @click="keyboardup('5')">5</el-button>
+              </el-col>
+              <el-col :span="8" align="center">
+                <el-button :disabled="callState" @click="keyboardup('6')">6</el-button>
+              </el-col>
+              <el-col :span="8" align="center">
+                <el-button :disabled="callState" @click="keyboardup('7')">7</el-button>
+              </el-col>
+              <el-col :span="8" align="center">
+                <el-button :disabled="callState" @click="keyboardup('8')">8</el-button>
+              </el-col>
+              <el-col :span="8" align="center">
+                <el-button :disabled="callState" @click="keyboardup('9')">9</el-button>
+              </el-col>
+              <el-col :span="8" align="center">
+                <el-button :disabled="callState" @click="keyboardup('*')">*</el-button>
+              </el-col>
+              <el-col :span="8" align="center">
+                <el-button :disabled="callState" @click="keyboardup('0')">0</el-button>
+              </el-col>
+              <el-col :span="8" align="center">
+                <el-button :disabled="callState" @click="keyboardup('#')">#</el-button>
+              </el-col>
+            </el-row>
+            <el-row class="footer">
+              <el-col :span="24" align="center">
+                <el-button class="calling" @click="startCall" v-if="!callState"></el-button>
+                <el-button class="called" @click="endCall" v-if="callState"></el-button>
+                <i class="el-icon-circle-cross" v-show="callCode.length > 0" @click="removeCode"></i>
+              </el-col>
+            </el-row>
+          </el-tab-pane>
+        </el-tabs>
+        <mobile-select
+          ref="mobile"
+          :visible="userPop"
+          :initdata="this.callRecordId"
+          :patient-id="this.patientId"
+          @close="closeUserPop"
+          @select="setUserItem"
+          @update="updateUserDia"
+          @transfercall="transferCall"
+        ></mobile-select>
+      </div>
+      <template v-if="!hideicon">
+        <el-button id="blueiphone" v-if="!visible && activeName=='first'" @click="visible = true"></el-button>
+        <el-button id="rediphone" v-if="!visible && activeName=='second'" @click="visible = true"></el-button>
+      </template>
+    </transition>
+    <transition enter-active-class="fadeIn" leave-active-class="fadeOut">
+      <div class="mask" v-if="visible"></div>
+    </transition>
+  </div>
+</template>
+<script>
+import api from '../store/callapi'
+import seatapi from '../store/seatapi'
+import { wsConnect } from '@/util/common/'
+import userBaseadd from '../page/userbaseadd.vue'
+import userBaseinfo from '../page/userbaseinfo.vue'
+import createConsultsmall from '../page/createconsultsmall.vue'
+import consultDetail from '../page/consultdetail.vue'
+import mobileSelect from '../page/mobileselect.vue'
+let ytx = require('ytxjs')
+
+export default {
+  props: ['data', 'hideicon'],
+  data () {
+    return {
+      api: api,
+      seatapi,
+      RL_YTX: ytx.default,
+      visible: false,
+      activeName: 'first',
+      callCode: [],
+      receiveCode: [],
+      callState: false,
+      isNewUser: false,
+      isHangup: false,
+      isCallin: false,
+      userPop: false,
+      openListener: false,
+      ismakeCall: false,
+      isShowcontent: 'addUser',
+      patientObj: {},
+      patientPhone: '',
+      patientName: '',
+      patientId: '',
+      callRecordId: '',
+      VoipReleaseBuilder: {},
+      callObj: {},
+      callId: '',
+      wsCount: 1,
+      wsClient: '',
+      callinTime: '',
+      value: '',
+      consultId: '',
+      transferObj: {},
+      isTransfer: false,
+      isEdit: false,
+      isAddConsult: false,
+      isShowStatus: false
+    }
+  },
+  watch: {
+    visible (val) {
+      if (val) {
+        this.getAnswerType()
+        this.getStatus()
+      }
+    },
+    'activeName': {
+      handler: function (val) {
+        if (val === 'first' && this.visible) {
+          window.addEventListener('keydown', this.keycall)
+        } else {
+          window.removeEventListener('keydown', this.keycall, false)
+        }
+      },
+      immediate: true
+    },
+    data (val) {
+      this.callCode = this.formatPhone(val.mobile)
+      // this.patientPhone = val.mobile
+      this.patientName = val.patientName
+      this.patientId = val.patientId
+    },
+    value (val) {
+      if (val === '1') {
+        this.setH5Sdkconfig()
+      } else if (val === '100') {
+        // todo logout
+        this.logout()
+      }
+      this.updateStatue(val)
+    },
+    openListener (val) {
+      if (val === true) {
+        this.RL_YTX.onCallMsgListener(rs => {
+          // 值是呼出
+          let voipAcceptBuilder = new this.RL_YTX.AcceptCallBuilder()
+          voipAcceptBuilder.setCallId(rs.callId)// 请求的callId
+          voipAcceptBuilder.setCaller(rs.caller)// 请求的主叫号码，即Tony的号码// 通过
+          // 挂断
+          let VoipReleaseBuilder = new this.RL_YTX.ReleaseCallBuilder()
+          VoipReleaseBuilder.setCallId(rs.callId)
+          VoipReleaseBuilder.setCaller(rs.caller)
+          VoipReleaseBuilder.setCalled(rs.called)
+          this.VoipReleaseBuilder = VoipReleaseBuilder
+          if (rs.state === 6) {
+            this.isHangup = true
+          } else if (rs.state === 5) {
+            this.isHangup = false
+            this.hangupCall()
+          }
+          if (this.ismakeCall) {
+            this.accetpCall(voipAcceptBuilder)
+          } else {
+            // todo show iphone.vue 呼入
+            this.visible = true
+            this.activeName = 'second'
+            this.callObj = voipAcceptBuilder
+            this.callId = rs.userdata.split('=')[1].replace(/;/g, '')
+            this.getCallDetail()
+          }
+        })
+      }
+    },
+    // callId (val) {
+    //   console.log('callid : val', val)
+    //   if (val) {
+    //     this.isEdit = true
+    //   }
+    // },
+    isEdit (val) {
+      if (val) {
+        this.isAddConsult = false
+      }
+    }
+  },
+  created () {
+    // todo getAnswerType
+  },
+  methods: {
+    before (dom) {
+    },
+    enter (dom) {
+      // console.log('进入后', dom)
+    },
+    leave (dom) {
+      // console.log('离开', dom)
+    },
+    getStatus () {
+      this.seatapi.getSeatStatus({ doctorId: this.$store.state.currentUser.userId }).then(rs => {
+        // console.log('rs: ', rs)
+      })
+    },
+    start (bolean) {
+      let _this = this
+      let hour, minute, second
+      hour = minute = second = 0
+      if (bolean === true) {
+        _this.timer = setInterval(function () {
+          if (second >= 0) {
+            second = second + 1
+          }
+          if (second >= 60) {
+            second = 0
+            minute = minute + 1
+          }
+          if (minute >= 60) {
+            minute = 0
+            hour = hour + 1
+          }
+          _this.callinTime = hour + '时' + minute + '分' + second + '秒'
+        }, 1000)
+      } else {
+        window.clearInterval(_this.timer)
+      }
+    },
+    addConsult () {
+      if (this.isEdit) {
+        this.isShowcontent = 'consult'
+      } else {
+        alert('请先添加客户资料！')
+      }
+    },
+    addUser () {
+      this.isShowcontent = 'addUser'
+    },
+    formatPhone (val) {
+      let arr = val ? val.split('') : []
+      arr.splice(3, 0, '-')
+      arr.splice(8, 0, '-')
+      return arr
+    },
+    keyboardup (val) {
+      if (this.callCode.length > 16) {
+        return false
+      }
+      if (this.callCode.length === 3 || this.callCode.length === 8) {
+        this.callCode.push('-')
+      }
+      this.patientId = ''
+      this.patientName = ''
+      this.callCode.push(val)
+    },
+    removeCode () {
+      if (this.callCode.length === 5 || this.callCode.length === 10) {
+        this.callCode.pop()
+      }
+      this.callCode.pop()
+    },
+    closeIphone () {
+      this.visible = false
+      this.start(false)
+    },
+    endCall () {
+      this.callState = false
+      this.hangupCall()
+    },
+    updateUserDia (val) {
+      this.userPop = val
+    },
+    closeUserPop () {
+      this.userPop = false
+    },
+    startCall (val) {
+      if (this.isTransfer) {
+        this.api.agentConsult({ callId: this.callId, doctorId: this.transferObj.id, number: this.transferObj.phone }).then(rs => {
+          console.log(rs)
+        })
+      } else {
+        this.api.makeCall({ mobile: this.outcall.split('-').join('') }).then(rs => {
+          this.ismakeCall = true
+        })
+      }
+    },
+    keycall (e) {
+      let rule = /^([0-9]|[*]|[#])+$/g
+      if (e.key === 'Enter' && this.visible) {
+        this.startCall()
+        return false
+      }
+      if (e.key === 'Backspace' || e.key === 'Delete') {
+        this.removeCode()
+        return false
+      }
+      return rule.test(e.key) && this.keyboardup(e.key)
+    },
+    receiveCall () {
+      let doctorId = this.$store.state.currentUser.userId
+      wsConnect('/exchange/exchange.direct.ivr.sign/' + doctorId, (client, d) => {
+        this.wsClient = client
+        let rs = JSON.parse(d.body)
+        if (rs.type === 2) {
+          this.hangupCall()
+        }
+        // let msg = JSON.parse(d.body)
+        // if (_this.outreceive === _this.formatPhone(msg.mobile).join('') && msg.hangup) {
+        //   _this.receiveCode = []
+        //   _this.patientName = ''
+        //   _this.patientId = ''
+        //   return false
+        // }
+        // _this.receiveCode = _this.formatPhone(msg.mobile)
+        // _this.patientName = msg.name
+        // _this.patientId = msg.patientId
+        // _this.activeName = 'second'
+        // _this.visible = false
+      })
+    },
+    submitCustomer () {
+      if (this.isShowcontent === 'addUser') {
+        this.$refs.user.createorUpuserInfo()
+      } else {
+        this.$refs.consult.saveTempalte()
+      }
+    },
+    getCallDetail () {
+      this.api.getCallDetail({ callId: this.callId }).then(rs => {
+        if (rs.data.patient) {
+          this.patientName = rs.data.patientName
+          this.patientObj = rs.data ? rs.data : {}
+          this.patientId = rs.data.patientId
+          this.isEdit = true
+        } else {
+          this.isEdit = false
+        }
+        this.patientPhone = rs.data.calling
+      })
+    },
+    mobileSelect () {
+      this.userPop = true
+    },
+    setUserItem (users) {
+      this.userPop = false
+      let ids = []
+      let names = []
+      users.forEach(user => {
+        ids.push(user.id)
+        names.push(user.name)
+      })
+      this.patientId = ids.join('')
+      this.patientName = names.join(',')
+    },
+    userSave (val) {
+      if (val) {
+        this.isEdit = true
+        this.patientObj = val
+        this.patientName = val.patient.name
+        this.patientPhone = val.patient.mobile
+        this.patientId = val.patientId
+      }
+    },
+    consultSave (val) {
+      this.isAddConsult = true
+      this.consultId = val
+    },
+    transferCall (val) {
+      this.activeName = 'second'
+      this.callCode = this.formatPhone(val.phone)
+      this.transferObj = val
+      this.isTransfer = true
+    },
+    getAnswerType () {
+      this.api.getAnswerType().then(rs => {
+        if (rs.data.clientType === 0) {
+          this.isShowStatus = true
+        }
+      })
+      this.receiveCall()
+    },
+    setH5Sdkconfig () {
+      let _this = this
+      this.seatapi.getYtxConfig().then(rs => {
+        let appid = rs.data.appId
+        let resp = this.RL_YTX.init(appid)
+        if (resp.code === 200) {
+          let loginBuilder = new this.RL_YTX.LoginBuilder()
+          loginBuilder.setType(3)
+          loginBuilder.setPwd(rs.data.voipPwd)
+          loginBuilder.setUserName(rs.data.voipAccount)
+          // loginBuilder.setSig(rs.data.sign)
+          loginBuilder.setTimestamp(rs.data.timestamp)
+          this.RL_YTX.login(loginBuilder, function (rs) {
+            console.log('登录成功: ', rs)
+          }, function (err) {
+            console.log('登录失败: ', err.msg)
+            _this.value = '0'
+          })
+        }
+      })
+    },
+    logout () {
+      this.RL_YTX.logout(function () {
+      }, function (obj) {
+      })
+    },
+    updateStatue (val) {
+      this.seatapi.getUpdateStatue({ status: val }).then(rs => {
+        if (rs.head.errCode === 0) {
+          this.openListener = true
+          // this.callId = '180517182024600100010038000058bc'
+          // this.getCallDetail()
+        }
+      })
+    },
+    callin () {
+      this.isCallin = true
+      this.isHangup = false
+      this.accetpCall(this.callObj)
+      this.start(true)
+    },
+    accetpCall (obj) {
+      let _this = this
+      this.RL_YTX.setCallView(document.getElementById('audioCall'), null)
+      document.getElementById('audioCall').volume = 0.5
+      this.RL_YTX.accetpCall(obj, function (rs) {
+        console.log('success', rs)
+        _this.callState = true
+      }, function callback (err) {
+        console.log(err)// 错误码
+        _this.value = '0'
+      })
+    },
+    hangupCall (obj) {
+      this.start(false)
+      let _this = this
+      this.RL_YTX.releaseCall(this.VoipReleaseBuilder, function (rs) {
+        _this.isHangup = false
+        _this.value = '0'
+        _this.callState = false
+        _this.isCallin = false
+      }, function (obj) { alert(obj.code) })
+    },
+    cancel () {
+      if (this.patientObj.id) {
+        if (this.isShowcontent === 'addUser') {
+          this.isEdit = true
+        } else {
+          this.isAddConsult = true
+        }
+      }
+    },
+    editUserDetail () {
+      this.isEdit = false
+      // if (this.callId) {
+      //   this.getCallDetail()
+      // } else {
+      //   // todo 查询患者信息
+      //   console.log(this.patientObj)
+      // }
+    },
+    editConsult () {
+      this.isAddConsult = false
+    }
+  },
+  computed: {
+    outcall () {
+      return this.callCode.join('')
+    },
+    outreceive () {
+      return this.receiveCode.join('')
+    }
+  },
+  destroyed () {
+    if (this.wsClient) {
+      this.wsClient.disconnect(rs => {
+        console.log('连接已断开')
+      })
+    }
+    window.removeEventListener('keydown', this.keycall, false)
+  },
+  components: {
+    userBaseadd,
+    userBaseinfo,
+    createConsultsmall,
+    consultDetail,
+    mobileSelect
+  }
+}
+</script>
+<style scoped>
+#iphone .mask {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1999;
+}
+#iphone .frame {
+  position: fixed;
+  width: 700px;
+  height: 510px;
+  left: 50%;
+  margin-left: -350px;
+  top: 50%;
+  margin-top: -245px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.12), 0 0 6px 0 rgba(0, 0, 0, 0.04);
+  z-index: 2000;
+}
+#iphone .el-tabs__item {
+  text-align: center;
+  font-weight: normal;
+  display: inline-block;
+  width: 68px;
+}
+#iphone .el-tabs__active-bar {
+  height: 2px;
+}
+#iphone .el-tabs__header {
+  border-bottom: none;
+  background-color: #f8f8f8;
+  padding-left: 20px;
+}
+#iphone .mobile {
+  text-align: center;
+  font-size: 22px;
+  padding: 10px 0 15px 0;
+  color: #000;
+  height: 52px;
+}
+#iphone .userinfo {
+  width: 660px;
+  background-color: #f8f8f8;
+  margin-left: 20px;
+  height: 50px;
+  text-align: center;
+  font-size: 14px;
+  color: #000;
+  border-radius: 4px;
+}
+.userinfo p {
+  text-align: center;
+  vertical-align: middle;
+  float: left;
+  width: 100%;
+}
+.btnContianer {
+  text-align: left;
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+.userName {
+  margin-left: 18px;
+  float: left;
+}
+.usermobile {
+  margin-left: 30px;
+  float: left;
+}
+.answer {
+  float: right;
+  font-size: 25px;
+  margin-right: 15px;
+  width: 25px;
+  height: 25px;
+  color: #72cc44;
+}
+.hangup {
+  float: right;
+  font-size: 25px;
+  margin-right: 15px;
+  width: 25px;
+  height: 25px;
+  color: #fe6555;
+}
+.transfer {
+  float: right;
+  font-size: 25px;
+  margin-right: 15px;
+  width: 25px;
+  height: 25px;
+  color: #1c7bef;
+}
+.submitContainer {
+  float: right;
+  margin-right: 20px;
+  margin-top: 20px;
+}
+.content {
+  max-height: 240px;
+  overflow-y: auto;
+  border-bottom: 1px solid #dddddd;
+}
+#iphone .username {
+  text-align: center;
+  color: #999;
+  height: 18px;
+}
+#iphone .keyboard {
+  text-align: center;
+}
+#iphone .keyboard .el-col {
+  padding-bottom: 19px;
+}
+#iphone .keyboard .el-col .el-button {
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  border-radius: 50%;
+  font-size: 18px;
+}
+#iphone .keyboard .el-col .el-button:hover {
+  background: #1c7bef;
+  color: #fff;
+}
+#iphone .footer {
+  position: relative;
+  padding: 0;
+}
+#iphone .footer .el-col .calling {
+  width: 50px;
+  height: 50px;
+  background: url("../assets/calling.png") center center no-repeat;
+  background-size: 135%;
+  border-radius: 50%;
+}
+#iphone .footer .el-col .called {
+  width: 50px;
+  height: 50px;
+  background: url("../assets/called.png") center center no-repeat;
+  background-size: 135%;
+  border-radius: 50%;
+}
+#iphone .footer .el-col .called:hover {
+  border-color: #ee4433 !important;
+}
+#iphone .el-icon-minus {
+  position: absolute;
+  z-index: 2000;
+  right: 10px;
+  top: 14px;
+  cursor: pointer;
+  color: #999999;
+}
+#iphone .status {
+  position: absolute;
+  z-index: 2000;
+  right: 40px;
+  top: 0px;
+  cursor: pointer;
+  color: #999999;
+  width: 98px;
+}
+#iphone .el-select-dropdown {
+  position: absolute;
+  z-index: 99999 !important;
+}
+#iphone .el-icon-circle-cross {
+  color: #dddddd;
+  font-size: 20px;
+  position: absolute;
+  top: 50%;
+  margin-top: -10px;
+  right: 26px;
+  z-index: 10000;
+  cursor: pointer;
+}
+#blueiphone {
+  width: 50px;
+  height: 50px;
+  background: url("../assets/calling.png") center center no-repeat;
+  background-size: 135%;
+  border-radius: 50%;
+  position: fixed;
+  bottom: 144px;
+  right: 44px;
+  z-index: 999999;
+}
+#rediphone {
+  width: 50px;
+  height: 50px;
+  background: url("../assets/called.png") center center no-repeat;
+  background-size: 135%;
+  border-radius: 50%;
+  position: fixed;
+  bottom: 44px;
+  right: 44px;
+  z-index: 999999;
+}
+#iphone .icon-phone {
+  width: 100px;
+  margin-top: 80px;
+}
+.bluec {
+  color: #1c7bef;
+  margin-left: 20px;
+}
+.bgcolor {
+  background-color: #ffffff;
+}
+.pd20 {
+  padding: 0px 20px;
+}
+</style>

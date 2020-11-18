@@ -1,0 +1,191 @@
+<template>
+  <div>
+    <div class="layout_inner">
+      <div class="panel-body">
+        <div class="hr">
+          <h4>生成唯一码</h4>
+          <el-form label-position="rigth" label-width="180px" :rules="rules" :model="ruleForm" ref="ruleForm" onsubmit="return false;">
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="类型:" prop="materialType">
+                  <ever-select v-model="ruleForm.materialType" :options="options"></ever-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12" class="pos_re">
+                <div class="explain pos_ab">
+                  <h6>说明：</h6>
+                  <p>唯一码可以方便快捷的标识物品、使用后可以保证物品的唯一性；</p>
+                  <p>操作：选择类型-->输入数量-->点击生成-->点击打印，即可完成打印。</p>
+                </div>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="生成数量:" prop="codeNum">
+                  <el-input v-model.number="ruleForm.codeNum" type="number" placeholder="每次最多生成100个"></el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item>
+                  <el-button type="primary" @click="submitForm('ruleForm')">生成</el-button>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20" v-if="codes.length">
+              <el-col :span="24">
+                <el-form-item>
+                  <div class="printOnlyCode">
+                    <strong>
+                      共生成{{codes.length}}个唯一码
+                    </strong>
+                    <div class="code">
+                      <span v-for="(code, i) in codes" :key="i">{{code.uniqueCode}}</span>
+                    </div>
+                    <el-button type="primary" @click="printFile">打印</el-button>
+                  </div>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </div>
+        <div>
+          <h4>快捷打印</h4>
+          <el-form label-position="rigth" label-width="180px" :rules="rules1" :model="fastForm" ref="fastForm" onsubmit="return false;">
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="唯一码:" prop="uniqueCode">
+                  <el-input v-model="fastForm.uniqueCode" placeholder="请录入唯一码" :maxlength="19"></el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item>
+                  <el-button type="primary" @click="printFile1('fastForm')">打印</el-button>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </div>
+      </div>
+    </div>
+    <div id="print" style="display: none">
+      <div v-for="(code, i) in codes" :key="i">
+        <barcode v-if="code.uniqueCode" :value="code.uniqueCode" :options="barcodeOptions" tag="svg"></barcode>
+      </div>
+    </div>
+    <div id="print1" style="display: none">
+      <barcode v-if="fastForm.uniqueCode" :value="fastForm.uniqueCode" :options="barcodeOptions" tag="svg"></barcode>
+    </div>
+    <iframe style="position: absolute; width: 200px; height: 100px; left: -500px; top: -500px;" id="piframe"></iframe>
+  </div>
+</template>
+<script>
+import {doPrint, DRUGTYPE, MATERIALTYPE, EQUIPMENTTYPE} from '@/util/common'
+import sysvalue from '@/warehouse/store/sysvalueapi'
+import uniqueCodeApi from '@/warehouse/page/storages/store/uniquecodeapi'
+export default {
+  name: 'code',
+  data () {
+    var checkOnlyCode = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('必填项'))
+      } else {
+        callback()
+      }
+      // else if (!/^[a-zA-Z]\w{18,18}$/.test(value)) {
+      //   callback(new Error('字母开头数字结尾，长度为19'))
+      // }
+    }
+    return {
+      barcodeOptions: { displayValue: true, width: 3, height: 90, fontSize: 24, margin: 0, textMargin: 0, font: '微软雅黑' },
+      ruleForm: {
+        materialType: DRUGTYPE,
+        codeNum: ''
+      },
+      fastForm: {
+        uniqueCode: ''
+      },
+      codes: [],
+      options: [],
+      rules: {
+        codeNum: [
+          {required: true, message: '必填项', trigger: 'blur', type: 'number'},
+          {max: 100, min: 1, message: '每次最多生成100个唯一码', trigger: 'blur', type: 'number'}
+        ]
+      },
+      rules1: {
+        uniqueCode: [
+          {required: true, validator: checkOnlyCode, trigger: 'blur'}
+        ]
+      }
+    }
+  },
+  created () {
+    sysvalue.listOnce('THC_WH_OBJECT_TYPE').then(res => {
+      if (res) {
+        let arr = []
+        res.forEach(item => {
+          if (item.id === DRUGTYPE || item.id === MATERIALTYPE || item.id === EQUIPMENTTYPE) {
+            arr.push(item)
+          }
+        })
+        this.options = arr
+      }
+    })
+  },
+  methods: {
+    handleFastPrint () {
+
+    },
+    printFile () {
+      let printObj = {
+        margin: [0]
+      }
+      doPrint(this, 'print', printObj)
+    },
+    printFile1 (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          let printObj = {
+            margin: [0]
+          }
+          doPrint(this, 'print1', printObj)
+        }
+      })
+    },
+    submitForm (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          uniqueCodeApi.create(this.ruleForm).then(res => {
+            if (res[0]) this.codes = res
+          })
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.panel-default {border: none; border-radius: 0; padding: 20px 0 0 0;}
+.explain { top: 0; left: 5%;
+  padding: 20px;
+  background: #f4f4f4;
+  border-radius: 5px;
+  width: 80%;
+  h6 { padding: 0; font-size: 16px; margin: 0}
+  p { font-size: 14px;}
+}
+.printOnlyCode { background: rgba(255, 253, 242, 1); border: 1px solid #eee; padding: 20px; width: 80%; border-radius: 5px; display: block;
+  .code { padding-bottom: 20px; width: 100%; display: block;}
+  .code span { display: inline-block; width: 16.66%;}
+}
+@media screen and (max-width: 1600px) {
+  .printOnlyCode .code span {width: 19%;}
+}
+</style>

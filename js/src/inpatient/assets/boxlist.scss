@@ -1,0 +1,354 @@
+.box_list{
+  min-height:200px;
+  .el-card{
+    height: 168px;
+  }
+  /deep/ .el-card__body{
+    height: 100%;
+  }
+  .patient_card{
+    margin:1px;
+    position: relative;
+
+    &:hover{
+      border:1px solid #1c7bef;
+    }
+    &.dai{
+      border-left:4px solid #1c7bef;
+      background: #ECF5FF;
+    }
+    &.check{
+      margin:0px;
+      border:2px solid #1c7bef;
+      background-color: #ECF5FF;
+    }
+  }
+  .patient_card_intoview{
+    transition:  all 800ms ease-in-out;
+    transform: scale(1.3);
+    z-index: 5000;
+  }
+  .ever-row-01{
+    padding-left:10px;
+    .el-col{
+      padding-left: 0;
+      margin-bottom: 10px;
+    }
+  }
+  .cls-1{fill:#e3e3e3;}
+  .cls-2{fill:url(#未命名的渐变);}
+  .cls-11{fill:#ffa1b2;}.cls-12{fill:#1c7bef;}
+  .cls-13{fill:#5dccff;}
+  .mainTopshu{
+    background: url('./../assets/opreation.png') no-repeat right 81px ;
+    background-color: #fff;
+    background-size: 85px 85px;
+  }
+  .mainTopchan{
+    background: url('./../assets/chan.png') no-repeat right 81px ;
+    background-color: #fff;
+    background-size: 85px 85px;
+  }
+	.mainTop{
+    font-size:12px;
+    height: 100%;
+    .emptyBed {
+      height: 100%;
+      text-align:center;
+      min-height: 94px;
+      img{
+        margin-top:30px;
+      }
+      svg{
+        margin-top:30px;
+        width: 100px;
+      }
+    }
+    .baoBed{
+      text-align: right;
+      p{
+        padding:0 10px;
+        color: #333;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 40px;
+        text-align: left;
+      }
+    }
+		p{
+		  margin:0;
+		}
+		.title{
+      line-height:35px;
+      background-color:#E8F3FF;
+      color: #333;
+      font-size: 12px;
+      padding-left: 5px;
+      b.bednum{
+        float: left;
+        line-height:35px;
+        color:#666;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space: nowrap;
+        font-weight: 700;
+        font-size: 14px;
+        padding:0;
+        vertical-align: middle;
+        box-sizing:border-box;
+        max-width: 100px;
+        padding-right: 10px;
+        margin-left:7px;
+      }
+      span.separate{
+        float: left;
+        width: 1px;
+        background-color: #666;
+        height: 15px;
+        margin-top: 10px;
+      }
+      span.care{
+        float: left;
+        padding-left: 6px;
+        padding-right: 5px;
+        b{
+          display: inline-block;
+          width: 8px;
+          height: 8px;
+          border-radius: 4px;
+          margin-right: 5px;
+        }
+        .icon{
+          font-size:16px;
+          color:#EE4433;
+        }
+        .lever1{
+          background-color: #EE4433;
+        }
+        .lever2{
+          background-color: #1C7BEF;
+        }
+        .lever3{
+          background-color: #43C890;
+        }
+      }
+      span.intime{
+        float: right;
+        padding-bottom: 0;
+
+        width: 60px;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space: nowrap;
+      }
+    }
+    .zhong{
+      background: #FFf3e0;
+      b.bednum{
+        color: #FF9C00;
+      }
+      span.separate{
+        background-color: #FF9C00;
+
+      }
+    }
+    .wei{
+      background: #EE4433;
+      b.bednum{
+        color: #fff;
+      }
+      span.separate{
+        background-color: #fff;
+
+      }
+      span.care{
+        color: #fff;
+        .icon{
+          color:#fff;
+        }
+      }
+      span.intime{
+        color: #fff;
+      }
+      .nursinglevel{
+        color: #fff;
+      }
+    }
+		.userinfo{
+      padding-left: 14px;
+      line-height:28px;
+      height: 28px;
+      color:#333;
+      margin-top:5px;
+      overflow: hidden;
+      font-size: 12px;
+			b{
+        font-size: 14px;
+				margin-right:15px;
+      }
+      span{
+        display: inline-block;
+        vertical-align: top;
+      }
+      div.baby{
+        padding-right: 10px;
+        float: right;
+        padding-top: 1px;
+        svg{
+          margin-top: 3px;
+          width: 25px;
+          height: 18px;
+          display: block;
+          float: left;
+        }
+        i{
+          margin-left:5px;
+          font-size: 20px;
+          display: block;
+          float: left;
+        }
+        .girl{
+          color: #FFA1B2
+        }
+        .boy{
+          color: #5DCCFF;
+        }
+        .unknow{
+          color: #AA7BFF;
+        }
+        p{
+          color: #666666;
+          font-size: 14px;
+          line-height: 20px;
+          margin:0;
+        }
+      }
+    }
+		.illinfo{
+			line-height:30px;
+      color:#000;
+      padding:0 10px;
+      margin-right:0;
+			span{
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 100%;
+			}
+
+    }
+    .peihu{
+      padding: 0 10px;
+      line-height: 30px;
+      height: 30px;
+      display: flex;
+      flex-wrap:nowrap;
+      justify-content:space-between;
+      span{
+        display: block;
+        text-overflow:ellipsis;
+        overflow:hidden;
+        white-space: nowrap;
+      }
+      .right{
+         text-align: right;
+      }
+    }
+    .status{
+      padding:0 10px;
+      position: relative;
+      height: 30px;
+      line-height: 30px;
+      span.pos{
+				i{
+          display:inline-block;
+          vertical-align: middle;
+				  width:18px;
+          height:18px;
+          line-height: 18px;
+				  // border-radius:50%;
+				  font-size:12px;
+				  text-align:center;
+          font-style:normal;
+          cursor: pointer;
+				  &.org{
+				  	// border:1px solid #F9C553;
+				  	// background: rgba(249,197,83,0.12);
+				  	color:#F9C553;
+				  }
+				  &.red{
+				  	// background: rgba(238,68,51,0.12);
+						// border: 1px solid #EE4433;
+				  	color:#EE4433;
+				  }
+				  &.blue{
+				  	// background: rgba(28,123,239,0.12);
+	  				// border: 1px solid #1C7BEF;
+				  	color:#1C7BEF;
+				  }
+				  &.green{
+				  	// background: rgba(103,194,58,0.10);
+	  				// border: 1px solid #67C23A;
+				  	color:#67C23A;
+				  }
+				}
+			}
+			em{
+				position:absolute;
+				top:-34px;
+				left:-37px;
+				width:0;
+				height:0;
+				border-color:transparent transparent #EE4433 transparent;
+				border-width:21px;
+				border-style: solid;
+				font-style:normal;
+			  	transform: rotate(-45deg);
+    			border-radius: 4px;
+    		b{
+    			position:relative;
+    			left:-6px;
+				color:#fff;
+	    		font-size:12px;
+	    		line-height:26px;
+    		}
+      }
+      .el-dropdown{
+        position: absolute;
+        right:10px;
+        top:5px;
+        i{
+          font-size: 19px;
+        }
+      }
+      .btn{
+        float: right;
+      }
+    }
+  }
+  .lock{
+    background-color: #f5f5f5;
+    .title{
+      color:#999999;
+      background-color:#DFDFDF;
+    }
+  }
+	.footer_patient{
+		background: #F8F8F8;
+		line-height:50px;
+		div{
+			width:100%;
+			display:flex;
+			a{
+			  flex:1;
+				font-size:16px;
+				color:#000;
+				text-align:center;
+			}
+			.br1{
+			  border-right:1px solid #eee;
+			}
+		}
+	}
+}

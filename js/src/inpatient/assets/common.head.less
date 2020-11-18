@@ -1,0 +1,235 @@
+.bg-box {
+  font-size: 12px;
+  font-weight: normal;
+  color: rgb(255, 255, 255);
+  display: inline-block;
+  height: 22px;
+  border-radius: 2px;
+  padding: 0 5px;
+}
+.common-head-box {
+  display: flex;
+  padding: 6px 10px;
+  background-color: #fff;
+  &.is-empty-station {
+    height: 0;
+    padding: 0;
+  }
+  .common-head-content {
+    flex: 1;
+    transition: height 0.6s ease-in-out;
+    &.not-expand {
+      height: 26px;
+      overflow: hidden;
+    }
+    .common-head-item {
+      margin-right: 15px;
+      white-space: nowrap;
+      line-height: 22px;
+      // 在没有分隔符的情况下，在mac上表现良好
+      // 有分隔符时，感觉分隔符占高比较大
+      display: inline-block;
+      height: 28px;
+
+      &.is-separate {
+        width: 100%;
+        margin-right: 0;
+        border-bottom: 1px solid #eeeeef;
+        height: 3px;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .common-head-item-container {
+        &.is-bg-container {
+          display: inline-block;
+          padding: 0 5px;
+          border-radius: 2px;
+
+        }
+        .common-head-item-label {
+
+        }
+        .common-head-item-value {
+
+        }
+      }
+      .common-head-custom {
+        // 自定义组件的共同样式
+        // 默认的标签样式
+        .common-head-def-label {
+          font-size: 12px;
+          font-weight: normal;
+          color: rgb(153, 153, 153);
+        }
+        // 默认内容样式
+        .common-head-def-value {
+          font-size: 12px;
+          font-weight: normal;
+          color: rgb(21, 21, 21);
+        }
+        &.is-bg-container {
+          //font-size: 12px;
+          //font-weight: normal;
+          //color: rgb(255, 255, 255);
+          //display: inline-block;
+          //height: 22px;
+          //border-radius: 2px;
+          //padding: 0 5px;
+          .bg-box;
+          &.is-bg-green {
+            background-color: #68C899; // 绿
+          }
+          &.is-bg-blue {
+            background-color: #1C7BEF; // 蓝
+          }
+          &.is-bg-yellow {
+            background-color: #FAAD14; // 黄
+          }
+          &.is-bg-red {
+            background-color: #EE4433; // 红
+          }
+          .common-head-def-label {
+            color: #fff;
+          }
+          .common-head-def-value {
+            color: #fff;
+          }
+        }
+        // todo 自定义组件的样式统一写在此处
+        // 商保
+        &.common-head-biz-insurance {
+          .el-dropdown {
+            font-size: 12px;
+            color: #151515;
+          }
+        }
+        &.common-head-name {
+          .el-link--inner {
+            font-size: 18px; // 设计稿上为16px，但是由于其他样式无法匹配，这里18px 更协调一些
+          }
+        }
+        .blood-pressure-exception {
+          .bg-box;
+          background-color: #EE4433;
+        }
+        // 异常箭头
+        .common-head-exception-icon {
+          font-size: 12px;
+          color: #fff;
+          vertical-align: 0;
+        }
+        .common-head-icon-infectious {
+          color: #e43;
+          font-size: 12px;
+          vertical-align: middle;
+        }
+        &.common-head-item-container-rule-0 {
+          .common-head-icon-chart {
+            &.icon-PHR-quxiantufanbai {
+              color: #68C899;
+            }
+            &.icon-PHR-quxiantu {
+              color: #68C899;
+            }
+          }
+        }
+        // 异常体温
+        &.common-head-item-container-rule-1,
+        &.common-head-item-container-rule--1 {
+          //font-size: 12px;
+          //font-weight: normal;
+          //color: rgb(255, 255, 255);
+          //display: inline-block;
+          //height: 22px;
+          //border-radius: 2px;
+          //padding: 0 5px;
+          .bg-box;
+          &.common-head-item-container-exception-type-1 {
+            background-color: #FAAD14;
+            .icon-qiboqi {
+              color: #fff;
+            }
+          }
+          &.common-head-item-container-exception-type-2 {
+            background-color: #EE4433;
+          }
+          .common-head-def-label {
+            color: #fff;
+          }
+          .common-head-def-value {
+            color: #fff;
+          }
+        }
+      }
+      // 药物过敏史，和非药物过敏史均采用红底白字 在这里定义（todo微调字体）
+      //.common-head-custom.common-head-warning {
+      //  background: #e43;
+      //  padding: 0 5px;
+      //  border-radius: 3px;
+      //  display: inline-block;
+      //  line-height: 18px;
+      //  .common-head-def-label {
+      //    color: #fff;
+      //  }
+      //  .common-head-def-value {
+      //    color: #fff;
+      //  }
+      //}
+      .common-head-icon-chart {
+        margin-left: 2px;
+        vertical-align: middle;
+        &.icon-PHR-quxiantufanbai {
+          font-size: 12px;
+        }
+        &.icon-PHR-quxiantu {
+          font-size: 12px;
+          color: #68C899;
+        }
+      }
+      .icon-huxiji, .icon-qiboqi {
+        color: #FAAD14;
+      }
+    }
+  }
+  // 更多按钮
+  .common-head-more {
+    width: 80px;
+    display: flex;
+    justify-content: center;
+    .common-head-more-btn {
+      padding-top: 7px;
+      padding-bottom: 7px;
+      background: #F7F8FA;
+      border: 1px solid #EEEEEE;
+      border-radius: 2px;
+      height: 28px;
+      span {
+        display: flex;
+        color: #333;
+        .more.iconfont {
+          margin-left: 2px;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+}
+.common-head-ellipsis {
+  //overflow: hidden;
+  //text-overflow: ellipsis;
+  //width: 320px;
+}
+.common-head-icon-info {
+  font-size: 12px;
+  margin-right: 2px;
+}
+.common-head-icon {
+  font-size: 14px;
+  margin-right: 2px;
+}
+.common-head-icon-balance {
+  color: #FAAD14;
+}
+.common-head-icon-expectedDateOfChildbirth {
+  color: #FAAD14;
+}

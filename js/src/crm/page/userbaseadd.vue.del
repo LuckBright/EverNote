@@ -1,0 +1,244 @@
+<template>
+  <div class="main-war add_user_info">
+    <div class="l1">
+      <el-row>
+        <el-col :span="20">
+          <div class="userProfileWar">
+            <ever-form-model
+              :schema="schema"
+              v-model="obj"
+              :api="api"
+              :rules="rules"
+              ref="userinfo"
+              label-position="right">
+              <template slot="sex">
+                <sys-type v-model="obj.sex" code="GBT.2261.1" :useValue="true"></sys-type>
+                <el-checkbox v-if="obj.sex === '2'" v-model="obj.pregnant" label="false" style="margin-left:10px">孕妇</el-checkbox>
+              </template>
+              <template slot="idNo">
+                <el-input  v-model="obj.idNo" placeholder="请输入证件号"></el-input>
+              </template>
+              <div slot="default"></div>
+            </ever-form-model>
+          </div>
+        </el-col>
+      </el-row>
+    </div>
+  </div>
+</template>
+
+<script>
+import api from '../store/memberapi'
+// import snapi from '../../workspace/store/userbaseapi'
+import moment from 'moment'
+var schema = [
+  {
+    name: 'name',
+    label: '姓名',
+    span: 12
+  },
+  {
+    name: 'sex',
+    type: 'custom',
+    span: 12,
+    label: '性别'
+  },
+  {
+    name: 'type',
+    type: 'systype',
+    code: 'CV02.01.101',
+    span: 12,
+    useValue: true,
+    className: 'idType',
+    label: '证件类型'
+  },
+  {
+    name: 'idNo',
+    type: 'custom',
+    span: 12,
+    label: '证件号码'
+  },
+  {
+    name: 'mobile',
+    span: 12,
+    placeholder: '请输入电话号',
+    label: '手机号'
+  },
+  {
+    name: 'birthday',
+    span: 12,
+    label: '生日',
+    type: 'date',
+    pickerOptions: {
+      disabledDate (time) {
+        return time.getTime() > Date.now()
+      }
+    }
+  },
+  {
+    name: 'remark',
+    label: '备注',
+    span: 24,
+    type: 'textarea'
+  }
+]
+
+export default {
+  props: ['initdata'],
+  data () {
+    var obj = this.$ever.createObjFromSchema(schema)
+    obj.sex = ''
+    obj.pregnant = 0
+    var checkIdNo = (rule, value, callback) => {
+      var reg = /^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/
+      if (this.obj.type === '1') { // 身份证
+        var idno = this.obj.idNo.trim().substr(6, 8)
+        var isD = moment(idno, 'YYYY-MM-DD').isValid()
+        if (!reg.test(this.obj.idNo.trim()) || !isD) {
+          return callback(new Error('请输入正确的身份证号'))
+        } else if (!this.obj.birthday) { // 身份证
+          let y = idno.substr(0, 4)
+          let m = idno.substr(4, 2)
+          let d = idno.substr(6, 2)
+          this.obj.birthday = y + '-' + m + '-' + d
+        }
+      }
+      callback()
+    }
+    return {
+      dialogVisible: false,
+      schema,
+      obj,
+      api,
+      // snapi,
+      iden: {},
+      objId: this.$route.params.id > -1 ? this.$route.params.id : null,
+      pickerOptions0: {
+        disabledDate (time) {
+          return time.getTime() > Date.now()
+        }
+      },
+      rules: {
+        name: [
+          { required: true, message: '请输入姓名', trigger: 'blur' },
+          { min: 2, max: 40, message: '长度在 2 到 40 个字符', trigger: 'blur' }
+        ],
+        mobile: [
+          { required: true, message: '请输入手机号', trigger: 'blur' },
+          { min: 11, max: 11, message: '请输入11位手机号码', trigger: 'blur' },
+          { pattern: /^1[34578]\d{9}$/, message: '请输入正确的手机号码' }
+        ],
+        sex: [
+          { required: true, message: '请选择性别', trigger: 'blur' }
+        ],
+        idNo: [
+          { required: false, validator: checkIdNo, trigger: 'blur' }
+        ]
+      },
+      options: [
+        { id: 1, 'name': '男' },
+        { id: 2, 'name': '女' }
+      ]
+    }
+  },
+  methods: {
+    // 4.11.1 by lvjiangtao@everjiankang.com 无人调用，删除
+    // createorUpuserInfo () {
+    //   this.snapi.getSn().then(res => {
+    //     localStorage.setItem('storagesn', res.data)
+    //     this.obj.sn = res.data
+    //     this.obj.birthday = this.obj.birthday ? moment(this.obj.birthday).format('YYYY-MM-DD 00:00:00') : ''
+    //     if (this.obj.idNo && this.obj.type) {
+    //       this.iden.idNo = this.obj.idNo ? this.obj.idNo : null
+    //       this.iden.type = this.obj.type ? this.obj.type : null
+    //       this.obj.iden = this.iden ? this.iden : null
+    //     }
+    //     this.$refs.userinfo.$refs.form.validate(valid => {
+    //       if (valid) {
+    //         this.api.createOrUpdate(this.obj).then(rs => {
+    //           if (rs.head.errCode === 0) {
+    //             this.$emit('save', rs.data)
+    //           }
+    //         })
+    //       }
+    //     })
+    //   })
+    // }
+  },
+  created () {
+    if (this.initdata.patient) {
+      this.obj = Object.assign(this.obj, this.initdata.patient)
+      this.obj.sex = this.initdata.patient && this.initdata.patient.sex ? this.initdata.patient.sex.toString() : ''
+    }
+  },
+  watch: {
+    'initdata': {
+      handler: function (val) {
+        if (val) {
+          this.obj = val
+          this.obj.type = val.iden && val.iden.type ? val.iden.type : ''
+          this.obj.idNo = val.iden && val.iden.idNo ? val.iden.idNo : ''
+        }
+      },
+      deep: true
+    },
+    'obj.sex': {
+      handler: function (val, oldVal) {
+        if (val === '1') {
+          this.obj.pregnant = 0
+        }
+      },
+      deep: true
+    },
+    'obj.age': {
+      handler: function (val) {
+        if (val < 0 || isNaN(val)) {
+          this.$notify({
+            title: '警告',
+            message: '请输入正确的年龄格式',
+            type: 'warning'
+          })
+          val = 0
+          this.obj.age = 0
+          return
+        }
+        let birth = moment().format('YYYY') - val
+        if (!this.obj.birthday) {
+          this.obj.birthday = birth + '-01' + '-01'
+        } else {
+          let birthday = new Date(this.obj.birthday)
+          let today = new Date()
+          if (birthday.getMonth() > today.getMonth()) {
+            birth--
+          } else if (birthday.getDate() > today.getDate()) {
+            birth--
+          }
+          today.setFullYear(birth)
+          today.setMonth(birthday.getMonth())
+          today.setDate(birthday.getDate())
+          this.obj.birthday = moment(today).format('YYYY-MM-DD 00:00:00')
+        }
+      }
+    },
+    'obj.birthday': {
+      handler: function (val) {
+        if (val !== null) {
+          let birthday = new Date(val)
+          let currentday = new Date()
+          let age
+          if (currentday.getMonth() < birthday.getMonth()) {
+            age = currentday.getFullYear() - birthday.getFullYear() - 1
+          } else if (currentday.getDate() < birthday.getDate()) {
+            age = currentday.getFullYear() - birthday.getFullYear() - 1
+          } else {
+            age = currentday.getFullYear() - birthday.getFullYear()
+          }
+          this.obj.age = age
+        } else {
+          this.obj.age = ''
+        }
+      }
+    }
+  }
+}
+</script>

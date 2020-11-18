@@ -1,0 +1,84 @@
+
+<template>
+<!-- 门诊摆药单 -->
+  <div class="clinic-container">
+    <!-- 搜索框 -->
+    <div class="clinic-search">
+      <div>
+        <dispen-search ref="inputSeach" placeholder="请输入摆药单号" @searchQuery="handleSearch" @seachAfterInquiry="handleAfterInquiry" :isAfterInquiry="isAfterInquiry"></dispen-search>
+      </div>
+    </div>
+    <!-- 患者信息 -->
+    <div class="pos_re" v-if="prescriptionObj.currentOutpatientDispense && prescriptionObj.currentOutpatientDispense.length">
+      <patient-header :patientId="currentVisitPatientId" :visitNumber="currentVisitNumber" :code="PATIENT_HEAD"></patient-header>
+      <!-- <history-btn @getLogList="getLogList"></history-btn> -->
+    </div>
+    <!-- 处方信息 -->
+    <div class="clinic-table">
+      <p class="table-type">摆药单信息</p>
+      <div class="table-content" v-for="(item, index) in prescriptionObj.currentOutpatientDispense" :key="index" :class="item[0].adviceType == TRADITIONAL_CHINESE_MEDICINE || item[0].adviceType == CHINESE_PATENT_MEDICINE ? 'table-tcm-content' : ''">
+        <el-row type="flex" align="middle" justify="start" class="table_title mb10">
+          <el-col :span="24">
+            <span class="light-gray">科室：</span>
+            <span>{{item[0].providerName}}</span>
+            <span class="ml20 light-gray">医生：</span>
+            <span>{{item[0].doctorName}}</span>
+            <span class="ml20 light-gray">诊断名称：</span>
+            <span>{{curDiseaseName}}</span>
+            <el-button v-if="$hasPermission('Auth_menu_treasury_outpatientmedicine_treatmentrecord')" style="margin-left: 10px !important;" type="text" @click="taskGoSendCrm(item[0])">诊疗记录</el-button>
+            <el-button v-if="$hasPermission('Auth_menu_treasury_outpatientmedicine_inspection')" style="margin-left: 10px !important;" type="text" @click="reportOpen(item[0])">检查检验报告</el-button>
+            <span class="ml20 blue f_bold" v-if="item[0].status != 6 && item[0].status != 7 && item[0].isInvalid">{{item[0].isInvalid == 1 ? '超时，待与医生沟通' : '超过3日，不能发药'}}</span>
+          </el-col>
+        </el-row>
+        <el-row type="flex" align="middle" justify="start" class="table_title">
+          <el-col :span="24">
+            <span>处方单号：{{item[0].recipeId}}</span>
+            <span class="ml20" v-if="item[0].adviceExecuteId">执行单号：{{item[0].adviceExecuteId}}</span>
+            <span class="ml20 blue f_bold">{{setName(DISPENSING_STATUS, item[0].status)}}</span>
+            <span class="ml20">申请时间：</span>
+            <span v-if="item[0].createTime">{{item[0].createTime | formatDateByExp}}</span>
+
+          </el-col>
+          <el-button v-if="item[0].status == 2 && ((item[0].isInvalid != -1 && item[0].isInvalid != 2) || (item[0].isInvalid == -1 && item[0].notInvalid))" @click="updateDispense(item, 4)" type="primary">打印</el-button>
+          <el-button v-if="item[0].status == 4 && ((item[0].isInvalid != -1 && item[0].isInvalid != 2) || (item[0].isInvalid == -1 && item[0].notInvalid))" @click="updateDispense(item, 5)" type="primary">摆药</el-button>
+          <el-button v-if="item[0].status == 5 && item[0].identification == 0 && item[0].isInvalid != 2" type="primary" @click="updateDispense(item, 6)">{{item[0].isInvalid == 1 ? '医生已确认，发药' : '审核并发药'}}</el-button>
+          <el-button v-if="item[0].status > 3 && item[0].status < 7 && item[0].identification == 0 && item[0].isInvalid != 2" @click="handlePrintPutMedicine(item)" type="primary">补打摆药单</el-button>
+        </el-row>
+        <tcm-template v-if="item[0].adviceType == TRADITIONAL_CHINESE_MEDICINE || item[0].adviceType == CHINESE_PATENT_MEDICINE" :templateData="item[1]"></tcm-template>
+        <wm-template v-else @sendPrint="handlerSendPrint" :tableData="item[1]" :otherData="item[0]" :tableCellClassName="tableCellClassName" :changeTableBg="medicineListCode" :curPutCode="item[0].dispense && item[0].dispense.code" :isMatchSearch="true" :curStatus="item[0].status" :curInvalid="item[0].isInvalid" curTypes="outpatient" :curAdviceType="item[0].adviceType"></wm-template>
+      </div>
+    </div>
+    <!-- 无数据提示 -->
+    <everNoData v-if="!prescriptionObj.currentOutpatientDispense" class="no-data" tipTxt="暂无摆药单信息"></everNoData>
+  </div>
+</template>
+
+<script>
+import dispenSearch from '@/warehouse/page/storages/components/dispensearch'
+import patientHeader from '@/inpatient/components/common.head.js'
+import { PATIENT_HEAD } from '@/util/common'
+export default {
+  data () {
+    return {
+      PATIENT_HEAD,
+      isAfterInquiry: false,
+      currentVisitPatientId: '',
+      currentVisitNumber: '',
+      prescriptionObj: {}
+    }
+  },
+  methods: {
+    handleSearch () {
+
+    },
+    handleAfterInquiry () {
+
+    }
+  },
+  components: {
+    dispenSearch,
+    patientHeader
+  }
+}
+</script>
+

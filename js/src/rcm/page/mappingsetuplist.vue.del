@@ -1,0 +1,91 @@
+<template>
+  <div>
+    <ever-bread-crumb name="映射管理" path="/warehouse/mappingsetups"></ever-bread-crumb>
+    <div class="layout_inner">
+      <div class="main-head">
+        <ever-query-form :schema="querySchema" v-model="queryObj" @query="query">
+        </ever-query-form>
+        <div class="main-option">
+          <router-link :to="'/warehouse/mappingsetupadd'"><el-button type="primary">新建</el-button></router-link>
+        </div>
+      </div>
+      <el-table
+        v-loading.body="loading"
+        :data="tableData"
+        style="width: 100%"
+        >
+        <el-table-column
+          type="index"
+          label="序号"
+          width="80"
+          align="center">
+        </el-table-column>
+        <el-table-column
+          prop="mapCode"
+          label="映射代码"
+          align="center">
+        </el-table-column>
+        <el-table-column
+          prop="mapName"
+          label="映射名称"
+          align="center">
+        </el-table-column>
+        <el-table-column
+          prop="mapExplain"
+          label="映射说明"
+          align="center">
+        </el-table-column>
+        <el-table-column
+          prop=""
+          label="操作"
+          align="center">
+          <template slot-scope="scope">
+            <el-button
+              type="primary"
+              size="small"
+              @click="$router.push('/warehouse/mappingsetup/' + scope.row.id)">明细</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+  </div>
+</template>
+<script>
+import api from '../store/mappingsetupapi'
+import list from '../../util/list'
+
+var schema = [
+  {
+    name: 'id',
+    label: '映射名称',
+    type: 'select',
+    options: []
+  }
+]
+export default {
+  mixins: [list],
+  data () {
+    var obj = this.$ever.createObjFromSchema(schema)
+    return {
+      querySchema: schema,
+      queryObj: obj,
+      api,
+      tableData: []
+    }
+  },
+  methods: {
+    list () {
+      api.list({}).then(result => {
+        this.loading = false
+        result.data.forEach(function (item) {
+          item.name = item.mapName
+        })
+        this.tableData = result.data
+        this.$ever.getFieldFromSchema(this.querySchema, 'id').options = result.data
+      })
+    }
+  },
+  created () {
+  }
+}
+</script>

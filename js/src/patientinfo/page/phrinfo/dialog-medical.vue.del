@@ -1,0 +1,118 @@
+<template>
+  <el-dialog :title="title" :visible.sync="dialogVisible" class="ui_dialog_02">
+     <div class="mgl30">
+        <el-radio v-model="drugRadio" label="0">中药</el-radio>
+        <el-radio v-model="drugRadio" label="1">西药</el-radio>
+        <el-table
+          v-if="drugRadio === '1'"
+          :data="drugData.wmAdviceResponseList"
+          height="250"
+          border
+          style="width: 100%">
+            <el-table-column
+              prop="adviceName"
+              label="医嘱名称"
+              width="180">
+            </el-table-column>
+            <el-table-column
+              prop="spec"
+              label="规格"
+              width="180">
+            </el-table-column>
+            <el-table-column
+              prop="measure"
+              label="剂量"
+              width="180">
+            </el-table-column>
+            <el-table-column
+              prop="useFreqTxt"
+              label="用药频次"
+              width="180">
+            </el-table-column>
+            <el-table-column
+              prop="employTxt"
+              label="用法"
+              width="180">
+            </el-table-column>
+            <el-table-column
+              prop="count"
+              show-overflow-tooltip
+              label="领量"
+              width="180">
+            </el-table-column>
+            <el-table-column
+              prop="termType"
+              show-overflow-tooltip
+              label="长/临嘱">
+            </el-table-column>
+            <el-table-column
+              prop="price"
+              label="金额"
+              width="180">
+            </el-table-column>
+            <el-table-column
+              label="开始/结束时间"
+              width="200">
+              <!-- <template slot-scope="scope">
+                <span>{{scope.row.startTime}}</span><br>
+                <span>{{scope.row.endTime}}</span>
+              </template> -->
+            </el-table-column>
+            <el-table-column
+              prop="executeTime"
+              show-overflow-tooltip
+              label="执行时间">
+            </el-table-column>
+            <el-table-column
+              props="remarks"
+              label="嘱托">
+            </el-table-column>
+        </el-table>
+        <el-table
+          v-if="drugRadio === '0'"
+          :data="drugData.cmAdviceResponseList"
+          height="250"
+          border
+          style="width: 100%">
+          <el-table-column
+            prop="adviceNameAll"
+            label="医嘱名称"
+            width="180">
+          </el-table-column>
+          <el-table-column
+            prop="measure"
+            label="剂量"
+            width="180">
+          </el-table-column>
+          <el-table-column
+            prop="isDecoct"
+            label="煎法"
+            width="180">
+          </el-table-column>
+          <el-table-column
+            prop="useFreqTxt"
+            label="其他信息">
+          </el-table-column>
+        </el-table>
+      </div>
+  </el-dialog>
+</template>
+<script>
+export default {
+  props: ['drugData', 'visible', 'title'],
+  data () {
+    return {
+      drugRadio: '0',
+      dialogVisible: false
+    }
+  },
+  watch: {
+    visible (val) {
+      this.dialogVisible = val
+    },
+    dialogVisible (val) {
+      this.$emit('update', val)
+    }
+  }
+}
+</script>

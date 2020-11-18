@@ -1,0 +1,540 @@
+<template>
+  <div id="numberinfo">
+    <div class="header">
+      <strong class="title">挂号信息</strong>
+    </div>
+    <div class="body">
+      <el-form :model="form" label-width="80px" label-position="right" ref="form">
+        <el-row :gutter="20">
+          <el-col :span="6">
+            <el-form-item label="号源信息" prop="serviceTimesliceDto" :rules="rules.requiredObject">
+              <strong v-if="form.serviceTimesliceDto">
+                {{form.serviceTimesliceDto.deptName || '无'}}
+                {{form.serviceTimesliceDto.resourceName || '无'}}
+                {{form.serviceTimesliceDto.startTimeStr}}
+              </strong>
+              <strong v-else-if="form.id">
+                {{form.deptName}}
+                {{form.appointmentResourceName}}
+                {{form.appointmentStarttime}}
+              </strong>
+              <strong v-else>请选择号源</strong>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+           <el-col :span="6">
+            <el-form-item label="折扣比例">
+              <el-select v-model="form.discountCard" value-key="id" style="width:100%">
+                <el-option :label="item.name" :value="item" v-for="(item, i) in discountList" :key="i"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="就诊类型" prop="subsequentVisit" :rules="rules.required">
+              <el-select v-model="form.subsequentVisit" style="width:100%">
+                <el-option label="初诊" :value="0"></el-option>
+                <el-option label="复诊" :value="1"></el-option>
+                <el-option label="转诊" :value="2"></el-option>
+                <el-option label="急诊" :value="3"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6" v-if="form.subsequentVisit === 2">
+            <el-form-item label="" label-width="0" prop="transferFrom" :rules="rules.required">
+              <el-input v-model="form.transferFrom" :maxlength="50" placeholder="转诊医院"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="6">
+            <el-form-item label="指定医生">
+              <el-select v-model="form.isAppointResource" style="width:100%">
+                <el-option label="患者指定" :value="1"></el-option>
+                <el-option label="客服指定" :value="0"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="医保类型">
+              <el-select v-model="form.medicalInsuranceType" style="width:100%">
+                <el-option label="自费" :value="0"></el-option>
+                <el-option label="基本医疗" :value="1"></el-option>
+                <el-option label="基本医疗(无卡)" :value="4"></el-option>
+                <el-option label="商业保险" :value="2"></el-option>
+                <el-option label="新农合" :value="3"></el-option>
+                <!-- 葛东加的新农合 10.03 -->
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6" v-if="form.medicalInsuranceType === 4">
+            <el-form-item label="" label-width="0" prop="medicalCardNumber" :rules="rules.required">
+              <el-input v-model="form.medicalCardNumber" :maxlength="50" placeholder="医保应用号"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="6">
+            <el-form-item label="爱院科室">
+              <referrer v-model="referrerObject"></referrer>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+          <el-form-item label="使用套餐">
+            <el-select v-model="form.shopSetItemId" placeholder="套餐信息" style="width: 100%">
+              <el-option :value="-1" label="不使用"></el-option>
+              <el-option :value="item.value" :label="item.name" v-for="(item, i) in serviceSetList" :key="i"></el-option>
+            </el-select>
+          </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="挂号备注">
+              <el-autocomplete
+                style="width:100%"
+                v-model="form.symptom"
+                :maxlength="50"
+                :fetch-suggestions="querySearchSymptom"
+                placeholder="请输入挂号备注"
+              ></el-autocomplete>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="4">
+            <el-form-item label="">
+              <el-checkbox v-model="form.isPhysicalExamination" :true-label="1" :false-label="0">预检</el-checkbox>
+            </el-form-item>
+          </el-col>
+          <el-col :span="4">
+            <el-form-item label="">
+              <el-checkbox v-model="form.jiuZhenCard" :true-label="1" :false-label="0">就诊卡</el-checkbox>
+            </el-form-item>
+          </el-col>
+          <el-col :span="4">
+            <el-form-item label="">
+              <el-checkbox v-model="form.medicalRecordBook" :true-label="1" :false-label="0">病历本</el-checkbox>
+            </el-form-item>
+          </el-col>
+           <el-col :span="12" v-if="form.serviceTimesliceDto">
+            <el-form-item label="">
+              <el-checkbox v-model="isAddSource">加号</el-checkbox>
+              <el-select v-model="addSourceTime" value-key="id" class="ml20" size="small">
+                <el-option v-for="(item, i) in timerangeList" :key="i" :value="item" :label="item.startTimeStr"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row class="gray" :gutter="20">
+          <el-col :span="5">
+            <el-form-item label="挂号费">
+              ￥{{form.servicePrice ? form.servicePrice.toFixed(2) : '0.00'}}
+            </el-form-item>
+          </el-col>
+          <el-col :span="5">
+            <el-form-item label="打折">
+              ￥{{discountPrice}}
+            </el-form-item>
+          </el-col>
+          <el-col :span="5">
+            <el-form-item label="病历本费">
+              ￥{{recordBookPrice.toFixed(2)}}
+            </el-form-item>
+          </el-col>
+          <el-col :span="5">
+            <el-form-item label="就诊卡费">
+              ￥{{jiuZhenCardPrice.toFixed(2)}}
+            </el-form-item>
+          </el-col>
+          <el-col :span="4">
+            <el-form-item label="实付">
+              ￥{{(form.servicePrice - discountPrice + recordBookPrice + jiuZhenCardPrice).toFixed(2)}}
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+    </div>
+    <div class="footer">
+      <el-button type="primary" @click="createNumber" :disabled="isSubmit">挂号</el-button>
+      <!-- <el-button type="" @click="createOrderRecordBook">收费</el-button> -->
+    </div>
+  </div>
+</template>
+<script>
+import appointapi from '@/arrange/store/appointapi'
+import sobapi from '@/sob/store/serviceapi'
+import referrer from '@/arrange/page/reservation/appointbest.vue'
+export default {
+  props: ['appoint', 'source'],
+  data () {
+    return {
+      appointapi,
+      sobapi,
+      isSubmit: false,
+      isAddSource: false,
+      addSourceTime: '',
+      tempStartTime: '',
+      tempEndTime: '',
+      timerangeList: [],
+      discountList: [{name: '无折扣', value: 0, id: -1}],
+      serviceSetList: [],
+      recordBookPrice: 0,
+      jiuZhenCardPrice: 0,
+      referrerObject: '',
+      form: {
+        id: '',
+        addWay: 1,
+        jiuZhenCard: 0,
+        discount: 0,
+        discountCard: '',
+        servicePrice: 0,
+        patient: '',
+        subsequentVisit: 0,
+        medicalRecordBook: 0,
+        isAppointResource: 0,
+        isMedicalInsurance: 0,
+        medicalInsuranceType: 0,
+        isPhysicalExamination: 0,
+        timerange: '',
+        description: '',
+        transferFrom: '',
+        serviceTimesliceDto: '',
+        medicalCardNumber: '',
+        isTodayAppoint: true,
+        shopSetItemId: -1
+      },
+      options: {
+        start: '08:00',
+        end: '23:50',
+        step: '00:10'
+      },
+      rules: {
+        required: [
+          {required: true, message: '必填项', trigger: ['blur', 'change']}
+        ],
+        requiredObject: [
+          {required: true, message: '必填项', trigger: ['blur', 'change'], type: 'object'}
+        ],
+        requiredArray: [
+          {required: true, message: '必填项', trigger: ['blur', 'change'], type: 'array'}
+        ]
+      }
+    }
+  },
+  watch: {
+    'appoint': {
+      handler (val) {
+        this.form = Object.assign(this.form, val)
+        this.form.subsequentVisit = this.form.subsequentVisit || 0
+        this.form.serviceId = this.form.serviceid
+        this.form.isAppointResource = this.form.isAppointResource || 0
+        this.form.isPhysicalExamination = this.form.isPhysicalExamination || 0
+        this.form.medicalRecordBook = this.form.medicalRecordBook || 0
+        this.form.jiuZhenCard = this.form.jiuZhenCard || 0
+        this.referrerObject = {referrer: {id: this.form.referrer, name: this.form.referrerName}, referrerDept: {id: this.form.referrerDeptId, name: this.form.referrerDeptNmae}}
+        if (!this.form.useAppoint) {
+          this.form.id = ''
+          this.form.serviceTimesliceDto = ''
+          this.form.shopSetItemId = -1
+          this.referrerObject = ''
+        }
+        this.getServicePrice()
+      },
+      deep: true
+    },
+    'source' (val) {
+      if (!val) {
+        return false
+      }
+      this.form = Object.assign({}, this.form, val)
+      this.isAddSource = false
+      this.isSubmit = false
+      if (!this.form.serviceTimesliceDto) {
+        this.form.serviceTimesliceDto = {
+          deptId: this.form.deptId,
+          deptName: this.form.deptName,
+          resourceId: this.form.resourceId || this.form.doctorList[0].resourceId,
+          resourceName: this.form.resourceName || this.form.doctorList[0].resourceName,
+          resourceType: this.form.appointmentResourceType || this.form.resourceType || this.form.doctorList[0].resourceType,
+          date: this.$moment().format('YYYY-MM-DD'),
+          serviceId: this.form.serviceId,
+          serviceName: this.form.serviceName,
+          startTimeStr: this.form.appointmentStarttime,
+          endTimeStr: this.form.appointmentEndtime
+        }
+      }
+      this.getServicePrice()
+      this.getBasesetResourceTimeList()
+    },
+    'form.serviceTimesliceDto': {
+      handler (val) {
+        if (val) {
+          this.form.appointmentResourceId = val.resourceId || ''
+          this.form.appointmentResourceName = val.resourceName || ''
+          this.form.appointmentResourceType = val.resourceType
+          this.form.appointmentDate = val.date
+          this.form.appointmentStarttime = val.startTimeStr
+          this.form.appointmentEndtime = val.endTimeStr
+        }
+      },
+      deep: true
+    },
+    'form.medicalInsuranceType' (val) {
+      this.form.isMedicalInsurance = val ? 1 : 0
+    },
+    'form.patient' (val) {
+      this.form.medicalInsuranceType = val.medPersonInfo ? 1 : 0
+      this.form.symptom = val.appointRemark
+      this.getPatientServiceSet()
+    },
+    'form.serviceId' (val) {
+      if (val) {
+        this.getDiscountList()
+        this.getPatientServiceSet()
+      }
+      this.form.serviceid = val
+    },
+    'form.discountCard' (val) {
+      this.form.discount = val.value
+      this.form.benefitId = val.id
+    },
+    'form.medicalRecordBook' (val) {
+      if (!val) {
+        this.recordBookPrice = 0
+      } else {
+        this.getItemPrice('病历本').then(price => {
+          this.recordBookPrice = price
+        })
+      }
+    },
+    'form.jiuZhenCard' (val) {
+      if (!val) {
+        this.jiuZhenCardPrice = 0
+      } else {
+        this.getItemPrice('就诊卡').then(price => {
+          this.jiuZhenCardPrice = price || 0
+        })
+      }
+    },
+    'isAddSource' (val) {
+      if (val) {
+        this.tempStartTime = this.form.appointmentStarttime
+        this.tempEndTime = this.form.appointmentEndtime
+        this.form.appointmentStarttime = this.addSourceTime.startTimeStr
+        this.form.serviceTimesliceDto.startTimeStr = this.addSourceTime.startTimeStr
+        this.form.appointmentEndtime = this.addSourceTime.endTimeStr
+        this.form.serviceTimesliceDto.endTimeStr = this.addSourceTime.endTimeStr
+        this.form.addWay = 2
+      } else {
+        this.form.appointmentStarttime = this.tempStartTime
+        this.form.serviceTimesliceDto.startTimeStr = this.tempStartTime
+        this.form.appointmentEndtime = this.tempEndTime
+        this.form.serviceTimesliceDto.endTimeStr = this.tempEndTime
+        this.form.addWay = 1
+      }
+    },
+    'addSourceTime' (val) {
+      if (this.isAddSource) {
+        this.form.appointmentStarttime = val.startTimeStr
+        this.form.serviceTimesliceDto.startTimeStr = val.startTimeStr
+        this.form.appointmentEndtime = val.endTimeStr
+        this.form.serviceTimesliceDto.endTimeStr = val.endTimeStr
+      }
+    },
+    'referrerObject' (val) {
+      Object.assign(this.form, {
+        referrer: val.referrer ? val.referrer.id : '',
+        referrerName: val.referrer ? val.referrer.name : '',
+        referrerDeptId: val.referrer ? val.referrerDept.id : '',
+        referrerDeptName: val.referrer ? val.referrerDept.name : ''
+      })
+    }
+  },
+  created () {
+    this.$bus.$off('onError')
+    this.$bus.$on('onError', val => {
+      this.isSubmit = false
+    })
+  },
+  methods: {
+    select (val) {
+      this.selectTime = val
+    },
+    createNumber () {
+      if (!this.form.patient) {
+        this.$notify({
+          title: '提示',
+          type: 'warning',
+          message: '请选择患者',
+          duration: 2000
+        })
+        return false
+      }
+      this.$refs.form.validate(valid => {
+        if (!valid) {
+          return false
+        }
+        this.isSubmit = true
+        this.appointapi.createAppoint(this.form).then(rs => {
+          this.isSubmit = false
+          if (rs.errCode) {
+            return false
+          }
+          this.$notify({
+            type: 'success',
+            title: '挂号成功',
+            message: '已挂号完成',
+            duration: 3000
+          })
+          let obj = {
+            id: '',
+            jiuZhenCard: 0,
+            discount: 0,
+            discountCard: {name: '无折扣', value: 0, id: -1},
+            servicePrice: 0,
+            patient: '',
+            subsequentVisit: 0,
+            medicalRecordBook: 0,
+            isAppointResource: 0,
+            isMedicalInsurance: 0,
+            medicalInsuranceType: 0,
+            isPhysicalExamination: 0,
+            timerange: '',
+            description: '',
+            transferFrom: '',
+            serviceTimesliceDto: '',
+            medicalCardNumber: '',
+            symptom: ''
+          }
+          if (rs.data.rcmId !== '-1') {
+            this.$bus.$emit('appoint:settlementId', {flag: 'ajax_success', settlementId: rs.data.rcmId, xianchang: 1, isMedicalInsurance: this.form.isMedicalInsurance})
+            this.$bus.$emit('appoint:rcmVisible', true)
+          }
+          this.$bus.$emit('appoint:success', true)
+          Object.assign(this.form, obj)
+        })
+      })
+    },
+    getServicePrice () {
+      if (!this.form.serviceId) {
+        return false
+      }
+      this.appointapi.getServicePrice(this.form.serviceId).then(rs => {
+        console.log(rs)
+        this.form.servicePrice = !rs.head.errCode ? rs.data[0].price : 0
+      })
+    },
+    querySearchSymptom (val, callback) {
+      this.appointapi.getAppointmentSymptom({symptom: val}).then(rs => {
+        rs.data.map(item => {
+          item.value = item.symptom
+        })
+        callback(rs.data)
+      })
+    },
+    getDiscountList () {
+      if (this.form.patient.id && this.form.serviceId) {
+        this.appointapi.getPatientDiscounts({patientId: this.form.patient.id, itemId: this.form.serviceId}).then(rs => {
+          if (rs.head.errCode) {
+            return false
+          }
+          if (rs.data[0]) {
+            this.discountList = rs.data.map(item => {
+              item.name = (item.discount / 10).toFixed(1) + '折'
+              item.value = item.discount
+              item.id = item.patientBenefitId
+              return item
+            })
+            this.discountList.unshift({name: '无折扣', value: 0, id: -1})
+          } else {
+            this.discountList = [{name: '无折扣', value: 0, id: -1}]
+          }
+          this.form.discountCard = {name: '无折扣', value: 0, id: -1}
+        })
+      }
+    },
+    getItemPrice (name) {
+      return this.sobapi.list({name: name}).then(rs => {
+        if (!rs.head.errCode && rs.data[0]) {
+          return this.appointapi.getServicePrice(rs.data[0].id).then(rs => {
+            return !rs.head.errCode ? rs.data[0].price : 0
+          })
+        } else {
+          return 0
+        }
+      })
+    },
+    getBasesetResourceTimeList () {
+      this.appointapi.getBasesetArrangeResource({
+        timeTrunkType: 1,
+        deptId: this.form.serviceTimesliceDto.deptId,
+        resourceId: this.form.serviceTimesliceDto.resourceId,
+        resourceType: this.form.serviceTimesliceDto.resourceType
+      }).then(rs => {
+        this.timerangeList = []
+        if (rs.head.errCode || !rs.data || !rs.data.timerangeList[0]) {
+          return false
+        }
+        rs.data.timerangeList.map(item => {
+          this.timerangeList = this.timerangeList.concat(item.timesliceVOList)
+        })
+        this.timerangeList = this.timerangeList.filter(item => {
+          return item.startTimeStr > this.$moment().format('HH:mm')
+        })
+        if (!this.addSourceTime && this.timerangeList[0]) {
+          this.addSourceTime = this.timerangeList[0]
+        }
+      })
+    },
+    getPatientServiceSet () {
+      this.serviceSetList = []
+      if (this.form.patient && this.form.patient.id && this.form.serviceId) {
+        this.appointapi.getServiceSetList({patientId: this.form.patient.id}).then(rs => {
+          if (rs.head.errCode || !rs.data) {
+            this.form.shopSetItemId = -1
+            return false
+          }
+          let arr = rs.data.filter(item => {
+            item.catalogInfos = item.catalogInfos.filter(cat => {
+              if (!cat.serviceInfos) {
+                return false
+              }
+              cat.serviceInfos = cat.serviceInfos.filter(info => {
+                return info.serviceId === this.form.serviceId && info.count > 0
+              })
+              return !!cat.serviceInfos[0]
+            })
+            return !!item.catalogInfos[0]
+          })
+          this.serviceSetList = arr.map(item => {
+            return {name: item.setMealName, value: item.catalogInfos[0].serviceInfos[0].orderDetailId}
+          })
+        })
+      } else {
+        this.form.shopSetItemId = -1
+      }
+    }
+  },
+  components: {
+    referrer
+  },
+  computed: {
+    discountPrice () {
+      if (this.form.discount && this.form.servicePrice) {
+        return (this.form.servicePrice - this.form.servicePrice * this.form.discount / 100).toFixed(2)
+      } else {
+        return '0.00'
+      }
+    }
+  }
+}
+</script>
+
+<style scoped>
+  #numberinfo{background: #fff; padding: 0 10px; border-radius: 3px; min-height: 451px;}
+  .el-form-item{margin-bottom: 4px;}
+  .header{padding: 7px 0;}
+  .header strong.title{padding-left: 6px; border-left: 3px solid #1C7BEF; font-size: 16px; color: #000; line-height: 36px;}
+  .gray{background: #eeeeee; padding: 0px 0;}
+  .gray .el-form-item{margin-bottom: 0}
+  .footer{padding: 15px 0; text-align: left;}
+</style>

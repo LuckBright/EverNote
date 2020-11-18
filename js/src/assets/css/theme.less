@@ -1,0 +1,73 @@
+@col_main:#1c7bef;
+@col_white: #fff;
+@col_light_main: #4995f2;
+
+/*** el-button **/
+.el-main .el-button--primary, .el-message-box .el-button--primary{
+  color: @col_white;
+  background-color: @col_main;
+  border-color: @col_main;
+}
+.el-main .el-button--primary:focus, .el-main .el-button--primary:hover{
+  color: @col_white;
+  border-color: @col_light_main;
+  background: @col_light_main;
+}
+
+.el-main .el-button.is-disabled, .el-button.is-disabled:focus, .el-button.is-disabled:hover{
+  color: #bfcbd9;
+  background-color: #eef1f6;
+  border-color: #d1dbe5;
+}
+.el-main .el-button.btn_disabled.is-disabled, .el-button.btn_disabled.is-disabled:focus, .el-button.btn_disabled.is-disabled:hover{
+  color: #bfcbd9;
+  background: none!important;
+  border: none!important;
+}
+
+/*** el-pagination ***/
+.el-main .el-pager li.active, .el-main .el-pager li.active:hover{
+  color: @col_white;
+  border-color: @col_main;
+  background-color: @col_main;
+}
+.el-main .el-pager li:hover{
+  color: @col_main;
+}
+.el-main .el-pagination button:hover{
+  color: @col_main;
+}
+
+/*** el-dialog ***/
+.el-main .el-dialog__headerbtn:focus .el-dialog__close, .el-main .el-dialog__headerbtn:hover .el-dialog__close{
+  color: @col_main;
+}
+
+.el-select-dropdown__item.hover,
+.el-select-dropdown__item:hover {color:#fff}
+
+.el-main .el-tabs__item.is-active{
+  color: @col_main;
+}
+
+.el-main .el-button--text{
+  color: @col_main;
+}
+
+.el-main .el-date-table td.today{
+  color: @col_main;
+}
+.el-menu
+.el-main .el-date-table td.current:not(.disabled), .el-main .el-date-table td.end-date, .el-main .el-date-table td.start-date{
+  color: @col_white;
+  background-color: @col_main !important;
+}
+
+.el-main .el-date-table td.today:before{
+  border-top: .5em solid @col_main;
+}
+
+.navSeondlist .el-menu-item.is-active,
+.navSeondlist .el-menu-item:hover{
+  border-bottom: 5px solid @col_main !important;
+}

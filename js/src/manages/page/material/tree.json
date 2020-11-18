@@ -1,0 +1,74 @@
+{
+  "citySet": [
+    {
+      "addressDetail": "国贸",
+      "province": "110000",
+      "city": "110100",
+      "county": "110105"
+    },
+    {
+      "addressDetail": "西城",
+      "province": "130000",
+      "city": "130700",
+      "county": "130727"
+    }
+  ],
+  "treeList": [
+    {
+      "clinicId": 5000031,
+      "modelList": null,
+      "architectureType": 121,
+      "ifShowButton": true,
+      "ifUnbind": 1,
+      "ifBlooc": 0,
+      "cityValue": "110100",
+      "localDepartmentList": null,
+      "architectureName": "测试机构AAA",
+      "architectureId": "5000031",
+      "id": "2daf05e9-62c2-425c-b8a8-0a1ed3ef7540",
+      "childNodes": null,
+      "isDelete": 0,
+      "tittleName": null,
+      "updateTime": "2019-05-15 02:28:19",
+      "childId": "831772f4-4204-4cdd-a04e-81a25e9b1ce3",
+      "leaf": 0,
+      "ifRoot": 0,
+      "parentId": null,
+      "createBy": "29e38f69-0c1c-4b6e-aab7-62bf0e1d22c4",
+      "createTime": "2019-05-15 02:27:36",
+      "clinicObject": null,
+      "blocId": 5000,
+      "directoryId": "32a1c57b-7380-43e9-9b89-6aec34494e83",
+      "child": null,
+      "lastUpdateBy": "29e38f69-0c1c-4b6e-aab7-62bf0e1d22c4"
+    },
+    {
+      "clinicId": 5000036,
+      "modelList": null,
+      "architectureType": 121,
+      "ifShowButton": true,
+      "ifUnbind": null,
+      "ifBlooc": 0,
+      "cityValue": "130700",
+      "localDepartmentList": null,
+      "architectureName": "张磊测试机构",
+      "architectureId": "5000036",
+      "id": "488cb267-9c76-44fa-9ae2-e3450fb18744",
+      "childNodes": null,
+      "isDelete": 0,
+      "tittleName": null,
+      "updateTime": "2019-05-15 02:28:19",
+      "childId": null,
+      "leaf": 0,
+      "ifRoot": 1,
+      "parentId": null,
+      "createBy": "29e38f69-0c1c-4b6e-aab7-62bf0e1d22c4",
+      "createTime": "2019-05-15 02:28:19",
+      "clinicObject": null,
+      "blocId": 5000,
+      "directoryId": "32a1c57b-7380-43e9-9b89-6aec34494e83",
+      "child": null,
+      "lastUpdateBy": "29e38f69-0c1c-4b6e-aab7-62bf0e1d22c4"
+    }
+  ]
+}

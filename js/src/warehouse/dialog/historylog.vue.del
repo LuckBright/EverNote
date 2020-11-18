@@ -1,0 +1,202 @@
+<template>
+  <div>
+    <el-dialog title="历史日志" :visible.sync="dialogVisible" class="ui_dialog_02">
+      <div style="min-height:500px; font-size: 14px">
+        <ul class="timeline" v-if="tableData.length">
+          <li class="pos_re list-item active" v-for="(item, index) in tableData" :key="index">
+            <div class="body">
+              <div class="header">
+                <span>{{item.createTime}}</span>
+                <span class="ml20 mr10">{{item.createBy}}</span>
+                <span
+                  v-if="_findName(item.node)"
+                  class="tag danger"
+                  :class="_findName(item.node).class"
+                >{{_findName(item.node).name}}</span>
+                <span v-if="item.source" class="ml20">数据来源：{{item.source}}</span>
+              </div>
+              <div class="content pt20" v-if="item.oldValue || item.newValue">
+                <!-- <el-table
+                :data="item.list"
+                border
+                style="width: 100%">
+                <el-table-column
+                  prop="date"
+                  align="center"
+                  label="数据项">
+                </el-table-column>
+                <el-table-column
+                  align="center"
+                  prop="name"
+                  label="变更前">
+                </el-table-column>
+                <el-table-column
+                  prop="address"
+                  align="center"
+                  label="变更后">
+                </el-table-column>
+                </el-table>-->
+                <el-row :gutter="20" v-if="item.oldValue || item.newValue">
+                  <el-col :span="8">{{item.oldValue}}&nbsp;</el-col>
+                  <el-col :span="16">
+                    <i class="iconfont icon-guodujiantou"></i>
+                    <span class="weight">{{item.newValue}}</span>
+                  </el-col>
+                </el-row>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <p v-else class="alg_c f18" style="padding: 150px 0">暂无历史日志</p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="close" type="primary">
+          <i class="iconfont icon-tijiao"></i>关闭
+        </el-button>
+      </span>
+    </el-dialog>
+  </div>
+</template>
+<script>
+import { MODIFY_RECORD_NODE } from '@/util/common'
+export default {
+  data () {
+    return {
+      dialogVisible: false,
+      MODIFY_RECORD_NODE,
+      tableData: []
+    }
+  },
+  methods: {
+    close () {
+      this.dialogVisible = false
+    },
+    open (data) {
+      this.tableData = data
+      this.dialogVisible = true
+    },
+    _findName (id) {
+      let index = this.MODIFY_RECORD_NODE.findIndex(item => {
+        return item.id === id
+      })
+      if (index > -1) {
+        return {
+          name: this.MODIFY_RECORD_NODE[index].name,
+          class: this.MODIFY_RECORD_NODE[index].class
+        }
+      }
+      return ''
+    }
+  }
+}
+
+</script>
+
+<style scoped lang="scss">
+.weight {
+  color: #000;
+}
+ul,
+li {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.timeline {
+  min-height: 500px;
+  display: block;
+  border-left: 1px dashed #979797;
+  .list-item {
+    margin-bottom: 20px;
+    &::before {
+      width: 12px;
+      height: 12px;
+      background: #999;
+      display: inline-block;
+      border-radius: 50%;
+      top: 50%;
+      margin-top: -6px;
+      position: absolute;
+      left: -6px;
+      content: "";
+    }
+    .body {
+      margin-left: 28px;
+      background: #f4f4f4;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      padding: 20px;
+      &::before {
+        box-sizing: content-box;
+        width: 0px;
+        height: 0px;
+        position: absolute;
+        top: 50%;
+        margin-top: -16px;
+        left: 0;
+        padding: 0;
+        border-bottom: 16px solid transparent;
+        border-top: 16px solid transparent;
+        border-left: 16px solid transparent;
+        border-right: 16px solid #f4f4f4;
+        display: block;
+        content: "";
+        z-index: 12;
+      }
+      &::after {
+        box-sizing: content-box;
+        width: 0px;
+        height: 0px;
+        position: absolute;
+        top: 50%;
+        left: 0;
+        margin-top: -15px;
+        padding: 0;
+        border-bottom: 15px solid transparent;
+        border-top: 15px solid transparent;
+        border-left: 14px solid transparent;
+        border-right: 15px solid #eee;
+        display: block;
+        content: "";
+        z-index: 10;
+      }
+      .header {
+        .tag {
+          font-size: 12px;
+          line-height: 18px;
+          padding: 0 5px;
+          display: inline-block;
+          border-radius: 2px;
+        }
+        & .danger {
+          border: 1px solid #fdbbbb;
+          background: #fee;
+          color: #fa5555;
+        }
+        & .primary {
+          border: 1px solid #b3d8ff;
+          background: #ecf5ff;
+          color: #409eff;
+        }
+        & .warning {
+          border: 1px solid #f7d89b;
+          background: #fdf5e6;
+          color: #eb9e05;
+        }
+      }
+      .content {
+        .iconfont {
+          color: #1c7bef;
+          transform: scale(0.5, 0.5);
+          display: inline-block;
+        }
+      }
+    }
+  }
+  & .active {
+    &::before {
+      background: #1c7bef;
+    }
+  }
+}
+</style>

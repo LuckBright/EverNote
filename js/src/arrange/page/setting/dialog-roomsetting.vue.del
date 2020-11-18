@@ -1,0 +1,168 @@
+<template>
+  <div id="editDiagnosis">
+    <el-dialog
+      :visible.sync="visible"
+      title="编辑诊室"
+      class="ui_dialog_02 spe">
+      <el-form :model="obj" :rules="rules" ref="ruleForm"  label-width="100px" label-position="right">
+        <el-form-item label="排班类型：" prop="diseaseCodeCategory">
+            <span>{{obj.diseaseCodeCategory?obj.diseaseCodeCategory:'--'}}</span>
+        </el-form-item>
+        <el-form-item label="专科：" prop="diseaseCodeCategory">
+            <span>{{obj.deptName?obj.deptName:'--'}}</span>
+        </el-form-item>
+        <el-form-item label="医生编码：" prop="doctorCode">
+            <el-input v-model="obj.doctorCode"></el-input>
+        </el-form-item>
+         <el-form-item label="诊室：" prop="resource">
+            <el-select v-model="obj.resource" value-key="resourceId" clearable placeholder="请选择诊室">
+              <el-option
+                v-for="item in options"
+                :key="item.resourceId"
+                :label="item.resourceName"
+                :value="item">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="诊室编码：" prop="clinicCode">
+              <el-input v-model="obj.clinicCode"></el-input>
+          </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="close">取消</el-button>
+        <el-button @click="clickBtn" type="primary">确认</el-button>
+      </span>
+    </el-dialog>
+  </div>
+</template>
+<script>
+import api from '@/arrange/store/templateapi'
+export default {
+  props: ['selectOrgan'],
+  data () {
+    let obj = {}
+    obj.form = {
+      bynameData: [
+        {
+          name: ''
+        }
+      ]
+    }
+    obj.group = []
+    obj.resource = null
+    obj.doctorCode = ''
+    obj.clinicCode = ''
+    return {
+      api,
+      obj,
+      visible: false,
+      content: {},
+      rules: {
+        doctorCode: [
+            {required: true, message: '必填项', trigger: ['blur', 'change']}
+        ],
+        clinicCode: [
+            {required: true, message: '必填项', trigger: ['blur', 'change']}
+        ],
+        resource: [
+            {required: true, message: '必填项', trigger: ['blur', 'change'], type: 'object'}
+        ]
+      },
+      options: []
+    }
+  },
+  created () {
+    this.getRoomdata()
+  },
+  methods: {
+    open (val) {
+      Object.assign(this.obj, val)
+      this.getRoomdata()
+      console.log(this.obj)
+      if (val & val.id) {
+        this.obj.arrangeId = val.id
+      }
+      if (val && val.resourceRList && val.resourceRList[0]) {
+        this.obj.resource = {
+          resourceId: val.resourceRList[0].resourceId,
+          resourceName: val.resourceRList[0].resourceName
+        }
+        Object.assign(this.obj.resource, val.resourceRList[0])
+      } else {
+        this.obj.resource = ''
+      }
+      this.visible = true
+    },
+    close () {
+      this.obj.resource = ''
+      this.obj.doctorCode = ''
+      this.obj.clinicCode = ''
+      this.visible = false
+    },
+    clickBtn () {
+      this.$refs.ruleForm.validate(valid => {
+        if (valid) {
+          let params = {
+            arrangeId: this.obj.id || '',
+            doctorCode: this.obj.doctorCode,
+            clinicCode: this.obj.clinicCode,
+            resourceRId: this.obj.resourceRId || '',
+            resourceId: this.obj.resource.resourceId,
+            resourceName: this.obj.resource.resourceName
+          }
+          this.api.updateRoom(params).then(rs => {
+            if (rs.head.errCode) {
+              return false
+            }
+            this.$notify({
+              type: 'success',
+              title: '成功',
+              message: '更新成功',
+              duration: 3000
+            })
+            this.$emit('clickBtn', 1)
+            this.obj.form = {
+              bynameData: [
+                {
+                  name: ''
+                }
+              ]
+            }
+            this.obj.group = []
+            this.obj.resource = null
+            this.visible = false
+          })
+        }
+      })
+    },
+    getRoomdata () {
+      if (this.selectOrgan && this.selectOrgan.organId) {
+        this.api.getRoomdata({
+          organId: this.selectOrgan.organId,
+          deptId: this.obj.deptId,
+          isValid: 1,
+          resourceType: 'SPACE_CONSULTING_ROOM'
+        }).then(rs => {
+          if (rs && rs.data && rs.data.resultList && rs.data.resultList[0]) {
+            let data = rs.data.resultList.map(v => {
+              let obj = {
+                resourceId: v.id,
+                resourceName: v.resourceName
+              }
+              return obj
+            })
+            this.options = data
+          }
+        })
+      }
+    }
+  },
+  components: {
+  }
+}
+</script>
+<style scoped>
+/* #editDiagnosis .el-row.lh40{height:40px;line-height:40px;}
+.el-dialog .el-dialog__body{padding: 0px 20px!important;} */
+</style>
+

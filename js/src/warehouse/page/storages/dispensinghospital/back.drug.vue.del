@@ -1,0 +1,224 @@
+<template>
+  <div class="prescription-layout hospital-layout">
+    <!-- 搜索框 -->
+    <drug-back-search
+      :searchPatient.sync="searchPatient"
+      @handelSearchPatient="handelSearchPatient"
+      placeholder="药包编号"
+    ></drug-back-search>
+    <div class="pos_re">
+      <div class="pr-l box_sha_6" :class="expandTable ? 'pr-l-w' : ''">
+        <div class="patient-list">
+          <div class="pt-params">
+            <div>
+              <el-row>
+                <el-col :span="24">
+                  <ever-select
+                    v-model="backStatus"
+                    :options="backStatusOptions"
+                    placeholder="请选择退药状态"
+                  ></ever-select>
+                </el-col>
+              </el-row>
+            </div>
+          </div>
+        </div>
+        <div class="patient-table pos_re">
+          <el-button
+            class="pos_ab"
+            type="text"
+            :class="expandTable ? 'i-zhankai' : ''"
+            @click="expandTable = !expandTable"
+          >
+            <i class="iconfont icon-zhankai"></i>
+          </el-button>
+          <el-table
+            :data.sync="patientData"
+            style="width: 100%"
+            :height="'calc(100vh - 210px)'"
+            :stripe="false"
+            @row-click="handleDetails"
+            :row-class-name="patientTableRowClassName"
+          >
+            <el-table-column width="120" class-name="pointer" label="姓名">
+              <template slot-scope="scope">
+                <span v-if="scope.row.patientName">{{scope.row.patientName}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column show-overflow-tooltip width="90" class-name="pointer" label="病区">
+              <template slot-scope="scope">
+                <span
+                  v-if="scope.row.spaceRecordObject"
+                >{{findBasesourceCode({arr: scope.row.spaceRecordObject.spaceRecordProperties, code: SPACE_CODE[0]})}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column class-name="pointer" label="医师">
+              <template slot-scope="scope">
+                <span v-if="scope.row.staffObject">{{scope.row.staffObject.name}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column v-if="expandTable" width="157" label="开单时间">
+              <template slot-scope="scope">
+                <span v-if="scope.row.createTime">{{scope.row.createTime | formatDateByExp}}</span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
+      <div class="pr-r">
+        <div class="layout_inner list-msg">
+          <div
+            class="back-content list_box"
+            :class="backStatus === 9 && Object.keys(obj).length ? 'have_btn' : ''"
+          >
+            <u-d-d-single
+              :obj="obj"
+              class="list"
+              @showLogs="showLogs"
+              :loading.sync="loading"
+              modelType="backdrug"
+            ></u-d-d-single>
+          </div>
+          <div class="alg_c" v-if="backStatus === 9 && Object.keys(obj).length">
+            <p>
+              <el-button type="primary" @click="confirmBack(10)">同意入库</el-button>
+              <el-button @click="confirmBack(7)">拒绝入库</el-button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 弹窗提醒 -->
+    <tips-dialog
+      ref="dialog"
+      :title="`${dialogObj.title}入库`"
+      :content="`确认${dialogObj.title}退药入库`"
+      :function="dialogConfirm"
+    ></tips-dialog>
+  </div>
+</template>
+<script>
+import { patch, SPACE_CODE } from '@/util/common'
+import DrugBackSearch from '../components/drug.back.search'
+import drugBackMixins from '../mixins/backdrug.mixins.js'
+import UDDSingle from '@/warehouse/page/storages/components/uddsingle'
+import getstorage from '@/warehouse/page/storages/util/getstorage'
+import tipsDialog from '@/warehouse/page/components/tipsdialog'
+import api from '../store/hospitalapi.js'
+export default {
+  mixins: [drugBackMixins, getstorage],
+  data () {
+    return {
+      SPACE_CODE,
+      searchPatient: '',
+      expandTable: false,
+      patientData: [],
+      backStatus: 9,
+      obj: {},
+      loading: false,
+      currentBackId: '',
+      dialogObj: { // 弹窗
+        title: '',
+        type: ''
+      }
+    }
+  },
+  mounted () {
+    this.fetchStocksSpaceList(this.backStatus)
+  },
+  methods: {
+    // 查询
+    handelSearchPatient () {
+      this.fetchStocksSpaceList(this.backStatus)
+    },
+    // 获取左侧列表
+    fetchStocksSpaceList (status) {
+      this.patientData = []
+      this.obj = {}
+      api.getBackStocksSpaceList({
+        code: this.searchPatient,
+        storageRoomId: this.storageId,
+        backStocksStatus: status
+      }).then(res => {
+        if (Array.isArray(res) && res.length) {
+          this.patientData = res
+          this.handleDetails(res[0])
+        }
+      })
+    },
+    // 点击事件
+    handleDetails (data) {
+      this.currentBackId = data.backId
+      this.fetchUddTable(data)
+    },
+    // 请求右侧表格数据
+    fetchUddTable (data) {
+      api.getBackStocksUddDispenseList({
+        storageRoomId: this.storageId,
+        backStocksStatus: this.backStatus,
+        spaceId: data.spaceId,
+        patientId: data.patientId,
+        hospitalizedNumber: data.hospitalizedNumber,
+        backId: data.backId
+      }).then(res => {
+        this.obj = res[0]
+      })
+    },
+    // 同意或拒绝入库
+    confirmBack (status) {
+      if (status === 10) {
+        this.dialogObj.title = '同意'
+      } else {
+        this.dialogObj.title = '拒绝'
+      }
+      this.dialogObj.type = status
+      this.$refs.dialog.open()
+    },
+    // 入库请求
+    dialogConfirm () {
+      api.updateBackStocks({
+        id: this.obj.id,
+        status: this.dialogObj.type
+      }).then(res => {
+        if (res) this.fetchStocksSpaceList(this.backStatus)
+      })
+    },
+    // 高亮显示
+    patientTableRowClassName ({ row }) {
+      return row.backId === this.currentBackId ? 'current-patient-row' : ''
+    },
+    ...patch
+  },
+  watch: {
+    'backStatus' (val) {
+      this.fetchStocksSpaceList(val)
+    }
+  },
+  components: {
+    DrugBackSearch,
+    UDDSingle,
+    tipsDialog
+  }
+}
+</script>
+<style lang="less" scoped>
+.layout_inner {
+  .back-content {
+    height: e("calc(100vh - 195px)");
+  }
+  .have_btn {
+    height: e("calc(100vh - 229px)");
+  }
+}
+.hospital-layout .list-msg {
+  padding-bottom: 20px;
+}
+#layout_box {
+  overflow: hidden !important;
+}
+.alg_c {
+  p {
+    margin: 0;
+  }
+}
+</style>

@@ -1,0 +1,24 @@
+{
+  "isAllergicHis": true,
+  "guomin": [
+      {
+          "allergen": [{
+              "id": "05",
+              "name": "阿莫西林",
+              "code": "05" 
+          },{
+              "id": "05",
+              "name": "阿莫西林2级",
+              "code": "05" 
+          }],
+          "remark": null 
+      },
+      {
+          "allergen": [{
+              "id": "02",
+              "name": "青霉素G钠",
+              "code": "02" 
+          }],
+          "remark": "" 
+      } ] 
+}

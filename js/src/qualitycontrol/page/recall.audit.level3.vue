@@ -1,0 +1,108 @@
+<template>
+  <div class="layout_inner">
+    <div class="main-head">
+      <ever-form2
+        :schema="schema"
+        v-model="queryObj"
+        :gutter="20"
+        :is-query="true"
+        :inline="true"
+        label-position="right">
+        <template slot="dptId">
+              <ever-subject-select
+                ref="dept"
+                v-model="queryObj.dptId"
+                type="select"
+                placeholder="科室名称"
+                fields="orgSubjectCode">
+              </ever-subject-select>
+          </template>
+        <template slot="default">
+          <el-form-item>
+            <el-button type="primary" @click="list">查询</el-button>
+          </el-form-item>
+        </template>
+      </ever-form2>
+    </div>
+    <ever-table
+      ref="table"
+      :columns="columns"
+      :url="url"
+      :params.sync="queryObj"
+      is-auto-height
+      :fixed-height="60"
+      :is-auto-check-row="false"
+      :is-record-url-params="false"
+      @eventChange="eventChange"
+      >
+      <template slot="sex">
+        <el-table-column prop="sex" show-overflow-tooltip label="性别">
+          <template slot-scope="scope">
+            <template v-if="scope.row.sex || scope.row.sex === 0">
+              <sys-value type="GBT.2261.1" :code="scope.row.sex"></sys-value>
+            </template>
+            <template v-else>
+              --
+            </template>
+          </template>
+        </el-table-column>
+      </template>
+    </ever-table>
+    <refuse-dialog command="1" :visible.sync="dialogVisible" @submit="refuseSubmit"></refuse-dialog>
+  </div>
+</template>
+<script>
+import { request } from '@/util/req'
+import urlMap from '@/emr/urls'
+import refuseDialog from '@/medrecmanage/page/recordmanage/refuse.dialog'
+import {
+  recallLevel3Schema,
+  recallLevel3Colums
+  } from '@/inpatient/page/medicalrecord/recall.config.js'
+export default {
+  name: 'recall_audit_level3',
+  components: {
+    refuseDialog
+  },
+  data () {
+    let schema = recallLevel3Schema
+    let queryObj = this.$ever.createObjFromSchema(schema)
+
+    return {
+      dialogVisible: false,
+      schema,
+      queryObj,
+      columns: recallLevel3Colums,
+      url: urlMap.recall.qualityAudit,
+      row: {} // 当前行的信息
+    }
+  },
+  methods: {
+    list (searchFirstPage = true) {
+      this.$refs.table.list(searchFirstPage)
+    },
+    eventChange ({ prop, row }) {
+      this.row = row
+      this[prop](row)
+    },
+    agree (row) {
+      request(urlMap.recall.qualityAgree, {id: row.id}).then(res => {
+        if (res.head.errCode === 0) {
+          this.list()
+        }
+      })
+    },
+    refuse () {
+      this.dialogVisible = true
+    },
+    refuseSubmit (val, form) {
+      request(urlMap.recall.qualityRefuse, {id: this.row.id, qcReasonsForRejection: form.reasonsForRejection}).then(res => {
+        if (res.head.errCode === 0) {
+          this.list()
+        }
+      })
+    }
+  }
+}
+</script>
+

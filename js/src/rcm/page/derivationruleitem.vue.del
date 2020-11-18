@@ -1,0 +1,118 @@
+<template>
+  <el-table
+    :data="items"
+    style="width: 100%"
+    ref="table">
+    <el-table-column
+      label="序号"
+      type="index"
+      width="80"
+      align="center">
+    </el-table-column>
+    <el-table-column
+      prop="type"
+      label="类型"
+      align="center">
+      <template slot-scope="scope">
+        {{returnName(scope.row.type, type)}}
+      </template>
+    </el-table-column>
+    <el-table-column
+      prop="project"
+      label="项目"
+      align="center">
+    </el-table-column>
+    <el-table-column
+      prop="lendingDirection"
+      label="借/贷"
+      align="center">
+      <template slot-scope="scope">
+        <el-radio-group v-model="scope.row.lendingDirection">
+          <el-radio class="radio" :label="true">借</el-radio>
+          <el-radio class="radio" :label="false">贷</el-radio>
+        </el-radio-group>
+      </template>
+    </el-table-column>
+    <el-table-column
+      prop="symbol"
+      label="正负号"
+      align="center">
+      <template slot-scope="scope">
+        <el-radio-group v-model="scope.row.symbol">
+          <el-radio class="radio" :label="true">正</el-radio>
+          <el-radio class="radio" :label="false">负</el-radio>
+        </el-radio-group>
+      </template>
+    </el-table-column>
+    <el-table-column
+      label="值(映射/常数)"
+      prop="value"
+      align="center">
+      <template slot-scope="scope">
+        <el-select v-model="scope.row.value" placeholder="请选择输入项" style="width: 100%" filterable>
+          <el-option
+            v-for="visit in typeArr(scope.row.type)"
+            :key="visit.id"
+            :label="visit.accountName"
+            :value="Number(visit.id)">
+          </el-option>
+        </el-select>
+      </template>
+    </el-table-column>
+  </el-table>
+</template>
+<script>
+  import coaaccountapi from '../store/coaaccountapi'
+  import subledgerapi from '../store/subledgerapi'
+  import mappingsetupapi from '../store/mappingsetupapi'
+  export default {
+    data () {
+      return {
+        valueArr: [],
+        mappingArr: [],
+        type: [{id: 1, name: '科目'}, {id: 2, name: '映射'}]
+      }
+    },
+    created () {},
+    watch: {
+      'id': {
+        handler (val) {
+          subledgerapi.getAccount(val).then(result => {
+            mappingsetupapi.getMapAdminByAccId({
+              accId: result.id
+            }).then(response => {
+              response.forEach(function (item) {
+                item.accountName = item.mapName
+              })
+              this.mappingArr = response
+            })
+            coaaccountapi.getAccSheetByIsHost({
+              setId: val,
+              accId: result.id
+            }).then(response => {
+              this.valueArr = response.data
+            })
+          })
+        }
+      }
+    },
+    methods: {
+      typeArr (type) {
+        let that = this
+        let typeArr = []
+        typeArr = (type === 1) ? that.valueArr : that.mappingArr
+        return typeArr
+      },
+      returnName (id, arr) {
+        let name = ''
+        arr.forEach(function (item) {
+          if (id === item.id) {
+            name = item.name
+          }
+        })
+        return name
+      }
+    },
+    props: ['items', 'id']
+  }
+</script>

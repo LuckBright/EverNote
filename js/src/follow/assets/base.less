@@ -1,0 +1,179 @@
+.tar {
+  text-align: right;
+}
+
+.bgc-fff {
+  background-color: #fff;
+}
+
+.bgc-white {
+  background-color: #fff;
+}
+
+.bgc-gray {
+  background-color: #f8f9fa;
+}
+
+.bgc-dark {
+  background-color: #eeeeed;
+}
+
+.common-label-text-color {
+  color: #999;
+}
+
+.oh {
+  overflow: hidden;
+}
+
+.oi {
+  overflow: initial;
+}
+
+.h {
+  height: 100%;
+}
+
+.h60 {
+  height: 60px;
+}
+
+.w400 {
+  width: 400px;
+}
+
+.fs20 {
+  font-size: 20px;
+}
+
+.p0 {
+  padding: 0 !important;
+}
+
+.p0_20 {
+  padding: 0 20px !important;
+}
+
+.p0_20_20 {
+  padding: 0 20px 20px !important;
+}
+
+.p0_20_15_20 {
+  padding: 0 20px 15px 20px !important;
+}
+
+.p20_20_15_20 {
+  padding: 20px 20px 15px 20px !important;
+}
+
+// 两个元素边框重合时可以使用
+.mr-1 {
+  margin-right: -1px;
+}
+
+.ml-1 {
+  margin-left: -1px;
+}
+
+.mt-1 {
+  margin-top: -1px;
+}
+
+.mb-1 {
+  margin-bottom: -1px;
+}
+
+@common-border: 1px solid #c0ccd9;
+
+.common-border {
+  border: @common-border;
+}
+
+.common-no-border {
+  border: none !important;
+}
+
+.common-no-border-top {
+  border-top: none !important;
+}
+
+.common-no-border-right {
+  border-right: none !important;
+}
+
+.common-no-border-bottom {
+  border-bottom: none !important;
+}
+
+.common-no-border-left {
+  border-left: none !important;
+}
+
+.common-border-top {
+  border-top: @common-border  !important;
+}
+
+.common-border-right {
+  border-right: @common-border  !important;
+}
+
+.common-border-bottom {
+  border-bottom: @common-border  !important;
+}
+
+.common-border-left {
+  border-left: @common-border  !important;
+}
+
+.common-auto-height {
+  height: e('calc(100vh - 75px - 30px)');
+}
+
+.common-auto-header-height {
+  height: e('calc(100vh - 75px - 1px - 46px)'); // 1px表示横向边框的高度
+}
+
+@media screen and (max-height: 540px) {
+  .common-auto-height {
+    height: e('calc(540px - 75px - 30px)');
+  }
+
+  .common-auto-header-height {
+    height: e('calc(540px - 75px - 30px - 1px - 60px)');
+  }
+}
+
+.common-max-height {
+  max-height: 420px;
+  min-height: 420px;
+}
+.common-isMember-height{
+  height: 600px;
+}
+.el-message-box__wrapper {
+  z-index: 5000 !important;
+}
+
+.el-select-dropdown {
+  z-index: 5000 !important;
+}
+
+.follow-select-down {
+  z-index: 5000 !important;
+}
+
+.follow-picker-panel {
+  z-index: 5000 !important;
+}
+
+// popper
+.task-popper-follow {
+  z-index: 5001 !important;
+}
+
+.el-notification {
+  z-index: 5001 !important;
+}
+.member-follow-cascader{
+  z-index: 3000!important;
+}

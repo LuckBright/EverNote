@@ -1,0 +1,53 @@
+<template>
+  <div class="layout_inner p20_30_20_40">
+    <div class="tips">退药地址在同意患者退药申请时自动发送给患者</div>
+    <el-form ref="form" label-width="150px" size="medium">
+      <el-form-item label="输入退药地址">
+        <el-input type="textarea" v-model="address" minlength="2" maxlength="70" show-word-limit placeholder="退药地址在同意患者退药申请时自动发送给患者"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="change">保存</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
+
+<script>
+import api from '@/titancare/api/business/index'
+import { debounce } from '@/titancare/utils/common'
+
+export default {
+  data () {
+    return {
+      api,
+      address: ''
+    }
+  },
+  created () {
+    this.getReturnAMedicineAddress()
+  },
+  methods: {
+    change: debounce(function () {
+      this.api.saveReturnAMedicineAddress({ address: this.address }).then(rs => {
+        if (rs.errCode === 0) {
+          this.$notify({
+            message: '保存成功',
+            type: 'success'
+          })
+        }
+      })
+    }),
+    getReturnAMedicineAddress () {
+      this.api.getReturnAMedicineAddress().then(rs => {
+        if (rs && rs.data) {
+          this.address = rs.data.address
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style scoped lang="less">
+.tips{padding: 20px 0 10px 150px; color: #999; font-size: 14px}
+</style>

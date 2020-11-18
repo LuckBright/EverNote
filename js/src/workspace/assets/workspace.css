@@ -1,0 +1,49 @@
+@media screen and (max-width: 1200px) {
+  #app{width: 1200px}
+  #container{width: 1200px}
+}
+
+/* 优惠券信息 */
+.giftbatches{margin: 0;padding:0;}
+.giftbatches li{margin:0 35px 35px 0;padding:0; list-style: none; }
+.giftbatch{background: url('../../assets/img/giftbatch2.png') right 0 no-repeat; width:219px;height:140px;float: left; }
+.giftbatch .num{padding: 10px 10px 0; height:60px; overflow: hidden; text-align: center}
+.giftbatch .icon{border-radius: 50%;background: #009E8E;width: 20px;height: 20px; line-height: 20px;display: inline-block;color: #fff;vertical-align: top;margin-top: 23px;font-size: 16px}
+.giftbatch .money{font-size: 60px;height: 60px;line-height: 60px;color:#151515;}
+.giftbatch .fnt{padding: 0 10px;height: 26px;}
+.giftbatch .fnt p{margin: 0;padding: 0;width:7em; height: 26px;line-height: 26px; float: left; overflow: hidden;text-overflow:ellipsis;white-space: nowrap;display:inline-block; text-align: center;}
+.giftbatch .time{color:#fff;text-align: center}
+.giftbatch.type1{ background:url('../../assets/img/giftbatch1.png') right 0 no-repeat;}
+.giftbatch.used{ background:url('../../assets/img/giftbatch3.png') right 0 no-repeat;}
+.giftbatch.type1 .icon{background: #BF9653}
+.giftbatch.used .icon{background: #ccc}
+.giftbatch.used .money{color: #ccc}
+
+/*门诊记录*/
+.tag{position: absolute;top: 11px;right: -22px;width: 84px;height:22px;line-height:22px; transform:rotate(45deg);font-size: 12px;color: #fff;}
+.tag.finished{background-color: #47B104;}
+.tag.process{background-color: #F5A41F;}
+/*门诊记录弹窗*/
+.dialogCommonWar .fw-b{font-weight: bold;}
+.dialogCommonWar .userOrders,.userMedicines{padding: 20px;background-color: #F8F8F8;margin-bottom: 20px; }
+.dialogCommonWar ul{padding: 0;margin: 0;}
+.dialogCommonWar .userOrders li,.userMedicines li{display: inline-block; text-align: center;list-style: none;padding: 0 20px;margin: 0 5px 15px;background: #Fff;box-shadow:0 2px 6px 0 rgba(221,221,221,0.50);border-radius: 2px;}
+.dialogCommonWar .userOrders li span{color: #387FEC;line-height: 44px;}
+.dialogCommonWar .userOrders li i{display: inline-block;font-size: 10px;color: #fff;padding:3px;background: #F5A41F;font-style: normal;margin-left: 8px;}
+.dialogCommonWar .userOrders li i.pay{background: #47B104;}
+.dialogCommonWar .el-table th > .cell{color: #999;font-size: 12px;}
+.dialogCommonWar .el-table td > .cell{color: #666;font-size: 12px;}
+.dialogCommonWar .icon{margin-right: 8px;}
+.examination .el-input{width: 92%;display: inline-block;margin-left: 20px;}
+
+/*执行日志*/
+.logList .el-row{line-height: 50px;background: #F8F8F8;padding: 0 20px;margin-bottom: 20px;}
+
+/*打印头部尾部*/
+.print_header,.print_footer{display:none}
+@media print {
+  .print_header,.print_footer{
+    visibility: visible;
+    display: block;
+  }
+}

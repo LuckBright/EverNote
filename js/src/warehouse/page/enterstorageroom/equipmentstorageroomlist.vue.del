@@ -1,0 +1,152 @@
+<template>
+  <div>
+    <ever-bread-crumb
+      name="设备入库"
+      :path="`/goods/equipmententerstoragerooms/${$route.params.status}`"
+    ></ever-bread-crumb>
+    <div class="layout_inner">
+      <div class="main-head">
+        <ever-query-form :schema="querySchema" v-model="queryObj" @query="query"></ever-query-form>
+        <el-button
+          type="text"
+          class="success"
+          @click="handleComplete"
+        >{{$route.params.status == 10 ? '查看已完成的任务' : '返回待入库的任务' }}</el-button>
+        <div class="main-option">
+          <h4>
+            <span v-if="$route.params.status == 10">待入库的任务</span>
+            <span v-else>已经完成的任务</span>
+          </h4>
+          <el-button type="primary" @click="addCheck">新建入库</el-button>
+        </div>
+      </div>
+      <el-table v-loading.body="loading" :data="tableData" style="width: 100%" border>
+        <el-table-column show-overflow-tooltip prop align="center" label="入库单号">
+          <template slot-scope="scope">
+            <span
+              class="blue"
+              @click="$router.push(scope.row.status == 10 ? `/goods/equipmententerstorageroom/${scope.row.id}` : `/goods/equipmententerstorageroomedit/${scope.row.id}?look=${scope.row.id}`)"
+            >{{scope.row.code}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column show-overflow-tooltip prop="type" align="center" label="入库类型">
+          <template slot-scope="scope">{{setName(FULL_IN_OUT_TYPE.intype, scope.row.type, true)}}</template>
+        </el-table-column>
+        <el-table-column show-overflow-tooltip prop align="center" label="关联单据">
+          <template slot-scope="scope">{{setName(FULL_ORDER_NAME.intype, scope.row.type, true)}}</template>
+        </el-table-column>
+        <el-table-column show-overflow-tooltip prop="billCode" align="center" label="关联单号">
+          <template slot-scope="scope">
+            <span>{{scope.row.billCode}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column show-overflow-tooltip prop="createTime" align="center" label="创建时间">
+          <template
+            slot-scope="scope"
+          >{{$moment(scope.row.createTime).format('YYYY-MM-DD HH:mm:ss')}}</template>
+        </el-table-column>
+        <el-table-column show-overflow-tooltip prop="status" align="center" label="状态">
+          <template slot-scope="scope">{{setName(FULL_STATE.instock, scope.row.status, true)}}</template>
+        </el-table-column>
+      </el-table>
+      <el-row type="flex" justify="end">
+        <ever-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :totalCount="totalCount"
+          :current="current"
+        ></ever-pagination>
+      </el-row>
+    </div>
+  </div>
+</template>
+<script>
+import list from '@/util/list'
+import api from './getinstockapi'
+import storageroomApi from '../../store/storageroomapi'
+import { debounce } from '@/util/common'
+import { EQUIPMENTTYPE, FULL_STATE, FULL_ORDER_NAME, FULL_IN_OUT_TYPE } from '@/util/warehouseconfig'
+import setName from '@/util/setstatusname'
+import inoutstocktype from '../../store/inoutstocktypeapi'
+import getMaterialInfoApi from '../../store/getmaterialinfoapi'
+import { REMOTE_METHODS_PLACEHOLDER, REMOTE_METHODS_WIDTH } from '@/warehouse/views/util/constant'
+var querySchema = [
+  {
+    name: 'localMaterialId',
+    label: '商品名称',
+    placeholder: REMOTE_METHODS_PLACEHOLDER,
+    type: 'remotemethod',
+    api: getMaterialInfoApi,
+    params: { materialType: EQUIPMENTTYPE },
+    showKeys: ['byname', 'spec', 'type', 'dosageForm'],
+    showName: 'equipmentObject',
+    apiName: 'listlocal',
+    style: REMOTE_METHODS_WIDTH,
+  },
+  {
+    name: 'storageRoomId',
+    label: '库房名称',
+    api: storageroomApi,
+    type: 'remotemethod',
+    initoptions: [],
+    userType: true
+  }
+]
+
+export default {
+  mixins: [list, setName],
+  data () {
+    var obj = this.$ever.createObjFromSchema(querySchema)
+    return {
+      querySchema,
+      queryObj: obj,
+      api,
+      FULL_STATE,
+      FULL_ORDER_NAME,
+      FULL_IN_OUT_TYPE,
+      listParams: { 'inOutstockType': 0, 'materialType': EQUIPMENTTYPE, status: this.$route.params.status },
+      inStockType: []
+    }
+  },
+  methods: {
+    addCheck () {
+      this.$router.push('/goods/equipmentinboundstorageadd')
+    },
+    handleComplete: debounce(function () {
+      Number(this.$route.params.status) === 10 ? this.$router.push('/goods/equipmententerstoragerooms/11') : this.$router.push('/goods/equipmententerstoragerooms/10')
+      this.listParams.status = this.$route.params.status
+      this.handleCurrentChange()
+    })
+  },
+  created () {
+    inoutstocktype.list({ 'inOutStockType': 0 }).then(result => {
+      let res = result.list || result.activityTypeList
+      if (res) {
+        for (var insur of res) {
+          insur.name = insur.activityName
+        }
+        this.inStockType = res
+      }
+    })
+  }
+}
+</script>
+<style lang="scss" scoped>
+span.blue {
+  color: #1c7bef;
+  cursor: pointer;
+}
+span.blue:hover {
+  text-decoration: underline;
+}
+.success {
+  position: absolute;
+  right: 40px;
+  top: 80px;
+}
+.main-option h4 {
+  margin: 0;
+  float: left;
+  line-height: 36px;
+}
+</style>

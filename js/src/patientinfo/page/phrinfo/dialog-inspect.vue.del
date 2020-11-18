@@ -1,0 +1,69 @@
+<template>
+  <!-- 检查医嘱信息 -->
+  <el-dialog :title="title" :visible.sync="dialogVisible" class="ui_dialog_02">
+    <el-table
+      :data="inspectTable"
+      height="250"
+      border
+      style="width: 100%">
+      <el-table-column
+        prop="examItemName"
+        label="医嘱名称"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="examPosition"
+        label="部位"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="price"
+        label="金额">
+      </el-table-column>
+      <el-table-column
+        prop="createTime"
+        label="开嘱时间"
+        width="160">
+      </el-table-column>
+      <el-table-column
+        prop="updateTime"
+        label="执行时间"
+        width="160">
+      </el-table-column>
+      <el-table-column
+        prop="remark"
+        show-overflow-tooltip
+        label="嘱托">
+      </el-table-column>
+      <el-table-column
+        label="操作">
+        <template slot-scope="scope">
+          <el-button @click="showReport(scope.row)"><a :href="scope.row.attachmentUrl" target="_blank">查看</a></el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </el-dialog>
+</template>
+<script>
+export default {
+  props: ['inspectTable', 'visible', 'title'],
+  data () {
+    return {
+      dialogVisible: false
+    }
+  },
+  watch: {
+    visible (val) {
+      this.dialogVisible = val
+    },
+    dialogVisible (val) {
+      this.$emit('update', val)
+    }
+  },
+  methods: {
+    showReport (data) {
+      // window.location.href = this.inspectTable.attachmentUrl
+    }
+  }
+}
+</script>

@@ -1,0 +1,482 @@
+<template>
+  <div class="hospital-container prepare-container">
+    <!-- 搜索框 -->
+    <div class="hospital-search">
+      <el-row :gutter="9.5">
+        <el-col :span="20">
+          <ever-patient-select
+            v-model="patientId"
+            :allow-create="false"
+            :grey-denies-dialog-show="true"
+            @select="selectPatient"
+          ></ever-patient-select>
+        </el-col>
+        <el-col :span="4">
+          <el-button type="primary" @click="selectPatient">查询</el-button>
+        </el-col>
+      </el-row>
+    </div>
+    <!-- 主体内容 -->
+    <el-container class="hospital-layout">
+      <el-aside style="width: 700px;" class="inner high prepare-left">
+        <!-- 搜索患者 -->
+        <el-row :gutter="10" class="patient-search">
+          <el-col :span="14">
+            <el-autocomplete
+              v-model="patientValue"
+              :fetch-suggestions="querySearch"
+              placeholder="请输入患者姓名"
+              :trigger-on-focus="false"
+              :clearable="true"
+              @select="handlePatientSelect"
+            >
+              <template slot-scope="scope">
+                <div class="option-field">
+                  {{scope.item.patient.name}}（
+                  <sys-value type="GBT.2261.1" :code="scope.item.patient.sex"></sys-value>
+                  ）{{scope.item.patient.birthday | formatDateByExp('YYYY-MM-DD')}}
+                </div>
+              </template>
+            </el-autocomplete>
+          </el-col>
+          <el-col :span="4">
+            <el-button
+              :loading="Object.keys(this.patientItem).length === 0 ? false : submitLoading"
+              :type="Object.keys(this.patientItem).length === 0 ? '' : 'primary'"
+              :disabled="Object.keys(this.patientItem).length === 0"
+              @click="addToPatientTable"
+            >新增患者</el-button>
+          </el-col>
+        </el-row>
+        <!-- 患者列表 -->
+        <div class="patient-list">
+          <el-table
+            :data="patientList"
+            height="calc(100vh - 225px)"
+            @row-click="handleCurrentPatient"
+            :row-class-name="tableRowClassName">
+            <el-table-column width="50" align="center">
+              <template slot-scope="scope">
+                <svg
+                  v-if="scope.row.patientHospitalizedObject && scope.row.patientHospitalizedObject.hosStatus == HOS_STATUS[5].id"
+                  class="icon f18"
+                  aria-hidden="true"
+                >
+                  <use xlink:href="#iconchuyuan"></use>
+                </svg>
+              </template>
+            </el-table-column>
+            <el-table-column label="患者姓名">
+              <template slot-scope="scope">
+                <span
+                  v-if="scope.row.patientHospitalizedObject && scope.row.patientHospitalizedObject.patient"
+                >{{scope.row.patientHospitalizedObject.patient.name}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column width="70" label="性别">
+              <template slot-scope="scope">
+                <span
+                  v-if="scope.row.patientHospitalizedObject && scope.row.patientHospitalizedObject.patient"
+                >{{scope.row.patientHospitalizedObject.patient.sex | formatSex}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column width="70" label="年龄">
+              <template slot-scope="scope">
+                <span
+                  v-if="scope.row.patientHospitalizedObject && scope.row.patientHospitalizedObject.patient"
+                >{{scope.row.patientHospitalizedObject.patient.age}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="科室">
+              <template slot-scope="scope">
+                <span
+                  v-if="scope.row.patientHospitalizedObject"
+                >{{scope.row.patientHospitalizedObject.providerName}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="病区">
+              <template slot-scope="scope">
+                <span
+                  v-if="scope.row.patientHospitalizedObject"
+                >{{scope.row.patientHospitalizedObject.hospitalizedAreaName}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column width="70">
+              <template slot-scope="scope">
+                <el-popover>
+                  <p>确定删除吗？</p>
+                  <div style="text-align: right; margin: 0">
+                    <el-button type="text" size="mini" @click="simulationClick">取消</el-button>
+                    <el-button type="primary" size="mini" @click="removePatientTable(scope.row)">确定</el-button>
+                  </div>
+                  <el-button
+                    v-if="scope.row.patientHospitalizedObject && scope.row.patientHospitalizedObject.hosStatus == HOS_STATUS[5].id"
+                    slot="reference"
+                    size="mini"
+                    type="text"
+                    data-target="button"
+                  >删除</el-button>
+                </el-popover>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </el-aside>
+      <el-main class="inner ml10 prepare-right">
+        <!-- 搜索药品 -->
+        <el-row :gutter="10" class="drug-search">
+          <el-col :span="10">
+            <remote-select
+              :disabled="currentPatient | disabledSelect"
+              class="custom-select"
+              ref="remoteselectdrug"
+              :queryParams="queryParamsDrug"
+              placeholder="请输入条码／通用名／商品名称"
+              :api="getDrugInfoApi"
+              apiName="listlocal"
+              @selectSave="handleDrugSelect"
+              :value="drugValue"
+              :isSeachSelect="false"
+              :isObj="true"
+              :state="0"
+            ></remote-select>
+          </el-col>
+          <el-col :span="4">
+            <el-button
+              :loading="Object.keys(this.drugItem).length === 0 ? false : submitLoading"
+              :type="Object.keys(this.drugItem).length === 0 ? '' : 'primary'"
+              :disabled="Object.keys(this.drugItem).length === 0 || currentPatient | disabledSelect"
+              @click="addToDrugTable"
+            >添加药品</el-button>
+          </el-col>
+        </el-row>
+        <!-- 药品列表 -->
+        <div class="drug-list">
+          <el-table
+            :data="drugList"
+            height="calc(100vh - 225px)"
+            :empty-text="currentPatient | emptyTextFn"
+          >
+            <el-table-column label="物资名称" align="left">
+              <template slot-scope="scope">
+                <wh-code-to-name
+                  v-if="scope.row.localSettingObject"
+                  :isExt="true"
+                  :patchObj="{
+                    code: GOLBAL_VAL_MATERIL_NAME.NAME_ONE,
+                    list: scope.row.localSettingObject.materialSkuObject.ext,
+                    isInfo: false
+                  }"
+                ></wh-code-to-name>
+              </template>
+            </el-table-column>
+            <el-table-column label="规格" width="300" align="center">
+              <template slot-scope="scope">
+                <wh-code-to-name
+                  v-if="scope.row.localSettingObject"
+                  :showIcon="false"
+                  :isExt="true"
+                  :patchObj="{
+                    code: [SPU_SPEC_CODE],
+                    list: scope.row.localSettingObject.materialSkuObject.ext,
+                    isInfo: false
+                  }"
+                ></wh-code-to-name>
+              </template>
+            </el-table-column>
+            <el-table-column width="70" align="center">
+              <template slot-scope="scope">
+                <el-popover>
+                  <p>确定删除吗？</p>
+                  <div style="text-align: right; margin: 0">
+                    <el-button type="text" size="mini" @click="simulationClick">取消</el-button>
+                    <el-button type="primary" size="mini" @click="removeDrugTable(scope.row)">确定</el-button>
+                  </div>
+                  <el-button slot="reference" size="mini" type="text">删除</el-button>
+                </el-popover>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </el-main>
+    </el-container>
+  </div>
+</template>
+
+<script>
+import dispenSearch from '@/warehouse/page/storages/components/dispensearch'
+import remoteSelect from '@/warehouse/page/joinstorage/remoteselect'
+import getDrugInfoApi from '@/warehouse/store/getmaterialinfoapi'
+import drugPrepareApi from '../store/drugprepareapi'
+import getstorage from '@/warehouse/page/storages/util/getstorage'
+import { debounce, HOS_STATUS, SPU_SPEC_CODE, GOLBAL_VAL_MATERIL_NAME } from '@/util/common'
+import './index.scss'
+export default {
+  mixins: [getstorage],
+  data () {
+    return {
+      getDrugInfoApi, // 物资接口
+      drugPrepareApi, // 自备药管理接口
+      HOS_STATUS, // 住院状态
+      SPU_SPEC_CODE,
+      GOLBAL_VAL_MATERIL_NAME,
+      patientId: '', // 全局搜索的患者
+      patientValue: '', // 住院患者姓名
+      patientItem: {}, // 选择的患者
+      patientList: [], // 患者列表
+      currentPatient: {}, // 当前患者
+      queryParamsDrug: { offset: 0, pagesize: 20 }, // 查询物资参数
+      drugValue: '',
+      drugItem: {}, // 选择的物资
+      drugList: [], // 药品列表
+      submitLoading: false // 提交loading
+    }
+  },
+  created () {
+    this.fetchPatientList(this.storageId)
+  },
+  methods: {
+    // 全局搜索选择的患者
+    selectPatient: debounce(function (data) {
+      if (this.patientId) {
+        drugPrepareApi.getPrepareRelationList({
+          storageRoomId: this.storageId,
+          patientId: this.patientId
+        }).then(res => {
+          this.patientList = res
+          this.choosePatientDefault(this.patientList)
+        })
+      } else {
+        this.fetchPatientList(this.storageId)
+      }
+    }),
+    // 查询患者列表
+    fetchPatientList (storageRoomId) {
+      drugPrepareApi.getPrepareRelationList({ storageRoomId }).then(res => {
+        console.log(res, '---')
+        this.patientList = res
+        this.choosePatientDefault(this.patientList)
+      })
+    },
+    // 默认选中第一个患者
+    choosePatientDefault (data) {
+      if (data.length) {
+        this.currentPatient = data[0]
+        this.fetchDrugList(this.currentPatient.id)
+      } else {
+        this.currentPatient = {}
+        this.drugList = []
+      }
+    },
+    // 查询患者
+    querySearch (name, cb) {
+      name = name && String(name).trim()
+      if (name) {
+        drugPrepareApi.getPrepareRelationPatientList({
+          name,
+          storageRoomId: this.storageId
+        }).then(result => {
+          cb(result)
+        })
+      } else {
+        cb([])
+      }
+    },
+    // 选择患者
+    handlePatientSelect (data) {
+      if (data) {
+        this.patientItem = data
+        this.patientValue = data.patient.name
+      } else {
+        this.patientItem = {}
+        this.patientValue = ''
+      }
+    },
+    // 添加患者
+    addToPatientTable: debounce(function (data) {
+      this.submitLoading = true
+      const params = {
+        patientId: this.patientItem.patientId,
+        patientName: (this.patientItem.patientHospitalizedObject && this.patientItem.patientHospitalizedObject.patient.name) || '',
+        hospitalizedNumber: this.patientItem.hospitalizedNumber,
+        spaceId: this.patientItem.hospitalizedAreaId,
+        spaceName: this.patientItem.hospitalizedAreaName,
+        providerId: this.patientItem.providerId,
+        providerName: this.patientItem.providerName,
+        storageRoomId: this.storageId
+      }
+      drugPrepareApi.createPrepareRelation(params).then(res => {
+        this.submitLoading = false
+        if (res && res.flag) {
+          this.$messageTips(this, 'success', '添加成功', '提示')
+          this.fetchPatientList(this.storageId)
+          this.resetData()
+        }
+      })
+    }),
+    // 点击当前患者
+    handleCurrentPatient: debounce(function (data, $event) {
+      if (data && $event.target.parentNode.dataset.target !== 'button') {
+        this.currentPatient = data
+        this.fetchDrugList(data.id)
+      }
+    }),
+    // 删除患者
+    removePatientTable: debounce(function (data) {
+      drugPrepareApi.updatePrepareRelation({
+        id: data.id,
+        isDelete: 1
+      }).then(res => {
+        if (res && res.flag) {
+          this.simulationClick()
+          this.$messageTips(this, 'success', '删除成功', '提示')
+          this.fetchPatientList(this.storageId)
+          if (this.currentPatient.id === data.id) {
+            this.drugList = []
+            this.currentPatient = {}
+          }
+        }
+      })
+    }),
+    // 请求物资列表
+    fetchDrugList (prepareRelationId) {
+      drugPrepareApi.getPrepareRelationItemList({ prepareRelationId }).then(res => {
+        this.drugList = res
+      })
+    },
+    // 选择物资
+    handleDrugSelect (data) {
+      if (data) {
+        this.drugItem = data
+      } else {
+        this.drugItem = {}
+      }
+    },
+    // 添加物资
+    addToDrugTable: debounce(function () {
+      this.submitLoading = true
+      const params = {
+        prepareRelationId: this.currentPatient.id,
+        localMaterialId: this.drugItem.localMaterialId,
+        materialType: this.materialType,
+        globalMaterialId: this.drugItem.materialSkuId,
+        unitId: this.drugItem.materialVoObject.packagUnitId
+      }
+      drugPrepareApi.createPrepareRelationItem(params).then(res => {
+        this.submitLoading = false
+        if (res && res.flag) {
+          this.$messageTips(this, 'success', '添加成功', '提示')
+          this.fetchDrugList(this.currentPatient.id)
+          if (this.$refs.remoteselectdrug) this.$refs.remoteselectdrug.select = ''
+        }
+      })
+    }),
+    // 删除物资
+    removeDrugTable: debounce(function (data) {
+      drugPrepareApi.updatePrepareRelationItem({
+        id: data.id,
+        isDelete: 1
+      }).then(res => {
+        if (res && res.flag) {
+          this.simulationClick()
+          this.$messageTips(this, 'success', '删除成功', '提示')
+          this.fetchDrugList(this.currentPatient.id)
+        }
+      })
+    }),
+    // 模拟点击 - 解决popover不消失的问题
+    simulationClick: debounce(function () {
+      document.querySelector('#app').click()
+    }),
+    // 重置数据
+    resetData () {
+      this.patientValue = ''
+      this.patientId = ''
+    },
+    // 表格选中行样式
+    tableRowClassName ({ row, rowIndex }) {
+      if (row.id === this.currentPatient.id) {
+        return 'current-select'
+      } else {
+        return ''
+      }
+    }
+  },
+  filters: {
+    // 是否禁用搜索物资框
+    disabledSelect (data) {
+      if (Object.keys(data).length) {
+        if (data.patientHospitalizedObject && data.patientHospitalizedObject.hosStatus === HOS_STATUS[5].id) {
+          return true
+        } else {
+          return false
+        }
+      } else {
+        return true
+      }
+    },
+    // 药品表格数据为空时展示的文字
+    emptyTextFn (data) {
+      if (Object.keys(data).length) {
+        if (data.patientHospitalizedObject && data.patientHospitalizedObject.hosStatus === HOS_STATUS[5].id) {
+          return '当前患者已出院，不可添加药品'
+        } else {
+          return '暂无数据'
+        }
+      } else {
+        return '请添加或选择一名患者'
+      }
+    }
+  },
+  watch: {
+    'patientValue' (val) { // 清空选择的患者
+      if (!val) this.patientItem = {}
+    }
+  },
+  components: {
+    dispenSearch,
+    remoteSelect
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.prepare-container {
+  .hospital-search {
+    padding-bottom: 10px;
+  }
+  .prepare-left {
+    padding: 10px;
+    font-size: 14px;
+    .patient-search {
+      margin-bottom: 10px;
+    }
+    .patient-list {
+      .el-table {
+        margin: 0;
+      }
+    }
+  }
+  .prepare-right {
+    padding: 10px;
+    font-size: 14px;
+    .drug-search {
+      margin-bottom: 10px;
+    }
+    .drug-list {
+      .el-table {
+        margin: 0;
+      }
+    }
+  }
+}
+/deep/ .el-autocomplete {
+  width: 100%;
+}
+/deep/ .el-table .current-select {
+  background: #dbe8f8;
+}
+/deep/ .custom-select input.el-input__inner {
+  height: 36px !important;
+}
+</style>

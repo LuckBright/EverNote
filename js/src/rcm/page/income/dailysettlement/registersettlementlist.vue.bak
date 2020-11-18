@@ -1,0 +1,253 @@
+<template>
+  <div class="patientList" :class="{isShowPatienList:isShow}">
+    <div class="btn" @click="showPatient" :class="{isShowPatienListBtn:isShow}">日结历史</div>
+    <div class="settle_body payStyle">
+      <div class="main-head">
+        <div class="main-head">
+          <ever-form2
+            :schema="querySchema"
+            v-model="queryObj"
+            @query="query"
+            :is-query="true"
+            class="main-form patientlist-d"
+          >
+            <template slot="date">
+              <ever-range-picker
+                :start.sync="queryObj.start"
+                :end.sync="queryObj.end"
+                :autoWidth="true"
+                @change="list()"
+              ></ever-range-picker>
+            </template>
+            <template slot="btn">
+              <el-button type="primary" @click="list()">查询</el-button>
+            </template>
+          </ever-form2>
+        </div>
+      </div>
+      <el-table
+        :data="tableData"
+        style="width: 100%"
+        @row-click="handledetail"
+        class="no-border table-hover-blue highlight-current-row"
+      >
+        <el-table-column prop="code" width="200" label="日结流水号"></el-table-column>
+        <el-table-column prop="total" label="结算合计金额" align="right">
+          <template slot-scope="scope">{{scope.row.total | formatToFinacial}}</template>
+        </el-table-column>
+        <el-table-column prop="closeTime" label="结账时间"></el-table-column>
+      </el-table>
+      <ever-pagination
+        :small="true"
+        class="pagecomponent"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :pagesize="pagesize"
+        :totalCount="totalCount"
+        :current="current"
+        justify="start"
+        :layout="'prev, pager, next'"
+      ></ever-pagination>
+    </div>
+  </div>
+</template>
+<script>
+import list from '@/util/list'
+import api from '@/rcm/store/income/dailysettlementapi'
+export default {
+  mixins: [list],
+  props: ['feeType', 'updateList'],
+  data () {
+    let schema = [
+      {
+        label: '日结时间',
+        name: 'date',
+        comp: 'custom',
+        span: 20,
+        labelWidth: '70px'
+      },
+      {
+        label: '',
+        labelWidth: '0',
+        name: 'btn',
+        comp: 'custom',
+        span: 4
+      }
+    ]
+    let obj = this.$ever.createObjFromSchema(schema)
+    obj.start = this.$moment().subtract(1, 'months').format('YYYY-MM-DD 00:00:00')
+    obj.end = this.$moment().format('YYYY-MM-DD 23:59:59')
+    return {
+      api,
+      querySchema: schema,
+      queryObj: obj,
+      cardloading: false,
+      isShow: false
+    }
+  },
+  created () { },
+  watch: {
+    'feeType': {
+      handler () {
+        this.queryObj.start = this.$moment().subtract(1, 'months').format('YYYY-MM-DD 00:00:00')
+        this.queryObj.end = this.$moment().format('YYYY-MM-DD 23:59:59')
+        this.list()
+      },
+      immediate: true
+    },
+    'updateList': {
+      handler () {
+        this.query()
+      },
+      immediate: true
+    }
+  },
+  methods: {
+    clearquery () {
+      this.queryObj.end = ''
+      this.queryObj.start = ''
+    },
+    handledetail (row) {
+      if (this.feeType === 7) {
+        this.$router.push(`/rcm/daily/rcmSettlement?id=${row.code}&closeId=${row.id}`)
+      } else {
+        this.$router.push(`/rcm/daily/settlement/${row.feeType}?id=${row.id}&code=${row.code}`)
+      }
+      this.isShow = false
+    },
+    showPatient () {
+      this.isShow = !this.isShow
+      if (this.isShow) this.list()
+    },
+    query () {
+      let end = this.$moment().format('YYYY-MM-DD 23:59:59')
+      this.list(end)
+    },
+    // 患者列表
+    async list (end, start) {
+      let params = {
+        offset: this.offset,
+        pagesize: this.pagesize,
+        feeType: this.feeType || 1,
+        start: this.queryObj.start ? this.$moment(this.queryObj.start).format('YYYY-MM-DD 00:00:00') : '',
+        end: this.queryObj.end ? this.$moment(this.queryObj.end).format('YYYY-MM-DD 23:59:59') : ''
+      }
+      let url = 'getDailysettlementList'
+      if (new Date(this.queryObj.start).getTime() > new Date(this.queryObj.end).getTime()) {
+        this.$messageTips(this, 'error', '开始时间不能早于结束时间')
+        return
+      }
+      if (this.feeType === 7) {
+        url = 'getMallSettlementList'
+      }
+      this.cardloading = true
+      try {
+        api[url](params).then(rs => {
+          this.tableData = rs.data
+          this.totalCount = rs.totalCount
+          this.cardloading = false
+        })
+      } catch (err) {
+        console.log(err)
+        this.cardloading = false
+      }
+    }
+  }
+}
+</script>
+<style lang="less" type scoped>
+.patientList {
+  height: 100vh;
+  width: 530px;
+  position: fixed;
+  transition: all linear 0.3s;
+  left: -530px;
+  top: 0;
+  z-index: 100;
+  padding: 60px 0;
+  margin: 30px 0;
+  box-sizing: border-box;
+  /* overflow-y: auto; */
+  overflow-y: scroll;
+  overflow-x: visible;
+  background-color: #fff;
+  border-left: 1px solid #ccc;
+  box-shadow: 10px 0 10px rgba(0, 0, 0, 0.05);
+}
+.isShowPatienList {
+  transition: all linear 0.3s;
+  left: 0px;
+  right: auto;
+}
+.patientList .isShowPatienListBtn.btn {
+  transition: all linear 0.3s;
+  left: 530px;
+}
+.patientList .payStyle {
+  width: 530px;
+  padding: 0;
+  /* position: relative; */
+  /* height: 100%; */
+  background-color: #fff;
+  overflow: hidden;
+}
+.patientList .btn {
+  transition: all linear 0.3s;
+  position: fixed;
+  left: 0px;
+  top: 30%;
+  width: 10px;
+  font-size: 12px;
+  padding: 10px 10px;
+  background-color: #1c7bef;
+  cursor: pointer;
+  color: #ffffff;
+  z-index: 200;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+patientList .isShowPatienListBtn {
+  transition: all linear 0.3s;
+  left: 530px;
+}
+.patientList /deep/ .el-form-item {
+  margin: 5px 10px 5px 5px;
+}
+.patientList /deep/ .form.ever_query_from .el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
+}
+.patientList /deep/ .el-date-editor {
+  width: 100%;
+}
+.layout_box .patientList .el-table .el-button {
+  font-size: 14px;
+}
+.patientList .main-head {
+  text-align: center;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.main-head .el-form {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+.patientList .main-title {
+  margin: 10px 0 0 20px;
+  text-align: left;
+  font-size: 16px;
+  font-weight: bold;
+}
+.patientlist-d /deep/ .el-row > .el-form-item {
+  display: none;
+}
+.pagecomponent {
+  position: absolute;
+  bottom: 35px;
+  right: 5px;
+}
+.patientList /deep/ .el-table__body tr:hover > td {
+  color: white;
+  background-color: #1c7bef !important;
+}
+</style>

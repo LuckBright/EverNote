@@ -1,0 +1,67 @@
+<template>
+    <span>
+        <el-select v-model="select" filterable clearable remote :placeholder="placeholder || '请输入关键词'" :remote-method="remoteMethod" @change="change" style="width: 100%" :filterable="true" value-key="accountCode">
+            <el-option v-for="item in patients" :key="item.accountName" :label="item.accountName" :value="item"> 
+                <!-- <span class="option-field">{{ item.accountCode }}</span>                 -->
+            </el-option>
+        </el-select>
+    </span>
+</template>
+<script>
+import { getAccListEnd } from '../store/voucherEntries'
+export default {
+  props: ['value', 'placeholder'],
+  data () {
+    return {
+      patients: [],
+      inputselect: ''
+    }
+  },
+  methods: {
+    async remoteMethod (query) {
+      query = query && String(query).trim()
+      try {
+        let params = {
+          accountCode: query,
+          accountName: query
+        }
+        let data = await getAccListEnd(params)
+        this.patients = data.data
+        data.data.map(v => {
+          this.select.statisticsDimension = v.statisticsDimension
+          if (v.accountCode === this.select.accountCode || v.accountName === this.select.accountName) {
+          }
+        })
+      } catch (err) {
+
+      }
+    },
+    change (val) {
+      this.$emit('change', val)
+    }
+  },
+  computed: {
+    select: {
+      set (newVal) {
+        Object.keys(newVal).map(v => {
+          newVal.isChange = true
+        })
+        this.$emit('input', newVal)
+        this.$emit('select', newVal)
+      },
+      get () {
+        return this.value
+      }
+    }
+  },
+  created () {
+    this.remoteMethod()
+  }
+}
+</script>
+<style scoped>
+.option-field {
+  display: inline-block;
+  margin-right: 10px;
+}
+</style>

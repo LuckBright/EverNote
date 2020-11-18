@@ -1,0 +1,93 @@
+<template>
+  <div class="buttonCon">
+    <el-button class="btns"
+      @click="handle"
+      :class="{'supperBtns': type == 'supper', 'largeBtns': type == 'large', 'normalBtns': type == 'normal', 'smallBtns': type == 'small', 'disabledBtn': disabled}"
+      :disabled="disabled">{{message}}
+      <slot>
+        <div class="cover" v-if="type !== 'small'" :class="{'disabledCover': disabled}"></div>
+      </slot>
+    </el-button>
+  </div>
+</template>
+<script>
+export default {
+  data () {
+    return {
+    }
+  },
+  props: ['message', 'type', 'disabled'],
+  methods: {
+    handle () {
+      this.$emit('click')
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.buttonCon {
+  display: inline-block;
+  .btns {
+    text-align: center;
+    background-image: linear-gradient(-180deg, #70ADF8 1%, #4A96F2 22%, #126FE0 100%);
+    box-shadow: inset 0 -2px 0 0 rgba(255,255,255,0.50);
+    border-radius: 10px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 60px;
+    padding: 0;
+    border: none;
+    letter-spacing: 4px;
+    position: relative;
+    z-index: 1;
+    .cover {
+      position: absolute;
+      opacity: 0.4;
+      background: #1C7BEF;
+      border-radius: 10px;
+      height: 40px;
+      bottom: -20px;
+      left: 5%;
+      right: 5%;
+      z-index: 0;
+      filter: blur(10px);
+    }
+    .disabledCover {
+      background: #C5C5C5;
+    }
+  }
+  .supperBtns {
+    width: 100%;
+    height: 110px;
+    line-height: 110px;
+    font-size: 60px;
+  }
+  .largeBtns {
+    width: 420px;
+    height: 110px;
+    line-height: 110px;
+    font-size: 60px;
+  }
+  .normalBtns {
+    width: 220px;
+    height: 110px;
+    line-height: 110px;
+    font-size: 60px;
+  }
+  .smallBtns {
+    width: 172px;
+    height: 80px;
+    line-height: 80px;
+    font-size: 36px;
+  }
+  .disabledBtn {
+    // background: linear-gradient(to bottom, #e1e1e1, #bbbbbb);
+    background: #bbbbbb;
+    color: #ffffff !important;
+  }
+  .disabledBtn:hover {
+    background: #bbbbbb;
+  }
+}
+</style>
+

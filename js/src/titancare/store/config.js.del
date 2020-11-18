@@ -1,0 +1,26 @@
+function isLocalHost () {
+  return [
+    'localhost', // 本地
+    '192.168.2.3', // 指定域名
+    '192.168.249.46', // 本就域名
+    '192.168.249.123',
+    '192.168.251.96',
+    '192.168.248.195'
+  ].includes(window.location.hostname)
+}
+
+const config = {}
+let baseHost = location.protocol + '//' + window.location.host.replace('www.', '')
+if (isLocalHost()) {
+  baseHost = localStorage.getItem('host') || 'http://dev4a.everjiankang.com.cn'
+  // baseHost = localStorage.getItem('host') || 'http://testa.everjiankang.com.cn'
+}
+
+config.api = baseHost + '/api-ih'
+config.thcApi = baseHost + '/api'
+config.baseHost = baseHost
+config.baseHttpsHost = baseHost.replace('http:', 'https:')
+config.host = baseHost.substring(baseHost.indexOf('://') + 3)
+config.filePath = baseHost + '/api/thc-platform-core/globalProxy/download?fileId=' // 上传之后的回显/下载地址
+
+export default config

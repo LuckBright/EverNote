@@ -1,0 +1,162 @@
+<template>
+  <el-dialog title="请选择分类执行单" :visible.sync="showDialog" width="60%">
+    <el-row style="padding:0 90px;">
+      <el-col>
+        <ever-form2 :schema="querySchema" v-model="queryObj" :nosubmit="true" :inline="true">
+          <template slot="executeType">
+            <el-checkbox-group v-model="queryObj.executeType">
+              <el-checkbox
+                v-for="option in executeType"
+                :label="option.code"
+                :key="option.code"
+              >{{option.name}}</el-checkbox>
+            </el-checkbox-group>
+          </template>
+        </ever-form2>
+      </el-col>
+      <el-col align="center">
+        <el-button type="primary" @click="print">立即打印</el-button>
+      </el-col>
+    </el-row>
+  </el-dialog>
+</template>
+<script>
+import storage from '@/util/storage'
+import { frPrint } from '@/util/common'
+export default {
+  props: ['show'],
+  data () {
+    let querySchema = [
+      {
+        name: 'patient',
+        label: '患者范围',
+        comp: 'sys-select',
+        span: 8,
+        props: {
+          type: 'radio',
+          options: [
+            { id: 0, name: '全部' },
+            { id: 1, name: '单患者' }
+          ]
+        }
+      },
+      {
+        name: 'patientId',
+        comp: 'ever-patient-select',
+        span: 8,
+        props: {
+          placeholder: '输入患者姓名'
+        }
+      },
+      {
+        name: 'daterange',
+        label: '执行单时间',
+        comp: 'el-date-picker',
+        span: 24,
+        props: {
+          type: 'daterange',
+          valueFormat: 'yyyy-MM-dd'
+        }
+      },
+      {
+        name: 'executeType',
+        label: '执行单类型',
+        comp: 'custom',
+        span: 24,
+        props: {}
+      }
+    ]
+    let queryObj = this.$ever.createObjFromSchema(querySchema)
+    return {
+      querySchema,
+      queryObj,
+      showDialog: false,
+      executeType: [
+        { code: 'thc_phr.advice_execute_YAO_LIAO_DAN_20181130', name: '药疗单' },
+        { code: 'thc_phr.advice_execute_ZHU_SHE_DAN_20181130', name: '注射单' },
+        { code: 'thc_phr.advice_execute_SHU_YE_DAN_20181130', name: '输液单' },
+        { code: 'thc_phr.advice_execute_HU_LI_DAN_20181130', name: '护理单' },
+        { code: 'thc_phr.advice_execute_XIAO_ZHI_LIAO_DAN_20181130', name: '小治疗单' }
+        // {code: 'thc_phr.advice_execute_ZHI_LIAO_20181130', name: '治疗单'}
+      ]
+    }
+  },
+  watch: {
+    show (val) {
+      this.showDialog = val
+      this.queryObj.executeType = []
+      this.queryObj.patient = '0'
+      this.queryObj.daterange = []
+      this.queryObj.startTime = ''
+      this.queryObj.endTime = ''
+    },
+    showDialog (val) {
+      this.$emit('update:show', val)
+    },
+    'queryObj.patient' (val) {
+      if (val === '0') {
+        let obj = {
+          comp: 'div',
+          style: {
+            height: '40px',
+            width: '200px'
+          },
+          span: 8
+        }
+        this.querySchema.splice(1, 1, obj)
+      } else {
+        let obj1 = {
+          name: 'patientId',
+          comp: 'ever-patient-select',
+          span: 8,
+          props: {
+            placeholder: '输入患者姓名'
+          }
+        }
+        this.querySchema.splice(1, 1, obj1)
+      }
+    }
+  },
+  created () {
+  },
+  methods: {
+    print () {
+      if (!this.queryObj.executeType.length) {
+        return this.$messageTips(this, 'warning', '请选择希望打印的执行单类型', '提示')
+      }
+      if (this.queryObj.patient === '1' && !this.queryObj.patientId) {
+        return this.$messageTips(this, 'warning', '请先选择患者', '提示')
+      }
+      if (this.queryObj.daterange && this.queryObj.daterange.length) {
+        this.queryObj.startTime = this.queryObj.daterange[0]
+        this.queryObj.endTime = this.queryObj.daterange[1]
+      } else {
+        this.queryObj.startTime = ''
+        this.queryObj.endTime = ''
+      }
+      let params = {
+        startTime: this.queryObj.startTime,
+        endTime: this.queryObj.endTime,
+        patientId: this.queryObj.patientId,
+        areaId: storage.getSessionStorage('spaceId') || ''
+      }
+      this.queryObj.executeType.forEach(item => {
+        frPrint(item, params, {
+          preview: true,
+          settings: {
+            portrait: true,
+            paperName: 'A4',
+            marginTop: 0,
+            marginRight: 0,
+            marginBottom: 0,
+            marginLeft: 0
+          }
+        })
+      })
+      this.showDialog = false
+    }
+  }
+}
+</script>
+<style scoped>
+</style>

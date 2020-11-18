@@ -1,0 +1,92 @@
+<template>
+  <div class="messCon">
+    <div class="shelter" v-if="mesVisible">
+      <div class="content">
+        <i class="iconfont" :class="{'icon-sales-zhengque': type == 'success', 'icon-sales-cuowu' : type == 'fail'}"></i>
+        <span v-if="type !== 'success'" class="tips">您还没有刷卡，请先刷卡再选择业务</span>
+        <span v-else class="tips">您已退出账号，<span class="curTime">{{curTime}}S</span>后自动返回主界面</span>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  data () {
+    return {
+      curTime: 5,
+      timer: '',
+      mesVisible: false
+    }
+  },
+  props: ['type', 'visible'],
+  watch: {
+    visible () {
+      this.mesVisible = this.visible
+    },
+    mesVisible () {
+      if (this.mesVisible) {
+        setTimeout(() => {
+          this.mesVisible = false
+          this.$emit('quit-mes')
+        }, 5000)
+        if (this.type === 'success' && this.curTime > 0) {
+          this.timer = setInterval(() => {
+            this.curTime--
+          }, 1000)
+        }
+      }
+    },
+    curTime () {
+      if (!this.curTime) {
+        clearInterval(this.timer)
+        this.curTime = 5
+      }
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.messCon {
+  .shelter {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 1;
+    .content {
+      height: 142px;
+      line-height: 142px;
+      text-align: center;
+      background: #ffffff;
+      width: 60%;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      margin-left: -30%;
+      margin-top: -71px;
+      border-radius: 4px;
+      padding: 20px 0;
+      .tips {
+        font-size: 42px;
+        color: #000;
+        .curTime {
+          color: #EE4433;
+        }
+      }
+      .iconfont {
+        font-size: 40px;
+        margin-right: 15px;
+      }
+      .icon-sales-zhengque {
+        color: #61A812;
+      }
+      .icon-sales-cuowu {
+        color: #ee4433;
+      }
+    }
+  }
+}
+</style>
+

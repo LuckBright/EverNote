@@ -1,0 +1,127 @@
+<template>
+  <el-dialog
+    title="打印费用清单"
+    :visible.sync="visibleFlag"
+    class="printFeeDialog ui_dialog_02"
+    width="500px"
+    @close="closeDialog"
+    :close-on-click-modal="false"
+  >
+    <el-row>
+      <el-col>
+        <ever-form2 :schema="querySchema" v-model="queryObj" :nosubmit="true"></ever-form2>
+      </el-col>
+      <el-col :span="24" align="right">
+        <el-button type="primary" @click="submitEvent" style="margin-right:10px">立即打印</el-button>
+      </el-col>
+    </el-row>
+  </el-dialog>
+</template>
+
+<script>
+import { frPrint } from '@/util/common'
+export default {
+  props: ['visible', 'patientId'],
+  data () {
+    let querySchema = [
+      {
+        name: 'type',
+        label: '打印单类型',
+        comp: 'sys-select',
+        span: 24,
+        props: {
+          type: 'radio',
+          options: [
+            { id: '0', name: '日清单' },
+            { id: '1', name: '汇总清单' }
+          ]
+        }
+      },
+      {
+        name: 'listDate',
+        label: '清单日期',
+        comp: 'el-date-picker',
+        span: 18,
+        props: {
+          type: 'date',
+          valueFormat: 'yyyy-MM-dd'
+        }
+      }
+    ]
+    let queryObj = this.$ever.createObjFromSchema(querySchema)
+    return {
+      querySchema,
+      queryObj,
+      visibleFlag: false,         // dialog显示隐藏标识
+      codes: {
+        '0': 'YI_RI_FEI_YONG_MING_XI',
+        '1': 'FEI_YONG_MING_XI_HUI_ZONG'
+      }
+    }
+  },
+  computed: {
+  },
+  created () {
+  },
+  methods: {
+    closeDialog () {
+      this.visibleFlag = false
+      this.$emit('update:visible', this.visibleFlag)
+    },
+    submitEvent () {
+      if (!this.queryObj.listDate || !this.queryObj.listDate.length) {
+        return this.$messageTips(this, 'warning', '请先选择日期', '提示')
+      }
+      let toPrint = {
+        code: this.codes[this.queryObj.type],
+        params: {
+          ip_no: this.patientId
+        },
+        printParams: {
+          preview: false,
+          settings: {
+            portrait: false,
+            marginTop: 0,
+            marginRight: 0,
+            marginBottom: 0,
+            marginLeft: 0
+          }
+        }
+      }
+      if (this.queryObj.type === '0') {
+        toPrint.params.dateTime = this.queryObj.listDate
+      } else {
+        toPrint.params.startTime = this.queryObj.listDate[0]
+        toPrint.params.endTime = this.queryObj.listDate[1]
+      }
+      frPrint(toPrint.code, toPrint.params, toPrint.printParams)
+      this.closeDialog()
+    }
+  },
+  watch: {
+    'visible' (val) {
+      this.visibleFlag = val
+      this.queryObj.type = '0'
+    },
+    'queryObj.type' (val) {
+      this.querySchema[1].span = val === '0' ? 18 : 24
+      this.querySchema[1].props.type = val === '0' ? 'date' : 'daterange'
+      this.$set(this.querySchema, 1, this.querySchema[1])
+      this.$nextTick(_ => {
+        this.queryObj.listDate = val === '0' ? '' : []
+      })
+    }
+  }
+}
+</script>
+<style scoped lang="scss">
+.refundDialog {
+  padding: 20px;
+  /deep/.el-dialog__title {
+    font-size: 16px !important;
+    line-height: 16px;
+    color: #000 !important;
+    font-weight: bold;
+  }
+}
+</style>

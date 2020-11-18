@@ -1,0 +1,125 @@
+<template>
+  <div>
+    <ever-bread-crumb name="腕带管理" path="/warehouse/wristband"></ever-bread-crumb>
+    <div class="layout_inner">
+      <div class="wristband_wrap">
+        <el-row class="setting_item">
+          <el-col class="title">腕带打印信息设置</el-col>
+          <el-col class="handler_wrap">
+            <el-checkbox-group v-model="normalCheck">
+              <el-checkbox
+                v-for="item,index in NORMAL_INFO"
+                :label="item.name"
+                :key="index"
+              >{{item.label}}{{item.des}}</el-checkbox>
+            </el-checkbox-group>
+            <el-button type="primary" class="priview_btn" @click="printPreview(1,normalCheck)">打印预览</el-button>
+          </el-col>
+        </el-row>
+        <!--<el-row class="setting_item">-->
+        <!--<el-col class="title">新生儿腕带打印信息设置</el-col>-->
+        <!--<el-col class="handler_wrap">-->
+        <!--<el-checkbox-group-->
+        <!--v-model="neonateCheck">-->
+        <!--<el-checkbox v-for="item,index in NEONATE_INFO" :label="item.name" :key="index">{{item.label}}</el-checkbox>-->
+        <!--</el-checkbox-group>-->
+        <!--<el-button type="primary" class="priview_btn" @click="printPreview(2,neonateCheck)">打印预览</el-button>-->
+        <!--</el-col>-->
+        <!--</el-row>-->
+        <print-preview
+          ref="preview"
+          :settings="settings"
+          :type="type"
+          :is-preview="true"
+          :view-type="1"
+        ></print-preview>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import api from '@/sob/store/wristband'
+import { NORMAL_INFO, NEONATE_INFO } from './common/config'
+import PrintPreview from './common/print.preview'
+export default {
+  data () {
+    return {
+      api,
+      NORMAL_INFO,
+      NEONATE_INFO,
+      normalCheck: [],
+      neonateCheck: [],
+      type: '',
+      settings: null,
+      wristbandData: {}
+    }
+  },
+  components: {
+    PrintPreview
+  },
+  async created () {
+    // await this.getConfig(0)
+  },
+  methods: {
+    async getConfig (type) {
+      // 目前默认为住院
+      // const res = await api.getConfig({ isNewborn: type, visitType: 2 })
+      // if (res && res.data && res.data.length) {
+      //   this.wristbandData[type] = res.data[0]
+      //   if (type === 0 && this.wristbandData[type] && this.wristbandData[type].content) {
+      //     this.normalCheck = JSON.parse(this.wristbandData[type].content)
+      //   }
+      //   if (type === 1 && this.wristbandData[type] && this.wristbandData[type].content) {
+      //     this.neonateCheck = JSON.parse(this.wristbandData[type].content)
+      //   }
+      // }
+    },
+    async updateConfig (type, config) {
+      let data = Object.assign({}, this.wristbandData[type], { isNewborn: type, visitType: 2, content: JSON.stringify(config) })
+      const res = await api.configCreate(data)
+      if (res && res.data && res.data.id) {
+        this.wristbandData[type] = res.data
+      }
+    },
+    printPreview (type, settings) {
+      this.type = type
+      this.settings = settings
+      if (!this.settings || !this.settings.length) {
+        return this.$messageTips(this, 'warning', '请选择腕带设置', '提示')
+      }
+      this.$nextTick(_ => {
+        this.$refs.preview.open()
+      })
+    }
+  },
+  watch: {
+    'normalCheck': {
+      async handler (val, old) {
+        if (val && val.length && old.length) {
+          await this.updateConfig(0, val)
+        }
+      }
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.wristband_wrap {
+  min-height: 500px;
+  .setting_item {
+    margin-bottom: 20px;
+    .title {
+      padding: 10px 0;
+      line-height: 20px;
+    }
+    .handler_wrap {
+      display: flex;
+      align-items: center;
+    }
+    .priview_btn {
+      margin-left: 20px;
+    }
+  }
+}
+</style>

@@ -1,0 +1,312 @@
+<template>
+  <div>
+    <el-dialog :title="title" :visible.sync="dialogTableVisible" width="90%" class="payableinvoiceaddDialog ui_dialog_02">
+      <ever-query-form :schema="querySchema" v-model="queryObj" @query="query">
+      </ever-query-form>
+      <el-table
+        v-loading.body="loading"
+        :data="tableData"
+        ref="table"
+        tooltip-effect="dark"
+        style="width: 100%"
+        height="350"
+        @selection-change="handleSelectionChange">
+        <el-table-column
+          prop="id"
+          label="id"
+          type="selection">
+        </el-table-column>
+        <el-table-column
+          prop="fee"
+          label="匹配金额">
+          <template slot-scope="scope">
+            <el-input size="small" v-model="scope.row.fee">
+            </el-input>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="supplierName"
+          label="供应商名称">
+        </el-table-column>
+        <el-table-column
+          prop="invItemCode"
+          label="项目编号">
+        </el-table-column>
+        <el-table-column
+          prop="invItemName"
+          label="项目名称">
+        </el-table-column>
+        <el-table-column
+          prop="purchaseOrderCode"
+          label="订单编号">
+        </el-table-column>
+        <el-table-column
+          prop="lineNum"
+          label="订单行号">
+        </el-table-column>
+        <el-table-column
+          prop="purchaseOrderNum"
+          label="订单数量"
+          align="right">
+          <template slot-scope="scope">
+            <span>{{scope.row.purchaseOrderNum}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="quantity"
+          label="收货数量"
+          align="right">
+          <template slot-scope="scope">
+            <span>{{scope.row.quantity}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="quantity"
+          label="验收数量"
+          align="right">
+          <template slot-scope="scope">
+            <span>{{scope.row.quantity}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="verifyCount"
+          label="已开票数量"
+          align="right">
+          <template slot-scope="scope">
+            <span>{{scope.row.verifyCount}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="purchaseOrderAmount"
+          label="订单金额"
+          align="right">
+          <template slot-scope="scope">
+            <span>{{scope.row.purchaseOrderAmount | formatToFinacial}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="acceptancePrice"
+          label="收货金额"
+          align="right">
+          <template slot-scope="scope">
+            <span>{{scope.row.acceptancePrice | formatToFinacial}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="acceptancePrice"
+          label="验收金额"
+          align="right">
+          <template slot-scope="scope">
+            <span>{{scope.row.acceptancePrice | formatToFinacial}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="verifyAmount"
+          label="已开票金额"
+          align="right">
+          <template slot-scope="scope">
+            <span>{{scope.row.verifyAmount | formatToFinacial}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="arrivalDate"
+          label="收货日期">
+        </el-table-column>
+        <el-table-column
+          prop="acceptanceDate"
+          label="验收日期">
+        </el-table-column>
+        <el-table-column
+          prop="batchCode"
+          label="验收批号">
+        </el-table-column>
+        <el-table-column
+          prop="barCode"
+          label="验收条码">
+        </el-table-column>
+      </el-table>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="onDialogClose"><i class="iconfont icon-quxiao"></i>取消</el-button>
+        <el-button type="primary" @click="submitForm"><i class="iconfont icon-tijiao"></i>确定</el-button>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+import api from '../store/payableinvoiceaddapi'
+import list from '../../util/list'
+import displayFormat from '../../util/displayformat'
+import { drugOrMaterialType } from '../../util/common'
+import localsettingApi from '@/warehouse/store/localdrugsettingapi'
+
+var schema = [
+  {
+    name: 'supplierId',
+    label: '供应商名称',
+    type: 'select',
+    options: [],
+    disabled: true
+  },
+  {
+    name: 'purchaseOrderCode',
+    label: '订单号'
+  },
+  {
+    startName: 'arrivalSDate',
+    endName: 'arrivalEDate',
+    type: 'rangedate',
+    label: '收货日期 自',
+    outformat: 'yyyy-MM-dd'
+  },
+  {
+    name: 'materialType',
+    label: '项目类别',
+    type: 'select',
+    options: drugOrMaterialType
+  },
+  // {
+  //   name: 'invItemCode',
+  //   label: '项目编码'
+  // },
+  // {
+  //   name: 'invItemName',
+  //   label: '项目名称'
+  // }
+  {
+    name: 'localMaterialId',
+    label: '项目名称',
+    type: 'remote',
+    options: [],
+    placeholder: '请输入名称查询',
+    loading: false,
+    funs: (query) => {
+      // console.log(query)
+    }
+  }
+  // {
+  //   name: 'supplierType',
+  //   label: '供应商类型',
+  //   type: 'systype',
+  //   code: 'THC_WH_VENDOR_TYPE'
+  // }
+]
+export default {
+  mixins: [list],
+  props: ['title', 'listItem', 'supplierArr', 'supplierId'],
+  data () {
+    var obj = this.$ever.createObjFromSchema(schema)
+    obj.materialType = '296'
+    return {
+      querySchema: schema,
+      queryObj: obj,
+      api,
+      dialogTableVisible: false,
+      tableData: []
+    }
+  },
+  created () {
+    this.$ever.getFieldFromSchema(this.querySchema, 'localMaterialId').funs = this.listfor
+  },
+  watch: {
+    'dialogTableVisible': {
+      handler (newValue) {
+        if (this.dialogTableVisible) {
+          this.$ever.getFieldFromSchema(this.querySchema, 'supplierId').options = this.supplierArr
+          this.queryObj.supplierId = this.supplierId
+        }
+      }
+    },
+    'queryObj.supplierId': {
+      handler (n) {
+        if (n) {
+          this.list()
+        }
+      }
+    },
+    'listItem': {
+      handler (v) {
+        this.selectFn(this.tableData, v)
+      },
+      deep: true
+    }
+  },
+  methods: {
+    list () {
+      let params = Object.assign({}, this.queryObj)
+      for (let key in params) {
+        if (params[key] === '') {
+          delete params[key]
+        }
+      }
+      api.list(params).then(result => {
+        if (result.data) {
+          this.tableData = result.data
+          this.$nextTick(_ => {
+            this.selectFn(result.data, this.listItem)
+          })
+        }
+      })
+    },
+    selectFn (n, arr) {
+      if (!this.$refs.table) {
+        return false
+      }
+      this.$refs.table.clearSelection()
+      n.forEach((item, index) => {
+        arr.forEach(v => {
+          if (item.acceptDetailId === v.acceptDetailId) {
+            this.$refs.table.toggleRowSelection(this.tableData[index])
+          }
+        })
+      })
+    },
+    listfor (query) {
+      let searchObj = {}
+      if (Object.prototype.toString.call(query) === '[object Number]') {
+        searchObj.code = query
+      } else {
+        searchObj.name = query
+      }
+      localsettingApi.listfor(Object.assign({
+        materialType: this.queryObj.materialType
+      }, searchObj)).then(result => {
+        for (let item of result) {
+          if (item.drugObject) {
+            item.name = item.drugObject.name
+            item.code = item.drugObject.code
+          } else if (item.consumptiveMaterialObject) {
+            item.name = item.consumptiveMaterialObject.name
+            item.code = item.consumptiveMaterialObject.code
+          } else if (item.equipmentObject) {
+            item.name = item.consumptiveMaterialObject.name
+            item.code = item.consumptiveMaterialObject.code
+          }
+        }
+        this.$ever.getFieldFromSchema(this.querySchema, 'localMaterialId').options = result
+      })
+    },
+    submitForm () {
+      this.listItem.length = 0
+      this.multipleSelection.map(select => {
+        this.listItem.push(select)
+      })
+      this.onDialogClose()
+    },
+    onDialogClose () {
+      this.dialogTableVisible = false
+    },
+    onDialogOpen () {
+      this.dialogTableVisible = true
+    },
+    handleSelectionChange (val) {
+      this.multipleSelection = val
+    },
+    ...displayFormat
+  }
+}
+</script>
+
+<style scoped>
+.payableinvoiceaddDialog .el-dialog { width: 80%}
+</style>

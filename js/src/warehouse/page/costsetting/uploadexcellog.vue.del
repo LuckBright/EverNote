@@ -1,0 +1,109 @@
+<template>
+  <el-dialog width="500px" title="导入数据" :visible.sync="dialogVisible" :before-close="handleClose" class="ui_dialog_02 q_ui_dialog_diy">
+  	<div class="patientInfo">
+  		<el-steps :space="250" :active="active" :center="true" finish-status="success">
+        <el-step title="上传文件"></el-step>
+        <el-step title="导入数据"></el-step>
+        <el-step title="完成"></el-step>
+      </el-steps>
+  	</div>
+  	<div class="content">
+      <el-row>
+        <el-col :span='24'>
+            1、请按照模版格式准备需要导入的数据
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span='24'>
+            <p @click="downTemplet" class="downbtn">下载导入数据模版</p>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span='24'>
+            2、请选择需要导入的文件
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span='24'>
+          <el-button @click="createReceivables"><i class="el-icon-upload2"></i>  上传附件</el-button>
+          <p style="display:inline-block">支持xls、xlsx文件，单个文件不得大于10M</p>
+        </el-col>
+      </el-row>
+    </div>
+    <div style="float:right">
+      <el-button  @click="createReceivables" style="margin-right:10px;">取消</el-button>
+      <el-button type="primary" @click="createReceivables" style="margin-right:10px;">开始导入</el-button>
+    </div>
+  	
+  </el-dialog>
+</template>
+<script type="text/javascript">
+  // import axios from '@/rcm/store/api'
+  // import { Loading } from 'element-ui'
+  export default {
+    props: ['ipNo', 'showLog'],
+    data () {
+      return {
+        dialogVisible: false,
+        theadData: [
+          {name: '序号'},
+          {name: '时间'},
+          {name: '支付方式'},
+          {name: '备注'},
+          {name: '收费员'},
+          {name: '金额'}
+        ],
+        info: {},
+        gridData: [],
+        totalDeposit: '',
+        obj: {},
+        active: 0
+      }
+    },
+    methods: {
+      createReceivables () {
+  
+      },
+      handleClose (val) {
+        this.dialogVisible = false
+        this.$emit('update', val)
+      },
+      downTemplet () {
+  
+      }
+    },
+    watch: {
+      'showLog': {
+        async handler (cur, old) {
+          if (cur) {
+            this.dialogVisible = true
+          } else {
+            this.dialogVisible = false
+          }
+        }
+      }
+    }
+  }
+</script>
+<style lang="less">
+  .q_ui_dialog_diy{
+    .el-dialog__body{
+      box-sizing: border-box;
+      margin:0 20px !important;
+      padding:20px 20px 40px 20px !important;
+      border-top: 1px solid #bfcbd9;
+      max-height:500px !important;
+    }
+    
+    .content{
+      font-size: 16px;
+      padding:30px 40px;
+    }
+    .el-row{
+      margin-bottom: 15px;
+    }
+    .downbtn{
+      color:#409eff
+    }
+  }
+</style>

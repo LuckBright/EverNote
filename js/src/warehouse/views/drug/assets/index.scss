@@ -1,0 +1,137 @@
+@import '../../../page/assets/base.scss';
+@import './animation.scss';
+.padd0 {padding: 0!important}
+.padd10 {padding: 10px}
+.lh35 {line-height: 35px;}
+.lh38 { height: 38px; line-height: 38px;}
+.ptb15 {padding:15px 0}
+.ptb5 {padding:5px 0}
+.un_hover {
+  &:hover{text-decoration: none}
+}
+.drugstore {
+  .w150 {
+    width: 150px;
+  }
+  .el-table--enable-row-transition .el-table__body td {
+    vertical-align: top;
+  }
+  /* 表单行间距 */
+  .el-form:not(.custom-form) .el-form-item--small.el-form-item:not(.custom-form-item) {
+    margin-bottom: 0px;
+  }
+  .form10 {
+    /* 表单行间距 */
+    .el-form:not(.custom-form) .el-form-item--small.el-form-item:not(.custom-form-item) {
+      margin-bottom: 10px;
+    }
+  }
+  .fjc {
+    justify-content: center;
+    align-items: center
+  }
+  .aic {
+    align-items: center;
+    align-self: center
+  }
+  h4.d_t {
+    margin: 0;
+    @extend .lh35;
+  }
+  .bWhite {
+    background: $white_color;
+  }
+  .header {
+    padding: 0;
+  }
+  .flex_scroll {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden
+  }
+  .radius {
+    border-radius: 2px;
+  }
+  // .showScroll {
+  //   // todo:页面数据多有滚动条和数据少没有滚动条切换时， 会导致页面部分内容不自动适配宽度 强制显示Y轴滚动条
+  //   // overflow-y: scroll
+  // }
+  .overflow-x {
+    overflow-x: auto;
+  }
+  .main {
+    @extend .padd0;
+  }
+  .main10 {
+    @extend .padd10;
+  }
+  // render icon
+  .markIcon {
+    font-weight: bold;
+    text-align: center;
+    margin-right: 5px;
+    margin-top: 2px;
+    font-size: 12px;
+    flex: 1;
+    color: #fff;
+    display: inline-block;
+    background: #e43;
+    border-radius: 3px;
+    height: 16px;
+    line-height: 16px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+  }
+  .no-margin-table {
+    margin-bottom: 0!important;
+  }
+  .flex_hidden {
+    height: 100%;
+    overflow: hidden
+  }
+  .query-style.el-form {
+    &.noflex {
+      display: initial;
+      .el-form-item {
+        .el-form-item__content {
+          height: 28px;
+          width: auto;
+        }
+      }
+    }
+    .el-checkbox-group, .el-radio-group {
+      line-height: 28px!important;
+      .el-checkbox, .el-radio {
+        margin-right: 10px;
+      }
+    }
+    @extend .no-margin-table;
+    .el-form-item {
+      @extend .no-margin-table;
+      width: 100%;
+      margin-right: 0;
+      .el-form-item__content, .el-input:first-child {
+        width: 100%;
+      }
+    }
+    &.el-form--inline .el-form-item:last-child {
+      .el-form-item__content, .el-button {
+        margin-top: -1px; // everform2 query btn position fix
+      }
+      flex: 1;
+    }
+    display: flex
+  }
+  .custom-checkboxed-style {
+    text-align: center;
+  }
+  span.blue {
+    text-decoration: none;
+  }
+  .el-table--enable-row-transition .el-table__body td {
+    vertical-align: middle
+  }
+  .margin-padding {
+    left: -10px;
+    top: -10px;
+  }
+}

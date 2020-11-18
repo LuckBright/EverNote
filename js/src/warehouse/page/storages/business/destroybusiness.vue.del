@@ -1,0 +1,460 @@
+<template>
+  <div>
+    <ever-bread-crumb name="销毁报废" showTitle="true"></ever-bread-crumb>
+    <div class="layout_inner">
+      <div class="panel-body">
+        <h4 v-if="!objId">第一步：基本信息</h4>
+        <h4 v-else>基本信息</h4>
+        <ever-form2 :class="[objId ? 'readform' : '']" :schema="schema" v-model="obj" ref="form" :span="12" :rules="rules" :nosubmit="true">
+          <!-- 新建的时候当前登录人就是申请人，不展示 -->
+          <template slot="applyName" v-if="!objId">
+            <span>{{$store.state.currentUser.displayName}}</span>
+          </template>
+        </ever-form2>
+        <div v-if="objId">
+          <h4>执行情况</h4>
+          <el-form ref="form" label-width="120px" class="readform">
+            <el-form-item label="出库单：">
+              <a class="blue cur" @click="handleOutRoute">{{obj.outStockCode}}</a>
+              <span v-if="obj.status == FULL_STATE.destroyReason[4].id" :class="'unfinish_color'">{{obj.statusName}}</span>
+              <span v-else-if="obj.status == FULL_STATE.destroyReason[3].id" class="unfinish_color">{{setName(FULL_STATE.outstock, obj.outStockStatus, true)}}</span>
+              <span v-else class="ungenerated">未生成</span>
+            </el-form-item>
+          </el-form>
+        </div>
+        <h4 v-if="!objId">第二步：添加商品</h4>
+        <h4 v-else>销毁报废商品明细</h4>
+        <div class="listinfo">
+          <div class="table" id="table_expand">
+            <el-table
+              v-if="obj.item"
+              :data="obj.item"
+              style="width: 100%"
+              ref="table"
+              :row-key="'localMaterialId' + parseInt(Math.random() * 1000)"
+              :expand-row-keys="entexpands"
+              @cell-mouse-enter="rowHover"
+              @row-click="rowDestroy">
+              <el-table-column type="expand" width="1">
+                <template slot-scope="scope">
+                  <div class="custom_popover pos_re">
+                    <span class="pos_ab"></span>
+                    <ul v-if="scope.row.detailList && scope.row.detailList.length">
+                      <li v-for="(item, index) in scope.row.detailList" :key="index">
+                        <span v-if="item.uniqueCode" style="padding-right: 20px">{{item.uniqueCode}}</span>
+                        <span v-if="item.ownUniqueCodes" style="padding-right: 20px">{{item.ownUniqueCodes}}</span>
+                        <span v-if="objId ? false : true" class="btn-del"><el-button type="text" class="red" @click="handlePopoverDelRow(index, scope.$index, 0, item)">删除</el-button></span>
+                      </li>
+                    </ul>
+                    <ul v-else>
+                      <li><p class="alg_c">暂无数据</p></li>
+                    </ul>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop=""
+                label=""
+                width="50">
+                <template slot-scope="scope">
+                  <span>{{scope.$index + 1}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="name"
+                label="商品名称">
+                <template slot-scope="scope">
+                  <material-show-name v-if="scope.row.materialName" :materialName="scope.row.materialName" :icons="scope.row.icons"></material-show-name>
+                </template>
+              </el-table-column>
+              <el-table-column prop label="规格" align="center" width="80px">
+                <template slot-scope="scope">
+                  <span>{{scope.row.spec || '-'}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop=""
+                label="生产批号"
+                align="center"
+                width="150">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.batchNum">{{scope.row.batchNum}}</span>
+                  <span v-else>{{'-'}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop=""
+                align="center"
+                width="100"
+                label="生产日期">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.batchNum && scope.row.produceDate">{{scope.row.produceDate | formatDateByExp('YYYY-MM-DD')}}</span>
+                  <span v-else>-</span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop=""
+                align="center"
+                width="100"
+                label="有效期">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.batchNum && scope.row.validityDate">{{scope.row.validityDate | formatDateByExp('YYYY-MM-DD')}}</span>
+                  <span v-else>-</span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="usableNum"
+                width="80"
+                v-if="!objId"
+                align="right"
+                :formatter="formatter.numUintFormatter"
+                label="库存数量">
+            </el-table-column>
+              <el-table-column
+                prop=""
+                align="right"
+                label="销毁报废数量"
+                width="120">
+                <template slot-scope="scope">
+                  <ever-popover v-if="scope.row.detailList" :data="scope.row.detailList" :index="scope.$index" :i="0" @handleDelRow="handlePopoverDelRow" :show="objId"></ever-popover>
+                  <div v-else>
+                    <span>{{scope.row.num}}{{scope.row.unitName}}</span>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="id"
+                v-if="!objId"
+                width="80"
+                label="操作">
+                <template slot-scope="scope">
+                  <el-button
+                    size="small"
+                    type="danger"
+                    @click.native.prevent="handleDeleteRow(scope.$index)">删除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </div>
+      </div>
+      <div class="panel-footer">
+        <div v-if="!objId" class="addcommodity">
+          <add-commodity :type="'销毁报废'" :clear="clear" :queryParams="queryParams" :flag="true" :list="obj.item" :storageRoomId="storageId" @saveObject="handleSaveAfterObj"></add-commodity>
+        </div>
+        <el-button v-if="!objId" type="primary" @click="submitForm('form')" :disabled="this.obj.item.length !=0 ? false : true" :loading="unRepeatedBtn">提交销毁报废单</el-button>
+        <el-button v-if="taskId && obj.status == 102" type="primary" @click="switchForm">我知道</el-button>
+        <el-button v-if="['20', '200', '24'].includes(`${obj.outStockStatus}`) && obj.status == 104" type="primary" @click="handleCancle">取消</el-button>
+      </div>
+    </div>
+
+    <tip-dialog title="确认是否取消" content="销毁报废单取消后不能恢复，请确认是否取消？" ref="dialog" :function="submitCancel"></tip-dialog>
+  </div>
+</template>
+<script>
+import api from '../store/destroyscrapapi'
+import outputstockApi from '../../outputstorageroom/outputstockapi'
+import addCommodity from '@/warehouse/page/components/addcommodity'
+import tipDialog from '@/warehouse/page/components/tipsdialog'
+import sysvalue from '@/warehouse/store/sysvalueapi'
+import everPopover from '@/warehouse/page/components/popover'
+import getstorage from '@/warehouse/page/storages/util/getstorage'
+import tableExpand from '@/warehouse/page/storages/util/tableexpand'
+import { debounce, FULL_STATE, patch, SPEC_CODE, GOLBAL_VAL_MATERIL_NAME, PACKAGE_CODE } from '@/util/common'
+import setName from '@/util/setstatusname'
+import * as formatter from '@/warehouse/util/formatter.js'
+import addProductMethods from '@/warehouse/page/storages/util/addproduct'
+import storage from '@/util/storage'
+
+let schema = []
+let schemaItem = [
+  {
+    name: 'destroyReason',
+    label: '销毁报废原因',
+    props: {},
+    span: 8
+  }
+]
+let readSchema = [
+  {
+    name: 'code',
+    label: '销毁报废单号:',
+    comp: 'readonlyitem',
+    span: 8
+  },
+  {
+    name: 'applicant',
+    label: '申请人:',
+    comp: 'readonlyitem',
+    span: 8
+  },
+  {
+    name: 'createTime',
+    label: '申请时间:',
+    comp: 'readonlyitem',
+    span: 8
+  },
+  {
+    name: 'statusName',
+    label: '销毁报废单状态:',
+    comp: 'readonlyitem',
+    span: 8
+  },
+  {
+    name: 'storageRoomObject.name',
+    label: '出库库房:',
+    comp: 'readonlyitem',
+    span: 8
+  },
+  {
+    name: 'descriptionName',
+    label: '申请原因:',
+    comp: 'readonlyitem',
+    span: 24
+  }
+]
+export default {
+  mixins: [setName, getstorage, addProductMethods, tableExpand],
+  data () {
+    schema = this.createObject().schema
+    let obj = this.createObject().obj
+    obj.item = []
+    // obj.items = []
+    return {
+      schema,
+      obj,
+      api,
+      SPEC_CODE,
+      PACKAGE_CODE,
+      GOLBAL_VAL_MATERIL_NAME,
+      outputstockApi,
+      formatter,
+      tableCode: {},
+      FULL_STATE,
+      dosageFormArr: [],
+      createDate: '',
+      objId: this.$route.params.id,
+      taskId: this.$route.query.taskId,
+      queryParams: { materialType: '', offset: 0, pagesize: 20, state: 0 },
+      rules: {
+        destroyReason: [{ required: true, message: '必填项', trigger: 'blur' },
+        { message: '输入最大长度为100个字符', trigger: 'blur', max: 100 }]
+      },
+      clear: false,
+      pathTo: false,
+      unRepeatedBtn: false // 控制重复提交
+      // popDeleteCode: '',
+      // delTotal: 0
+    }
+  },
+  created () {
+    this.storageRoomMaterial()
+    this._info()
+    if (this.objId) {
+      this.getDetail().then((res) => {
+        Object.assign(this.obj, res)
+      })
+    }
+    sysvalue.listOnce('THC_WH_DRUG_FORM').then(res => {
+      if (res) {
+        this.dosageFormArr = res
+      }
+    })
+  },
+  methods: {
+    handleOutRoute () {
+      const id = this.obj.outStockId
+      const status = this.obj.outStockStatus
+      this.$router.push(status === FULL_STATE.outstock[0].id ? `/storages/output/outputsee/${id}` : `/storages/output/outputedit/${id}?${status === 24 ? 'look' : 'look='}${id}`)
+    },
+    handleSaveAfterObj: debounce(function (data) {
+      this.clear = false
+      if (data && data.isManageAlone) data.num = data.detailList.length
+      if (!this.obj.item[0]) {
+        this.obj.item.push(data)
+        return
+      } else {
+        // 同一个商品 并且是唯一码管理
+        for (let i = 0; i < this.obj.item.length; i++) {
+          if (data.isManageAlone && data.detailList[0] && data.localMaterialId === this.obj.item[i].localMaterialId) {
+            for (let n = 0; n < data.detailList.length; n++) {
+              this.obj.item[i].detailList.push(data.detailList[n])
+              this.obj.item[i].num = this.obj.item[i].detailList.length
+            }
+            this.obj = JSON.parse(JSON.stringify(this.obj))
+            return
+          }
+        }
+        if (data.isManageAlone && data.detailList[0]) {
+          this.obj.item.push(data)
+          this.obj = JSON.parse(JSON.stringify(this.obj))
+          return
+        }
+        // 验证同一个商品
+        for (let i = 0; i < this.obj.item.length; i++) {
+          if (data.localMaterialId === this.obj.item[i].localMaterialId && data.batchNum === this.obj.item[i].batchNum) {
+            this.$messageTips(this, 'warning', '该商品已经添加')
+            return
+          }
+        }
+        // 既不是唯一码管理也不是有效期管理
+        if (!data.isExpiryDate && !data.isManageAlone) {
+          this.obj.item.push(data)
+          this.obj = JSON.parse(JSON.stringify(this.obj))
+          return
+        }
+        // 有效期管理
+        if (data.isExpiryDate) {
+          this.obj.item.push(data)
+          this.obj = JSON.parse(JSON.stringify(this.obj))
+          return
+        }
+      }
+      setTimeout(() => {
+        this.clear = false
+      }, 500)
+    }),
+    handlePopoverDelRow (i, n, m, val) {
+      // i,当前索引； n,父索引； m,祖父索引; val,需要删除code的对下岗
+      let item = this.obj.item[n]
+      item.detailList.splice(i, 1)
+      item.num--
+      if (!item.detailList[0]) {
+        this.obj.item.splice(n, 1)
+      }
+    },
+    createObject () {
+      this.$route.params.id ? schema = readSchema : schema = schemaItem
+      return {
+        schema,
+        obj: this.$ever.createObjFromSchema(schema)
+      }
+    },
+    getDetail (id) {
+      return new Promise((resolve, reject) => {
+        api.getById({ id: id || this.objId }).then(res => {
+          res.statusName = this.setName(FULL_STATE.destroyReason, res.status, true)
+          res.descriptionName = res.destroyReason
+          // res.items = []
+          resolve(res)
+        })
+      })
+    },
+    switchForm: debounce(function () {
+      let params = {
+        id: this.$route.params.id,
+        type: 0,
+        billType: this.obj.code
+      }
+      this.api.updateSwitch(params).then(res => {
+        if (res) this.$router.push('/storages/business/destroybusiness/' + this.objId + '?look=' + this.objId)
+      })
+    }),
+    handleCancle () {
+      this.$refs.dialog.open()
+    },
+    submitCancel: debounce(function () {
+      this.api.createOrUpdate({ id: this.objId, status: 105 }).then(res => {
+        this.getDetail().then((res) => {
+          this.obj = Object.assign({}, this.obj, res)
+        })
+      })
+    }),
+    submitForm: debounce(function (form) {
+      this.$refs.form.$refs.form.validate(valid => {
+        if (valid) {
+          if (!this.obj.item.length) {
+            this.$messageTips(this, 'warning', '销毁报废单中还未添加商品，请先添加商品再提交')
+            return
+          }
+          let params = {}
+          params = Object.assign({}, params, JSON.parse(JSON.stringify(this.obj)))
+          delete params.applyName
+          params.pageType = 'storages/business/destroybusiness'
+          params.materialType = ''
+          params.storageRoomId = this.storageId
+          for (let n = 0; n < params.item.length; n++) {
+            if (params.item[n].detailList) {
+              delete params.item[n].batchNum
+              delete params.item[n].produceDate
+              delete params.item[n].validityDate
+            }
+            delete params.item[n].uniqueCode
+            // 处理单位
+            delete params.item[n].batchNumList
+          }
+          this.unRepeatedBtn = true
+          this.api.createOrUpdate(params).then(res => {
+            if (res) {
+              this.unRepeatedBtn = false
+              if (res && res.id) this.$router.push('/storages/business/destroybusiness/' + res.id + '?look=' + res.id)
+            }
+          })
+        }
+      })
+    }),
+    handleDeleteRow (index) {
+      this.obj.item.splice(index, 1)
+      this.obj = JSON.parse(JSON.stringify(this.obj))
+    },
+    _info () {
+      this.queryParams.storageRoomId = this.storageId
+      let storageArr = JSON.parse(storage.getLocalStorage('STORAGE_ITEM'))
+      if (storageArr && storageArr.length) {
+        const storageObj = storageArr.filter(item => { return item.id === this.storageId })
+        if (storageObj) this.queryParams.classifyIds = JSON.parse(storageObj[0].materialType)
+      }
+      this.tableCode = Object.assign({}, this.tableCode, {
+        localMaterialId: '',
+        usableNum: '',
+        isInvented: '',
+        materialName: '',
+        unitName: '',
+        unitId: '',
+        isExpiryDate: '',
+        classifyId: '',
+        batchNum: '',
+        batchNumList: [],
+        num: '',
+        isManageAlone: '',
+        spec: '',
+        uniqueCode: '',
+        produceDate: '',
+        validityDate: '',
+        freight: {}
+      })
+    },
+    ...patch
+  },
+  watch: {
+    '$route' (val) {
+      this.objId = val.params.id
+      this.taskId = val.query.taskId
+      if (this.objId) {
+        this.schema = this.createObject().schema
+        this.obj = this.createObject().obj
+        this.getDetail().then((res) => {
+          this.obj = Object.assign({}, this.obj, res)
+          this.pathTo = true
+        })
+      }
+    },
+  },
+  components: {
+    everPopover,
+    addCommodity,
+    tipDialog
+  }
+}
+</script>
+<style lang="scss" scoped>
+.table /deep/ .el-input-number__decrease, .table /deep/ .el-input-number__increase { width: 28px;}
+.table /deep/ .el-input-number__decrease { right: 29px}
+.table /deep/ .el-input-number { width: 135px}
+.table /deep/ .el-input-number .el-input__inner { padding-right: 65px}
+.readform /deep/ .el-form-item { margin-bottom: 0 }
+.addcommodity { margin-bottom: 20px}
+.unfinish_color { margin-left: 20px;}
+#table_expand /deep/ .el-table__expanded-cell .custom_popover span.pos_ab { left: 400px}
+.product /deep/ .el-form-item__content{line-height: 32px;}
+</style>

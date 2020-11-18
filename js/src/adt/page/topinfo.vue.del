@@ -1,0 +1,159 @@
+<template>
+  <div>
+    <div class='topTip'>
+      <div class='imgInfo'>
+        <img src="" alt="">
+        <div>
+          <p>
+            <span class='name-font'>{{value.patientName}}</span>
+            <span class='statusBg'>{{statusObj[value.status]}}</span>
+          </p>
+          <p class='sexBg'>
+            <span>{{value.sex === 1 ? '男' : '女'}}</span>
+            <span>{{value.birthday}}</span>
+            <span>{{value.age}}岁</span>
+          </p>
+        </div>
+      </div>
+      <div class='close'>
+        <el-button @click='closeBtn'>退出</el-button>
+      </div>
+      <div class='basic'>
+        <p>
+          <span class='fontBg'>住院号：</span>
+          <span class='infoSty'>{{value.hospitalizedNumber}}</span>
+          <span class='fontBg'>病案号：</span>
+          <span class='infoSty'>{{value.inpatientNumber}}</span>
+          <span class='fontBg'>患者档案号：</span>
+          <span class='infoSty'>{{value.patientNumber}}</span>
+          <span class='fontBg'>入院途径：</span>
+          <span class='infoSty'>{{admitRouteStatus[value.admitRoute]}}</span>
+          <span class='fontBg'>入院科室：</span>
+          <span class='infoSty'>{{value.admitDeptName}}</span>
+          <span class='fontBg'>登记时间：</span>
+          <span class='infoSty'>{{value.admitRecordTime}}</span>
+        </p>
+        <p>
+          <span class='fontBg'>在院押金：</span>
+          <span class='infoSty'>￥{{value.admitDeposit}}</span>
+          <span class='fontBg'>缴纳次数：</span>
+          <span class='infoSty'>{{value.payCount}}次</span>
+          <span class='fontBg'>记账费用：</span>
+          <span class='infoSty'>￥{{value.accountBillFee}}</span>
+          <span class='fontBg'>押金余额：</span>
+          <span class='infoSty'>￥{{value.depositBalance}}</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  props: {
+    'value': {
+      type: Object,
+      default: () => {}
+    }
+  },
+  data () {
+    return {
+      statusObj: {
+        1: '非正式档案',
+        2: '待入院',
+        3: '待入科',
+        4: '已入科',
+        5: '待转科',
+        6: '待出科',
+        7: '已出科',
+        8: '办理出院',
+        9: '已结算'
+      },
+      admitRouteStatus: {
+        1: '门诊',
+        2: '急诊',
+        3: '其他医疗机构转入',
+        9: '其他'
+      }
+    }
+  },
+  methods: {
+    closeBtn () {
+      this.$router.currentRoute.path === '/adt/leavepatient' ? this.$router.replace('/adt/leaveHospita') : this.$router.replace('/adt/inhosmanage')
+    }
+  }
+}
+</script>
+<style scoped>
+.topTip{
+  height: 70px;
+  background: #fff;
+  margin-bottom: 10px;
+}
+.topTip .imgInfo{
+  width: 195px;
+  height: 70px;
+  float: left;
+}
+.topTip .imgInfo img{
+  width: 48px;
+  height: 48px;
+  float: left;
+  margin: 11px 0 11px 20px;
+}
+.topTip .imgInfo div{
+  width: 130px;
+  height: 48px;
+  margin-left: 78px;
+  font-size: 12px;
+}
+.topTip .imgInfo .sexBg{
+  font-size: 12px;
+  color: #8a929e;
+  line-height: 12px;
+}
+.topTip p{
+  padding: 0;
+  margin: 0 0 3px 0;
+}
+.topTip .imgInfo:nth-last-child() {
+  color: #8A929E;
+}
+.topTip .imgInfo p .name-font{
+  display: inline-block;
+  margin: 16px 0 3px;
+  font-size: 16px;
+  color: #333;
+  font-weight: 1000;
+}
+.topTip .imgInfo p .statusBg{
+  background: #1c7bef;
+  padding: 2px 5px;
+  border-radius: 2px;
+  font-size: 12px;
+  color: #fff;
+  line-height: 12px;
+}
+.topTip .basic{
+  margin: 0 80px 0 270px;
+  padding-top: 10px;
+}
+.topTip .basic p:first-child{
+  margin-bottom: 7px;
+}
+.topTip .basic .fontBg {
+  font-size: 14px;
+  color: #999999;
+  line-height: 14px;
+}
+.topTip .basic .infoSty{
+  margin-right: 10px;
+  font-size: 14px;
+  color: #333333;
+}
+.topTip .close {
+  float: right;
+  width: 80px;
+  height: 70px;
+  line-height: 70px;
+}
+</style>

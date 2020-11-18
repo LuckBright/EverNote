@@ -1,0 +1,48 @@
+<template>
+  <el-form :model="params" :inline="true" label-width="80px" label-position="right" id="template-search-head">
+    <el-form-item label="模版名称">
+      <el-input v-model="params.name" placeholder="请输入模版名称" clearable :maxlength="20"></el-input>
+    </el-form-item>
+    <el-form-item label="适用机构">
+      <el-select v-model="params.organId" placeholder="请选择" clearable> 
+        <el-option v-for="item in orgItemList" :key="item.organId" :value="item.organId" :label="item.organName"></el-option>
+      </el-select>
+    </el-form-item>
+    <el-form-item>
+      <el-button type="primary" @click="onSearch" icon="el-icon-search">查询</el-button>
+    </el-form-item>
+  </el-form>
+</template>
+
+<script>
+  import api from '@/arrange/store/templateapi'
+  import schedulingapi from '@/arrange/store/schedulingapi'
+  export default {
+    data () {
+      return {
+        api,
+        schedulingapi,
+        orgItemList: [],
+        params: {
+          name: '',
+          organId: ''
+        }
+      }
+    },
+    created () {
+      this.getOrgList()
+    },
+    methods: {
+      onSearch () {
+        this.$emit('query', this.params)
+      },
+      getOrgList () {
+        this.schedulingapi.getOrgList().then(rs => {
+          rs.data.map(item => {
+            this.orgItemList.push({organId: '' + item.clinicId, organName: item.clinicName})
+          })
+        })
+      }
+    }
+  }
+</script>

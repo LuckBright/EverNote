@@ -1,0 +1,56 @@
+$color_ccc: #ccc;
+.drag-table {
+  .drag-tree-table {
+    margin: 0;
+    font-size: 14px;
+    color: #000;
+    /deep/ .drag-tree-table-header {
+      .tree-column:first-child {
+        text-align: left;
+        padding-left: 10px;
+      }
+      padding: 0;
+      padding-right: 15px;
+      height: 31px;
+      line-height: 30px;
+      background: #eee;
+      align-items: left;
+      border: 1px solid $color_ccc;
+      padding-right: 20px;
+    }
+    /deep/ .drag-tree-table-body {
+      overflow-y: scroll!important;
+      border: 1px solid $color_ccc;
+      border-top: none;
+      .zip-icon {
+        cursor: pointer;
+      }
+      .space {
+        width: 30px
+      }
+      .tree-row {
+        padding: 0 5px;
+        border-bottom: 1px solid $color_ccc;
+      }
+    }
+  }
+  .no-data {
+    color: #666;
+    font-size: 14px;
+    border: 1px solid $color_ccc;
+    border-radius: 2px;
+    text-align: center;
+  }
+}
+.no-bottom-border {
+  .drag-tree-table {
+    /deep/ .drag-tree-table-header {
+      border-bottom: none;
+    }
+  }
+}
+.el-icon-caret-bottom {
+  left: 72px;
+  top: 7px;
+  cursor: pointer;
+}

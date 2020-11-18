@@ -1,0 +1,168 @@
+<template>
+  <div class="htmlTpl">
+    <!-- :label-width="tpl.props.labelWidth" :label-position="tpl.props.labelPosition"
+      :gutter="tpl.props.gutter"  -->
+    <ever-form2 v-if="tpl.templateId" :allDisabled="dataId && dataId != -1" :labelPosition="'top'" :schema="schema" v-model="obj"
+      :force-fullline="true"
+      ref="form" :span="24" :rules="rules"
+      :readonly="readonly"
+      @focus="(name, obj) => {this.$emit('focus', name, obj)}"
+      class="form remote-form" :nosubmit="nosubmit">
+      <template v-for="name in slotNames" :slot="name">
+        <slot :name="name"></slot>
+      </template>
+      <template slot="default">
+        <slot>
+          <el-col :span="24" slot="default">
+            <el-form-item>
+              <el-button type="primary" @click="save()" v-if="dataId == '-1'">保存</el-button>
+            </el-form-item>
+          </el-col>
+        </slot>
+      </template>
+    </ever-form2>
+  </div>
+</template>
+<script>
+/**
+## 两种方式获取schema
+1 code 模版编码, dptId 部门ID 需要同时传这两个值确定唯一表单
+加载表单schema后会更新 schemaId，后续所有操作根据schemaId进行，比如加载表单数据
+2 根据表单schemaId直接获取
+*/
+import { getMixed } from '@/util/formconverter'
+import api from '../store/tplform.js'
+
+export default {
+  props: ['code', 'providerId', 'origId', 'visitId', 'patientId', 'slotNames', 'value', 'dptId', 'schemaId', 'nosubmit', 'readonly', 'dataId', 'userId'],
+  data () {
+    return {
+      schema: [],
+      rules: null,
+      tpl: {
+        props: {}
+      },
+      initObj: {},
+      obj: {}
+    }
+  },
+  created () {
+    let promise
+    if (!this.code) return
+    const params = {
+      code: this.code,
+      userId: this.userId,
+      providerId: this.providerId,
+      origId: this.dptId
+    }
+    promise = api.getTemplateByCode(params)
+    promise.then(result => {
+      this.tpl = result
+      let obj = getMixed(this.tpl.element, true)
+      this.schema = obj.schema
+      this.$emit('update:schemaId', this.tpl.templateId)
+      this.rules = obj.rules
+      if (!this.obj.id) {
+        this.obj = obj.obj
+        this.initObj = JSON.parse(JSON.stringify(obj.obj))
+      }
+      // console.log(result, 'result')
+      return this.tpl.templateId
+    }).then(schemaId => {
+      // 有dataId说明有实例
+      // dataId不存在，或者dataId==-1时候调用formData
+      // console.log(`dataId`, this.dataId)
+      if (this.dataId) {
+        // -1为点击新建，但是不能确定有没有实例
+        // 点击实例渲染模版
+        if (this.dataId !== '-1') {
+          api.getById(this.dataId, this.userId).then(result => {
+            let data = result.data
+            data.id = result.id
+            this.obj = data
+            this.initObj = JSON.parse(JSON.stringify(data))
+          })
+        }
+      }
+    })
+  },
+  methods: {
+    validate (cb) {
+      this.$refs.form.$refs.form.validate(cb)
+    },
+    save () {
+      this.obj.visitId = this.visitId
+      this.obj.patientId = this.patientId
+      this.obj.dptId = this.dptId
+      this.$refs.form.$refs.form.validate(async valid => {
+        if (valid) {
+          if (this.obj.id && this.obj.id === '-1') delete this.obj.id
+          let result = await api.createOrUpdate(this.schemaId, this.obj, {
+            visitId: this.visitId,
+            patientId: this.patientId,
+            userId: this.userId,
+            dptId: this.providerId
+          })
+          if (result.id) {
+            this.obj = Object.assign({}, this.obj, { id: result.id })
+            this.$notify({
+              title: 'success',
+              message: '保存成功',
+              type: 'success'
+            })
+            window.AndroidJs.onSuccess()
+            this.$emit('success', result)
+          } else {
+            this.$notify.error({
+              title: 'error',
+              message: '保存失败'
+            })
+          }
+        }
+      })
+    }
+  },
+  watch: {
+    obj: {
+      handler (val) {
+        if (val) {
+          this.$store.commit('setDocState', {
+            obj: this.obj,
+            preObj: this.initObj
+          })
+          this.$emit('input', val)
+        }
+      },
+      deep: true,
+      immediate: true
+    },
+    value: {
+      handler (val) {
+        Object.assign(this.obj, val)
+      },
+      deep: true
+    }
+  }
+}
+</script>
+<style scoped lang="scss">
+.remote-form /deep/ .el-checkbox {
+  margin-right: 20px;
+}
+.remote-form /deep/ .el-checkbox + .el-checkbox {
+  margin-left: 0!important;
+}
+.remote-form /deep/ .el-form-item__label {
+  // height: 20px;
+  font-weight: bold;
+}
+.htmlTpl /deep/ .el-checkbox__input.is-disabled + span.el-checkbox__label{
+  color: #666
+}
+.el-checkbox__input.is-disabled .el-checkbox__inner {
+  background-color: #eee
+}
+.htmlTpl /deep/ .el-button--primary {
+  width: 100%
+}
+</style>

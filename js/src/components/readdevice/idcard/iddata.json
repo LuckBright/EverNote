@@ -1,0 +1,20 @@
+{
+  "head": {
+    "errMsg": "successful",
+    "errCode": 0
+  },
+  "data": {
+    "name": "吕江涛",
+    "sex": "男",
+    "nation": "汉族",
+    "birthday": "19811017",
+    "address": "河北省深州市北溪村乡西留曹村297号",
+    "idCode": "133025198110171413",
+    "department": "深州市公安局",
+    "startDate": "20141128",
+    "endDate": "20341128",
+    "samId": null,
+    "image": "data:image/jpeg;base64,Qk3OlwAAAAAAADYAAAAoAAAAZgAAAH4AAAABbalabala",
+    "imagePath": null
+  }
+}

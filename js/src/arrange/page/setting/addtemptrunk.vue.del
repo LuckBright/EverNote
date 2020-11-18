@@ -1,0 +1,229 @@
+<template>
+  <el-popover
+    v-model="visible"
+    placement="bottom"
+    title
+    width="300"
+    @show="visible=true"
+    trigger="click"
+  >
+    <el-form :model="form" label-width="80px" ref="addform">
+      <el-form-item
+        label="科室"
+        prop="dept"
+        :rules="[{required: true, message: '必填项', trigger: 'change', type: 'object'}]"
+      >
+        <dept-cascader
+          v-model="selectDept"
+          :organ-id="organ.organId"
+          :template-type="template.timeTrunkType"
+          style="width:100%"
+        ></dept-cascader>
+      </el-form-item>
+      <el-form-item
+        label="医生"
+        prop="doctor"
+        :rules="[{required: true, message: '必填项', trigger: 'change', type: 'object'}]"
+      >
+        <el-select v-model="form.doctor" clearable style="width:100%" value-key="id">
+          <el-option
+            v-for="item in arrangeResource"
+            :key="item.id"
+            :value="item"
+            :label="item.resourceName"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="医生编码">
+        <el-input v-model="form.doctorCode" style="width:100%"></el-input>
+      </el-form-item>
+      <el-form-item
+        label="诊室"
+        prop="clinic"
+        :rules="[{required: true, message: '必填项', trigger: 'change', type: 'object'}]"
+      >
+        <el-select v-model="form.clinic" value-key="id" clearable placeholder="请选择诊室" style="width:100%">
+          <el-option
+            v-for="item in clicList"
+            :key="item.id"
+            :label="item.resourceName"
+            :value="item"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="诊室编码">
+        <el-input v-model="form.clinicCode" style="width:100%"></el-input>
+      </el-form-item>
+      <el-form-item label>
+        <el-button type="primary" @click="createTempArrange">确定</el-button>
+        <el-button type @click="visible=false">取消</el-button>
+      </el-form-item>
+    </el-form>
+    <el-button type="primary" slot="reference">临时出诊</el-button>
+  </el-popover>
+</template>
+<script>
+import api from '@/arrange/store/settingapi'
+import roomapi from '@/arrange/store/templateapi'
+import workapi from '@/arrange/store/workapi'
+import deptCascader from '@/arrange/page/scheduling/deptcascader'
+export default {
+  props: ['dept', 'organ', 'template', 'date'],
+  data () {
+    return {
+      api,
+      roomapi,
+      workapi,
+      visible: false,
+      clicList: [],
+      arrangeResource: [],
+      selectDept: '',
+      form: {
+        templetId: this.template.id,
+        clinic: '',
+        clinicCode: '',
+        resource: '',
+        doctor: '',
+        doctorCode: '',
+        timeTrunk: '',
+        timeRangeList: [],
+        dept: '',
+        organDto: '',
+        resourceArrangeResourceList: [],
+        date: this.date || this.$moment().format('YYYY-MM-DD')
+      }
+    }
+  },
+  watch: {
+    'template' (val) {
+      this.form.templetId = val.id
+    },
+    'dept' (val) {
+      this.selectDept = val
+    },
+    'organ' (val) {
+      this.form.organDto = this.organ
+      if (val) {
+        if (this.selectDept) {
+          this.getArrangeResource()
+        } else {
+          this.arrangeResource = []
+        }
+        this.getRoomdata()
+      } else {
+        this.clicList = []
+      }
+      this.getTempTrunk()
+    },
+    'selectDept' (val) {
+      this.form.dept = val
+      if (val) {
+        this.getArrangeResource()
+        this.getRoomdata()
+      } else {
+        this.arrangeResource = []
+      }
+    },
+    'form.clinic' (val) {
+      this.form.clinicCode = val ? val.clinicCode : ''
+      this.form.resourceArrangeResourceList = val ? [{
+        resourceType: val.resourceType,
+        resourceId: val.id,
+        resourceName: val.resourceName
+      }] : []
+    },
+    'doctor' (val) {
+      this.form.doctorCode = val.resourceCode
+    },
+    'date' (val) {
+      this.form.date = val
+    }
+  },
+  methods: {
+    createTempArrange () {
+      this.form.resource = {
+        arrangeType: 1,
+        visitStatus: 1,
+        doctorCode: this.form.doctorCode,
+        clinicCode: this.form.clinicCode,
+        resourceId: this.form.doctor.id,
+        resourceName: this.form.doctor.resourceName,
+        resourceType: this.form.doctor.resourceType
+      }
+      this.$refs.addform.validate(valid => {
+        if (valid) {
+          this.api.addTempArrange(this.form).then(rs => {
+            if (!rs.head.errCode) {
+              this.form.doctor = ''
+              this.form.doctorCode = ''
+              this.form.clinic = ''
+              this.form.clinicCode = ''
+              this.validate = false
+              this.visible = false
+              this.$messageTips(this, 'success', '提交成功', '')
+              this.$emit('success', rs.data)
+            }
+          })
+        }
+      })
+    },
+    getArrangeResource () {
+      let params = {
+        resourceType: 'STAFF_DOCTOR',
+        deptId: this.selectDept.deptId,
+        organId: this.organ.organId,
+        templetId: this.template.id
+      }
+      if (!params.deptId) {
+        return
+      }
+      this.api.getResourceList(params).then(rs => {
+        if (rs.head.errCode || !rs.data.resultList[0]) {
+          this.arrangeResource = []
+          return false
+        }
+        this.arrangeResource = rs.data.resultList
+      })
+    },
+    getRoomdata () {
+      this.roomapi.getRoomdata({
+        organId: this.organ.organId,
+        deptId: this.selectDept.deptId,
+        isValid: 1,
+        resourceType: 'SPACE_CONSULTING_ROOM'
+      }).then(rs => {
+        if (rs && rs.data && rs.data.resultList && rs.data.resultList[0]) {
+          this.clicList = rs.data.resultList
+        } else {
+          this.clicList = []
+        }
+      })
+    },
+    getTempTrunk () {
+      this.workapi.list().then(rs => {
+        if (!rs.head.errCode && rs.data && rs.data.resultList[0]) {
+          let resultList = rs.data.resultList.filter(item => {
+            return item.arrangeType === 1
+          })
+          if (resultList[0]) {
+            this.form.timeTrunk = {
+              timeTrunkId: resultList[0].id,
+              timeTrunkName: resultList[0].name
+            }
+            if (!resultList[0].timeTrunkTimeRanges) {
+              this.$messageTips(this, 'warning', '请设置临时班次时段', '提示')
+              return false
+            }
+            this.form.timeRangeList = [{ timeTrunkTimerangeId: resultList[0].timeTrunkTimeRanges[0].id }]
+          } else {
+            this.$messageTips(this, 'warning', '请配置临时班次', '提示')
+          }
+        }
+      })
+    }
+  },
+  components: {
+    deptCascader
+  }
+}
+</script>

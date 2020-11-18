@@ -1,0 +1,34 @@
+<template>
+  <el-dialog :title="title" :visible.sync="dialogVisible" class="ui_dialog_02">
+    <print-wrap v-if="settings && settings.length" v-model="value" :settings="settings" :type="type" :is-preview="isPreview" :view-type="viewType"></print-wrap>
+  </el-dialog>
+</template>
+<script>
+  import PrintWrap from './print.wrap'
+  export default {
+    data () {
+      return {
+        title: '打印预览',
+        dialogVisible: false
+      }
+    },
+    props: ['type', 'value', 'settings', 'isPreview', 'viewType'],
+    components: {
+      PrintWrap
+    },
+    methods: {
+      open () {
+        this.dialogVisible = true
+      },
+      close () {
+        this.dialogVisible = false
+      }
+    }
+  }
+</script>
+<style lang="scss" scoped>
+  .print_wrap {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+</style>

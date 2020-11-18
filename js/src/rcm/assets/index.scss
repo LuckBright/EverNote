@@ -1,0 +1,19 @@
+// 公共样式提取（相同的样式， 在很多歌组件中都有重复定义，在此处提取出来）
+
+// 详情页面子标题左侧蓝色竖条标识
+h4.left_high_light {
+  padding: 0;
+  margin: 10px 0;
+  padding-left: 10px;
+  border-left: 3px solid #1c7bef;
+  line-height: 18px;
+}
+// warehouse 中实现form表单查看（非编辑态）
+.readform /deep/ .el-form-item, .invoice /deep/ .el-form--inline .el-form-item {
+  margin-bottom: 0!important;
+}
+.readform {
+  /deep/ .el-form-item__label {
+    color: #666;
+  }
+}

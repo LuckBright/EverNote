@@ -1,0 +1,611 @@
+<template>
+  <div class="mb20">
+    <el-row>
+      <el-col :span="24" class="printlistbox">
+        <el-row
+          class="title_info bordercol pos_re"
+          :class="(itemData.identification || itemData.status == 7) && 'danger'"
+        >
+          <span v-if="thisIndex" class="f_bold font20">{{thisIndex}}</span>
+          <span class="checkboxs" v-if="isPrint">
+            <el-checkbox @change="printChange" v-model="print"></el-checkbox>
+          </span>
+          <span class="f_bold cGray6">
+            UDD药包：
+            <span class="cBlack">{{itemData.code}}</span>
+          </span>
+          <span v-if="isIcon">
+             <el-tooltip
+                v-if="itemData.dateType == 1"
+                effect="dark"
+                content="今日"
+                placement="top"
+              >
+                <i style="font-size: 18px; height: 18px" class="iconfont icon-today blue"></i>
+              </el-tooltip>
+          </span>
+          <span>
+            <el-button
+              v-if="itemData.isPrint === 2 && !itemData.identification && itemData.status <= 6 && dispenseSettingObject.uddDispenseSettingObject && dispenseSettingObject.uddDispenseSettingObject.dispensePaste == 1"
+              type="text"
+              @click="supplementPrint(itemData)"
+            >补打药包</el-button>
+            <el-button
+              v-if="itemData.isPrint === 2 && !isSee"
+              type="text"
+              @click="handleSeePrint(itemData)"
+            >查看备药单</el-button>
+            <el-button v-if="itemData.identification && itemData.status < 6 && showAgainBtn && listIdentificationCount != itemData.uddDispenseItemList.length" type="text" @click="againFn(itemData)">重新生成药包</el-button>
+            <el-button
+              v-if="itemData.identification && itemData.status < 6 && !onlyCancel"
+              type="text"
+              @click="handleUnusual(itemData.id, 'cancel')"
+            >撤销异常</el-button>
+            <el-button
+              v-if="!itemData.identification && itemData.status < 6"
+              type="text"
+              @click="handleUnusual(itemData.id, 'sign')"
+            >标记异常</el-button>
+          </span>
+          <div>
+            <span
+              v-if="itemData.patientObject"
+            >{{itemData.patientObject.name}} ({{itemData.patientObject.sex | formatSex}}) {{itemData.patientObject.age}}岁</span>
+            <span v-if="itemData.spaceRecordObject">{{itemData.spaceRecordObject.name}}</span>
+            <label v-if="itemData.bedNum">床号:</label>
+            <span v-if="itemData.bedNum">{{itemData.bedNum}}</span>
+            <label>预执行时间:</label>
+            <span>
+              <template
+                v-if="itemData.implementTime"
+              >{{itemData.implementTime | formatDateByExp('YYYY-MM-DD')}}</template>
+              <strong class="f18">
+                <span v-if="itemData.termType">{{itemData.implementTime | formatDateByExp('HH:mm')}}</span>
+                <span v-else>立即</span>
+              </strong>
+            </span>
+            <!-- <span class="f_bold">{{itemData.employTxt}}</span> -->
+
+            <!-- <label v-if="itemData.hospitalizedNumber">住院号:</label>
+            <span v-if="itemData.hospitalizedNumber">{{itemData.hospitalizedNumber}}</span>-->
+            <label v-if="itemData.allergicHistory">过敏史:</label>
+            <span v-if="itemData.allergicHistory">{{itemData.allergicHistory}}</span>
+            <el-button type="text" @click="handleLookAdvice(itemData)" v-if="$hasPermission('Auth_menu_treasury_hospitalization_seedoctorsadvice')">
+              <i class="iconfont icon-menzhen-lishijilu"></i>
+              <span class="cBlack f_nor">查看医嘱</span>
+            </el-button>
+            <skin-test :prop-data="testResult" v-if="testResult.length"></skin-test>
+          </div>
+          <div
+            :class="{
+            status: true,
+            error: itemData.status == 7
+          }"
+            class="pos_ab f18 blue f_bold"
+            style="top: 5px;  right: 10px;"
+          ><el-button type="text" class="logs" @click="showLogs(itemData)">操作记录</el-button> {{setName(DISPENSING_STATUS, itemData.status, true)}}</div>
+        </el-row>
+      </el-col>
+    </el-row>
+    <el-row class="infobbs">
+      <el-table
+        :data="itemData.uddDispenseItemList"
+        class="ipdrighttable tableiconhover no-border"
+        :cell-class-name="tableRowClassName"
+        :stripe="false"
+      >
+        <el-table-column v-for="item in IPD_TABLE_HEAD" v-bind="item.options" :key="item.name">
+          <template slot="header" slot-scope="scope">
+            <el-tooltip v-if="item.name === 'name' && !CHINESE_MEDICINE_TYPE.includes(itemData.adviceType)" class="item" :content="`${needIcon(itemData.adviceType).name}`" effect="dark" placement="top">
+              <svg class="icon mr5" style="fontSize: 18px; height: 18px;" aria-hidden="true">
+                <use :xlink:href="'#' + needIcon(itemData.adviceType).icon"></use>
+              </svg>
+            </el-tooltip>
+            <span v-if="item.options">{{item.options.label}}</span>
+          </template>
+          <template slot-scope="scope">
+            <slot :name="item.name" v-bind="scope">
+              <template v-if="item.name === 'name'">
+                <div v-if="scope.row.isMain" style="display: inline-block;">
+                  <i class="f12 iconfont icon-guanlian2" v-if="scope.row.isMain == 1"></i>
+                  <i
+                    class="f12 iconfont icon-guanlian1"
+                    v-if="scope.$index == mineIndex && scope.row.isMain == 2"
+                  ></i>
+                  <i class="f12 iconfont icon-guanlian" v-else-if="scope.row.isMain == 2"></i>
+                </div>
+                <span
+                  v-if="scope.row.localSettingObject && parserJSON({data: scope.row.localSettingObject.materialSkuObject.ext, property: IDENTIFICATION_CODE})">
+                  <wh-code-to-name
+                    :isExt="true"
+                    :patchObj="{
+                      code: IDENTIFICATION_CODE,
+                      list: scope.row.localSettingObject.materialSkuObject.ext,
+                      isInfo: false
+                    }"
+                    :showSourceValue="scope.row.source"
+                  ></wh-code-to-name>-
+                </span>
+                <span v-if="scope.row.localSettingObject">
+                  <wh-code-to-name
+                    :isExt="true"
+                    :patchObj="{
+                      code: MATERILA_CODE,
+                      list: scope.row.localSettingObject.materialSkuObject.ext,
+                      isInfo: false
+                    }"
+                    :showSourceValue="scope.row.source"
+                  ></wh-code-to-name>
+                  <i class="iconfont icon-shuoming" @click="drugOpen(scope.row)"></i>
+                  <div
+                    v-if="isSkinTestMaterial(scope.row) && !outTest"
+                    class="red f12"
+                  >该药品需要皮试才能使用，医生暂未开具皮试医嘱</div>
+                </span>
+                <p class="font red" v-if="scope.row.cdssResult">
+                  <i class="iconfont icon-wodebaojing red mr10 f12"></i>
+                  {{scope.row.cdssResult}}
+                </p>
+                <p v-if="scope.row.identification" class="font red">
+                  <span>异常原因：</span>
+                  <span
+                    v-html="filterClassifyList(scope.row.classifyList)"
+                    v-if="!scope.row.isCancle"
+                  ></span>
+                  <span v-else>{{'医嘱被撤回'}}</span>
+                  <!-- {{!scope.row.isCancle ? scope.row.identificationTxt : '医嘱被撤回'}} -->
+                </p>
+              </template>
+              <template v-if="item.name === 'spec'">
+                <span v-if="scope.row.localSettingObject">
+                  <wh-code-to-name
+                    :isExt="true"
+                    :showIcon="false"
+                    :patchObj="{
+                      code: [SPU_SPEC_CODE],
+                      list: scope.row.localSettingObject.materialSkuObject.ext,
+                      isInfo: false
+                    }"
+                  ></wh-code-to-name>
+                </span>
+              </template>
+              <template v-if="item.name === 'employ'">
+                <span>{{scope.row.employTxt}}</span>
+                <sys-value
+                  type="THC_CPOE_DropRate"
+                  v-if="scope.row.dropSpeed"
+                  :code="scope.row.dropSpeed"
+                ></sys-value>
+                <el-popover
+                  :key="scope.$index + 'channel'"
+                  placement="bottom"
+                  width="200"
+                  v-if="scope.row.employ == '1460'"
+                  trigger="hover"
+                >
+                  <template>皮试结果：{{scope.row.taskRemarkLogObject ? scope.row.taskRemarkLogObject.remark : '-'}}</template>
+                  <el-button size="mini" type="text" slot="reference">
+                    <svg class="icon" style="fontSize: 14px; height: 14px;" aria-hidden="true">
+                      <use xlink:href="#icon-pishuo"></use>
+                    </svg>
+                  </el-button>
+                </el-popover>
+              </template>
+              <template v-if="item.name === 'type'">
+                <span v-if="scope.row.localSettingObject">
+                  <wh-code-to-name
+                    :showIcon="false"
+                    :isExt="true"
+                    :patchObj="{
+                      code: [DOSAGE],
+                      list: scope.row.localSettingObject.materialSkuObject.ext,
+                      isInfo: false
+                    }"
+                  ></wh-code-to-name>
+                </span>
+              </template>
+              <template
+                v-if="item.name === 'dosage'"
+              >{{scope.row.measure}}{{scope.row.measureUnitName}}</template>
+              <template v-if="item.name === 'length'">{{scope.row.num}} {{scope.row.countUnit}}</template>
+              <!-- <template v-if="item.name === 'position'">
+                {{scope.row.countUnit}}
+              </template>-->
+              <template v-if="item.name === 'doctor'">
+                <span v-if="scope.row.doctorObject">{{scope.row.doctorObject.name}}</span>
+              </template>
+              <template v-if="item.name === 'other'">
+                <span class="red" v-if="scope.row.isCancle">已取消</span>
+                <span class="red" v-else-if="scope.row.identification">异常</span>
+              </template>
+            </slot>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-row>
+    <!-- 操作记录 -->
+    <record-dialog :value.sync="dialogRecord" :tableData="recordTableData"></record-dialog>
+    <!-- 异常弹出框 -->
+    <exception-dialog
+      v-if="operate === 'cancel'"
+      :appendBody="appendBody"
+      :exceptionData="unusualTableData"
+      :operate="operate"
+      :visible.sync="dialogTableVisible"
+      @confirm="saveUnusual"
+    ></exception-dialog>
+    <!-- 新版异常弹出框 -->
+    <anomaly-dialog
+      v-if="operate === 'sign'"
+      :visible.sync="dialogTableVisible"
+      :exceptionData="unusualTableData"
+      :operate="operate"
+      @confirm="saveUnusual"
+      :drugPackInfo="itemData"
+    ></anomaly-dialog>
+    <!-- 查看医嘱 -->
+    <dialog-slot width="90%" title="医嘱信息" :dialogSlot.sync="dialogSlot" :appendBody="appendBody">
+      <advice-list
+        v-if="dialogSlot"
+        :base-info="baseInfo"
+        :no-operate="true"
+        :show-add="false"
+        :show-all="true"
+      ></advice-list>
+    </dialog-slot>
+    <!-- 查看药品说明 -->
+    <drug-instructions v-if="thisObjData.localSettingObject" ref="drugTips" :objData="thisObjData"></drug-instructions>
+  </div>
+</template>
+
+<script>
+import exceptionDialog from '../../components/exceptiondialog'
+import dialogSlot from '@/warehouse/page/components/dialog.slot'
+import adviceList from '@/inpatient/components/advice.list.vue'
+import { IPD_TABLE_HEAD } from './table.head'
+import anomalyDialog from '@/warehouse/page/storages/components/anomalydialog'
+import { patch, SEARCH_CODE, SPU_SPEC_CODE, DOSAGE, DISPENSING_STATUS, MATERILA_CODE, IDENTIFICATION_CODE, SCENE, WEST_MEDICINE_TYPE, CHINESE_MEDICINE_TYPE, parserJSON } from '@/util/common'
+import setName from '@/util/setstatusname'
+import hospitalApi from '../store/hospitalapi'
+import drugInstructions from './drug.instructions'
+import commonApi from '../store/dispensingcommonapi.js'
+import recordDialog from '../ipd/record.dialog'
+import dispenseSettingMixin from '@/warehouse/util/dispense.setting.mixin'
+import skinTest from './skin.test'
+import '@/warehouse/page/storages/dispensings/ipd/index.scss'
+import { setUpClassifyName } from '@/util/formcustom'
+import needIcon from '@/warehouse/page/storages/dispensings/mixins/needicon.mixins.js'
+export default {
+  mixins: [setName, dispenseSettingMixin, needIcon],
+  props: {
+    itemData: {
+      type: Object,
+      default () {
+        return {}
+      }
+    },
+    thisIndex: {
+      type: Number,
+      default: 0
+    },
+    isSee: {
+      type: Number,
+      default: 0
+    },
+    showAgainBtn: {
+      type: Boolean,
+      default: false
+    },
+    isIcon: {
+      type: Boolean,
+      default: false
+    },
+    appendBody: {
+      type: Boolean,
+      default: false
+    },
+    isPrint: {
+      type: Boolean,
+      default: false
+    },
+    outTest: {
+      type: Boolean,
+      default: false
+    },
+    testResult: {
+      type: Array,
+      default () {
+        return []
+      }
+    }
+  },
+  data () {
+    return {
+      IDENTIFICATION_CODE,
+      IPD_TABLE_HEAD,
+      SEARCH_CODE,
+      SCENE,
+      parserJSON,
+      SPU_SPEC_CODE,
+      commonApi,
+      CHINESE_MEDICINE_TYPE,
+      WEST_MEDICINE_TYPE,
+      setUpClassifyName,
+      DOSAGE,
+      MATERILA_CODE,
+      DISPENSING_STATUS,
+      unusualTableData: [],
+      recordTableData: [],
+      dialogRecord: false,
+      mineIndex: '',
+      mineArr: [],
+      operate: 'cancel',
+      onlyCancel: false, // 只有取消没有异常明细
+      dialogTableVisible: false,
+      dialogSlot: false,
+      listIdentificationCount: 0,
+      thisObjData: {},
+      baseInfo: [], // 患者基本信息，主要用到：doctorType，hospitalizedNumber，patientId （查看医嘱组件）
+      print: false
+    }
+  },
+  watch: {
+    'itemData': {
+      handler: function (v) {
+        this.print = v.checked
+      },
+      deep: true,
+      immediate: true
+    },
+    'itemData.uddDispenseItemList': {
+      handler: function (v) {
+        this.onlyCancel = false
+        this.listIdentificationCount = 0
+        this.mineArr = []
+        v.forEach((item, i) => {
+          if (item.identification && item.isCancle) {
+            this.onlyCancel = true
+          }
+          if (item.identification && !item.isCancle) {
+            this.onlyCancel = false
+          }
+          if (item.identification) {
+            this.listIdentificationCount++
+          }
+          if (item && [1, 2].includes(item.isMain)) {
+            this.mineIndex = i
+            this.mineArr.push(item)
+          }
+        })
+      },
+      deep: true,
+      immediate: true
+    }
+  },
+  methods: {
+    showLogs (data) {
+      let params = {
+        identificationId: data.id,
+        stoageRoomId: data.storageRoomId
+      }
+      hospitalApi.getDispenseLogForUdd(params).then(res => {
+        if (res) this.recordTableData = res
+      })
+      this.dialogRecord = true
+    },
+    drugOpen (data) {
+      this.thisObjData = data
+      this.$nextTick(_ => {
+        this.$refs.drugTips.open()
+      })
+    },
+    printChange () {
+      this.$emit('print', {
+        status: this.print,
+        id: this.itemData.id
+      })
+    },
+    filterClassifyList (list) {
+      if (list && list.length) {
+        let arr = []
+        list.map((item, index) => {
+          arr.push(`<div><span>${index + 1}、</span>${setUpClassifyName(item, true, 'childClassifyItem', 'contentText')}</div>`)
+        })
+        // 异常原因只有一条不显示前面的 1、
+        if (arr.length === 1) {
+          arr[0] = arr[0].replace(new RegExp('<span>1、</span>'), '')
+        }
+        return arr.join('')
+      }
+    },
+    //  重新生成药包
+    againFn (data) {
+      if (this.mineArr.length) {
+        this.$messageTips(this, 'warning', '该药包的药品为父子医嘱，不能拆分重新生成', '提示')
+        return false
+      }
+      this.$confirm(`<p class="againtitle">将该药包拆分为新的药包，请确认</p><p>1、正常药品将生成新的药包</p><p>2、异常药品将生成新的药包</p><p>3、取消药品不生成新的药包</p>`, ' ', {
+        dangerouslyUseHTMLString: true,
+        customClass: 'againpop',
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
+      }).then(() => {
+        hospitalApi.regenerateUddDispense({ id: data.id }).then(res => {
+          if (res.flag) {
+            this.$messageTips(this, 'success', '重新生成药包成功', '提示')
+            this.$emit('updateStatus', true)
+          }
+        })
+      })
+    },
+    supplementPrint (v) {
+      // this.printSinge({ type: v.adviceType, data: v })
+      this.$emit('supplementPrint', v)
+    },
+    handleSeePrint (v) {
+      this.$emit('seePrescription', v)
+    },
+    // 查看医嘱
+    handleLookAdvice (data) {
+      this.baseInfo = data
+      this.dialogSlot = true
+    },
+    tableRowClassName ({ row, rowIndex }) {
+      return row.identification ? 'danger-row' : ''
+    },
+    // 处理异常
+    handleUnusual (id, operate) {
+      hospitalApi.getUddDispenseByIds({
+        ids: id
+      }).then(res => {
+        // if (res && res.length) {
+        this.unusualTableData = res
+        this.operate = operate
+        this.dialogTableVisible = true
+        // }
+      })
+    },
+    // 保存异常
+    async saveUnusual (data) {
+      // 更新发药接口测试
+      let params = []
+      data.checkedItems.forEach((item) => {
+        params.push({
+          id: item.id,
+          identification: this.operate === 'sign' ? 1 : 0,
+          identificationTxt: data.inputVal,
+          uddDispenseId: item.uddDispenseId
+        })
+      })
+      // 新版标记异常
+      let tempObj = {}
+      tempObj.classifyList = data.selectList
+      tempObj.content = data.inputVal
+      tempObj.itemIds = []
+      tempObj.recipeType = SCENE[2].id
+      data.checkedItems.forEach(item => {
+        tempObj.recipeId = item.uddDispenseId
+        tempObj.itemIds.push(item.id)
+      })
+      let result
+      if (this.operate === 'sign') {
+        result = await commonApi.updateComment(tempObj).then(res => res)
+      } else {
+        result = await hospitalApi.updateUddDispense(params).then(res => res)
+      }
+      if (result.flag) {
+        this.dialogTableVisible = false
+        this.$messageTips(this, 'success', this.operate === 'sign' ? '标记异常成功' : '取消异常成功')
+        this.$emit('updateStatus', this.operate)
+      }
+    },
+    ...patch
+  },
+  components: {
+    exceptionDialog,
+    dialogSlot,
+    adviceList,
+    drugInstructions,
+    skinTest,
+    anomalyDialog,
+    recordDialog
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.hospital-layout .list-msg p /deep/ span {
+  margin-left: 0;
+}
+.printlistbox {
+  padding: 5px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-bottom: 0;
+}
+.infobbs {
+  padding: 5px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-top: 0;
+}
+.title_info {
+  line-height: 26px;
+  font-size: 14px;
+  label {
+    color: #666;
+    padding-right: 10px;
+  }
+  span {
+    margin-right: 10px;
+  }
+}
+.bordercol {
+  // border:1px solid #ccc;
+  border-bottom: 0;
+  padding-left: 10px;
+  background: #eee;
+  position: relative;
+  &.danger {
+    background: inherit;
+    background: rgba(255, 0, 0, 0.2);
+    color: #ff0000;
+    .f_bold {
+      color: #ff0000;
+    }
+    label {
+      color: #ff0000;
+    }
+    .status {
+      color: #ff0000;
+    }
+  }
+}
+.ipdrighttable {
+  margin-top: 0;
+  /deep/ th {
+    background: #fff;
+    color: #ccc;
+    border-bottom: 1px solid rgb(240, 240, 240) !important;
+    /deep/ div {
+      background: #fff;
+    }
+  }
+  /deep/ td {
+    color: #333;
+    border-bottom: 1px solid rgb(240, 240, 240) !important;
+  }
+  /deep/ tr:last-child td {
+    border-bottom: 0 !important;
+  }
+}
+.font20 {
+  font-size: 24px;
+}
+.mt15 {
+  /deep/ span {
+    margin-right: 0;
+  }
+}
+button.mt15 {
+  margin-top: 10px;
+}
+.status.error {
+  color: #d50000;
+}
+.fr.clearfix {
+  button {
+    margin-top: 7px;
+  }
+}
+.hospital-layout .title_info span.checkboxs {
+  margin-right: 0;
+  /deep/ span {
+    margin-right: 0;
+  }
+}
+.logs{
+  text-align: right;
+}
+</style>
+

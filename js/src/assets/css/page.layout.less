@@ -1,0 +1,187 @@
+.layout_main_wrap {
+  padding: 10px !important;
+  background: #ebedef;
+  height: 100%; // fix:flex=1 => 遇到有不自动100%高度的展示bug，不确定会不会影响其他的效果
+  &.full {
+    padding: 0 !important;
+    > .layout_box {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  // 使页面高度 100%
+  &.h {
+    & > .station_layout {
+      height: 100%;
+      & > .layout_box {
+        height: 100%;
+      }
+    }
+  }
+  > .layout_box{
+    &.full{
+      height: 100%;
+      overflow: hidden;
+    }
+  }
+}
+.station_layout_wrap {
+  width: 100%;
+  &.full,
+  .full_layout_wrap {
+    height: 100%;
+  }
+  .layout_inner {
+    padding: 10px;
+    background: #fff;
+  }
+}
+// .grey_wrap {
+//   .station_layout_wrap {
+//     background: none;
+//   }
+// }
+
+.page_layout_full {
+  height: 100%;
+}
+.page_layout_full_hidden {
+  height: 100%;
+  overflow: hidden;
+}
+
+.flex_column_full {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.flex_column_full_hidden {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  &.el-tabs {
+    .el-tabs__content {
+      flex: 1;
+      .el-tab-pane {
+        height: 100%;
+      }
+    }
+  }
+  &.row {
+    flex-direction: row;
+  }
+  &.bg_white {
+    background: #fff;
+  }
+  &.flex_none {
+    .el-table {
+      flex: none;
+    }
+  }
+}
+.flex_layout_full .flex_column_full_hidden,
+.page_layout_full_hidden .flex_column_full_hidden,
+.flex_column_full .flex_column_full_hidden,
+.flex_col_1_hidden .flex_column_full_hidden{
+  &.el-table {
+    position: absolute;
+    > .el-table__header-wrapper {
+      overflow: inherit;
+    }
+    > .el-table__body-wrapper {
+      flex: 1;
+      overflow-y: auto;
+    }
+    &.x-hidden {
+      > .el-table__body-wrapper {
+        overflow-x: hidden;
+      }
+    }
+  }
+}
+.flex_layout_1 {
+  display: flex;
+  flex: 1;
+}
+.flex_column_1 {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.flex_column_1_hidden {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+.flex_layout {
+  display: flex;
+  width: 100%;
+}
+.flex_layout_full {
+  display: flex;
+  height: 100%;
+}
+
+.flex_layout_scroll {
+  flex: 1;
+  overflow: auto;
+  &.spe {
+    overflow: hidden;
+  }
+}
+
+.flex_col_1 {
+  flex: 1;
+}
+.flex_col_1_auto {
+  flex: 1;
+  overflow: auto;
+}
+.flex_col_1_hidden {
+  flex: 1;
+  overflow: hidden;
+}
+
+.flex_column_1_hidden {
+  .main-head {
+    margin-bottom: 0;
+    .el-form {
+      margin-bottom: 0;
+    }
+  }
+  .main-wrap {
+    .el-table {
+      margin: 0;
+    }
+  }
+}
+.layout_main_wrap {
+  .main-wrap {
+    position: relative;
+  }
+}
+.page_layout_full_hidden,
+.flex_col_1_hidden {
+  &.main-wrap {
+    margin: 5px 0;
+    .el-table {
+      margin: 0;
+    }
+  }
+}
+
+.edit_con_wrap {
+  .ever__editor.medical {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    &.disabled {
+      .menubar {
+        display: none;
+      }
+    }
+  }
+}

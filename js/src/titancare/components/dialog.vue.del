@@ -1,0 +1,25 @@
+<template>
+  <el-dialog :title="title" :visible.sync="dialogFormVisible" :custom-class="customClass || ''">
+    <slot></slot>
+  </el-dialog>
+</template>
+
+<script>
+export default {
+  props: ['title', 'customClass'],
+  data () {
+    return {
+      dialogFormVisible: false
+    }
+  },
+  methods: {
+    open () {
+      this.dialogFormVisible = true
+    },
+    close () {
+      this.dialogFormVisible = false
+    }
+  }
+}
+</script>
+

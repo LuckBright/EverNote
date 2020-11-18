@@ -1,0 +1,76 @@
+.phr—main-container{
+  height: 100%;
+  position: relative;
+}
+.date-year-tip{
+  background: rgba(0, 0, 0, 0.75) !important;
+  p{
+    padding: 0px;
+    margin: 3px;
+  }
+}
+.svg-icon {
+  /* 图标和文字相邻时，垂直对齐 */
+  vertical-align: -0.15em;
+  /* 通过设置 color 来改变 SVG 的颜色/fill */
+  fill: currentColor;
+  /* path 和 stroke 溢出 viewBox 部分在 IE 下会显示
+      normalize.css 中也包含这行 */
+  overflow: hidden;
+}
+.right-main-container{
+  padding: 20px 10px 0 20px;
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+}
+.right-tree-container {
+
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  position: relative;
+  display: flex;
+  .right-tree-box{
+    overflow-y: auto;
+    min-width: 184px;
+    height: 100%;
+    background: #FDFDFF;
+    border-left: 1px solid #DADCE0;
+    box-shadow: 0 0 13px 0 rgba(136,136,136,0.13);
+    box-sizing: border-box;
+    padding: 15px 10px 0 7px;
+    /deep/ .custom-tree-node {
+      font-size: 12px;
+      &.tree-checked{
+        color: #4484C9;
+      }
+    }
+    /deep/ .el-tree-node__label {
+      font-size: 12px;
+    }
+    /deep/ .el-tree-node__content{
+      background: transparent;
+      &:hover{
+        background: transparent;
+        color: #4484C9;
+      }
+    }
+    ///deep/ .el-tree-node__children .el-tree-node.is-current.is-focusable > .el-tree-node__content .el-tree-node__label{
+    //  color: #4484C9;
+    //}
+  }
+}
+.follow-label {
+  color: #aaa;
+}
+.lh30 {
+  line-height: 30px;
+}
+.phr-register-iframe {
+  height: e('calc(100vh - 180px)');
+}
+.phr-survey-iframe {
+  height: e('calc(100vh - 270px)');
+}

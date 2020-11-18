@@ -1,0 +1,63 @@
+const prefix = '/thc-platform-core'
+export default {
+  building: {
+    pageList: {url: prefix + '/tsBuilding/pageList', isStatic: false},
+    getById: {url: prefix + '/tsBuilding/getById', isStatic: false},
+    insert: {url: prefix + '/tsBuilding/insert', isStatic: false},
+    delete: {url: prefix + '/tsBuilding/delete', isStatic: false},
+    update: {url: prefix + '/tsBuilding/update', isStatic: false},
+  },
+  room: {
+    pageList: {url: prefix + '/tsRoom/pageList', isStatic: false},
+    getById: {url: prefix + '/tsRoom/getById', isStatic: false},
+    insert: {url: prefix + '/tsRoom/insert', isStatic: false},
+    delete: {url: prefix + '/tsRoom/delete', isStatic: false},
+    update: {url: prefix + '/tsRoom/update', isStatic: false},
+    getRoomListByParam: {url: prefix + '/out/room/getRoomListByParam', isStatic: false},
+  },
+  bed: {
+    pageList: {url: prefix + '/tsBed/pageList', isStatic: false},
+    getById: {url: prefix + '/tsBed/getById', isStatic: false},
+    insert: {url: prefix + '/tsBed/insert', isStatic: false},
+    delete: {url: prefix + '/tsBed/delete', isStatic: false},
+    update: {url: prefix + '/tsBed/update', isStatic: false},
+    getTree: {url: prefix + '/tsBed/getTree', isStatic: false},
+  },
+  bedType: {
+    pageList: {url: prefix + '/tsBedType/pageList', isStatic: false},
+    getById: {url: prefix + '/tsBedType/getById', isStatic: false},
+    insert: {url: prefix + '/tsBedType/insert', isStatic: false},
+    update: {url: prefix + '/tsBedType/update', isStatic: false},
+    queryItem: {url: prefix + '/tsBedType/queryItem', isStatic: false},
+  },
+  seat: {
+    pageList: {url: prefix + '/tsSeat/pageList', isStatic: false},
+    getById: {url: prefix + '/tsSeat/getById', isStatic: false},
+    insert: {url: prefix + '/tsSeat/insert', isStatic: false},
+    delete: {url: prefix + '/tsSeat/delete', isStatic: false},
+    update: {url: prefix + '/tsSeat/update', isStatic: false},
+    getTree: {url: prefix + '/tsSeat/getTree', isStatic: false},
+  },
+  seatType: {
+    pageList: {url: prefix + '/tsSeatType/pageList', isStatic: false},
+    getById: {url: prefix + '/tsSeatType/getById', isStatic: false},
+    insert: {url: prefix + '/tsSeatType/insert', isStatic: false},
+    update: {url: prefix + '/tsSeatType/update', isStatic: false},
+    queryItem: {url: prefix + '/tsSeatType/queryItem', isStatic: false},
+  },
+  sickArea: {
+    pageList: {url: prefix + '/tsSickArea/pageList', isStatic: false},
+    getById: {url: prefix + '/tsSickArea/getById', isStatic: false},
+    insert: {url: prefix + '/tsSickArea/insert', isStatic: false},
+    delete: {url: prefix + '/tsSickArea/delete', isStatic: false},
+    update: {url: prefix + '/tsSickArea/update', isStatic: false},
+    relationStaffList: {url: prefix + '/tsSickArea/relationStaffList', isStatic: false},
+  },
+  diagnosisArea: {
+    pageList: {url: prefix + '/tsDiagnosisArea/pageList', isStatic: false},
+    getById: {url: prefix + '/tsDiagnosisArea/getById', isStatic: false},
+    insert: {url: prefix + '/tsDiagnosisArea/insert', isStatic: false},
+    delete: {url: prefix + '/tsDiagnosisArea/delete', isStatic: false},
+    update: {url: prefix + '/tsDiagnosisArea/update', isStatic: false},
+  },
+}

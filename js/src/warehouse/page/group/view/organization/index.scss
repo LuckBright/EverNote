@@ -1,0 +1,13 @@
+.flex {
+  display: flex;
+  flex-direction: column;
+}
+.item {
+  flex: auto;
+}
+.overflow {
+  overflow: auto;
+}
+.outer {
+  height: 100%;
+}

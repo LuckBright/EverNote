@@ -1,0 +1,39 @@
+<template>
+  <div>
+    <ever-bread-crumb name="业务处理" path="/warehouse/busienss" showTitle="true" :pathTo="pathTo"></ever-bread-crumb>
+    <div class="layout_inner">
+      <el-table :data="tableData" border>
+        <el-table-column label="物资更新">
+          <template slot-scope="scope">
+            <el-button type="text">{{scope.row.name}}</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <ever-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :pagesize="pagesize"
+        :totalCount="totalCount"
+        :current="current"
+      ></ever-pagination>
+    </div>
+  </div>
+</template>
+<script>
+let tableData = [
+  {
+    name: '111111'
+  },
+  {
+    name: '2222222'
+  }
+]
+export default {
+  data () {
+    return {
+      tableData
+    }
+  }
+}
+</script>
+

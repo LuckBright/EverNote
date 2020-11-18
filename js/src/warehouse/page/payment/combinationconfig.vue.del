@@ -1,0 +1,394 @@
+<template>
+  <div>
+    <ever-bread-crumb name="支付方组合配置" path="/warehouse/combinationconfig"></ever-bread-crumb>
+    <div class="layout_inner">
+      <div class="payment-module">
+        <el-row>
+          <el-col :span="8">
+            <label>基本医疗保险</label>
+          </el-col>
+          <el-col :span="16">
+            <el-select v-model="obj.med_insurance_offerrate.value" placeholder="请选择">
+              <el-option
+                v-for="item in optionsArr.jurisdiction"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              ></el-option>
+            </el-select>
+            <label>例外设定</label>
+            <el-button
+              @click="createReceivables(obj.med_insurance_offerrate.id)"
+              style="margin-right:10px;"
+            >详情</el-button>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="8">
+            <label>商业医疗保险</label>
+          </el-col>
+          <el-col :span="16">
+            <el-select v-model="obj.com_insurance_offerrate.value" placeholder="请选择">
+              <el-option
+                v-for="item in optionsArr.jurisdiction"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              ></el-option>
+            </el-select>
+            <label>例外设定</label>
+            <el-button
+              @click="createReceivables(obj.com_insurance_offerrate.id)"
+              style="margin-right:10px;"
+            >详情</el-button>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="8">
+            <label>第三方合作单位</label>
+          </el-col>
+          <el-col :span="16">
+            <el-select v-model="obj.third_org_offerrate.value" placeholder="请选择">
+              <el-option
+                v-for="item in optionsArr.jurisdiction"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              ></el-option>
+            </el-select>
+            <label>例外设定</label>
+            <el-button
+              @click="createReceivables(obj.third_org_offerrate.id)"
+              style="margin-right:10px;"
+            >详情</el-button>
+          </el-col>
+        </el-row>
+      </div>
+      <div>
+        <el-button type="primary" @click="updateinfo" style="margin-right:10px;">保存</el-button>
+      </div>
+    </div>
+    <el-dialog :visible.sync="loginfo.dialogVisible" class="ui_dialog_02">
+      <div class="patientInfo" v-if="loginfo.dialogVisible">
+        <el-table :data="loginfo.tableData" style="width: 100%" border>
+          <el-table-column show-overflow-tooltip prop="calculateType" label="保险公司">
+            <template slot-scope="scope">
+              <el-select
+                v-model="scope.row.orgId"
+                filterable
+                placeholder="请选择"
+                @change="(item)=>{layerchange(scope.row)}"
+              >
+                <el-option
+                  v-for="item in optionsArr.insurance"
+                  :key="item.id"
+                  :label="item.insuranceOrgCnName"
+                  :value="item.id"
+                ></el-option>
+              </el-select>
+            </template>
+          </el-table-column>
+          <el-table-column show-overflow-tooltip prop="spec" label="保险产品">
+            <template slot-scope="scope">
+              <el-select v-model="scope.row.productId" filterable placeholder="请选择">
+                <el-option
+                  v-for="item in scope.row.insureProduct"
+                  :key="item.id"
+                  :label="item.typeName"
+                  :value="item.id"
+                ></el-option>
+              </el-select>
+            </template>
+          </el-table-column>
+          <el-table-column show-overflow-tooltip prop="index" label="规则">
+            <template slot-scope="scope">
+              <el-select v-model="scope.row.value" filterable placeholder="请选择">
+                <el-option
+                  v-for="item in optionsArr.jurisdiction"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                ></el-option>
+              </el-select>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="150">
+            <template slot-scope="scope">
+              <el-button
+                size="small"
+                type="danger"
+                @click="deleterow(scope.$index)"
+                v-if="!(loginfo.tableData.length==1&&scope.row.id)"
+              >删除</el-button>
+              <el-button
+                size="small"
+                type="primary"
+                @click="addrow"
+                v-if="scope.$index==loginfo.tableData.length-1"
+              >增加</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <div style="float:right">
+        <el-button type="primary" @click="addtype" style="margin-right:10px;">保存</el-button>
+        <el-button @click="loginfo.dialogVisible=false" style="margin-right:10px;">取消</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog :visible.sync="details" class="ui_dialog_02">
+      <div class="patientInfo details-layer">
+        <div v-if="detailskey === 1">
+          <span>权益不参与计算</span>
+          <span>举例：</span>
+          <span>消费，1000，5折卡，卡里余额：100.00，剩余现金支付</span>
+          <span>100 - 1000*0.5 = - 400.00</span>
+          <span>需现金支付 = 1000.00 - 100.00 = 900.00</span>
+          <span class="mar">权益参与计算+直接使用余额</span>
+          <span>举例：</span>
+          <span>消费，1000，5折卡，卡里余额：100.00，剩余现金支付</span>
+          <span>需现金支付 = 1000.00*.5 - 100 = 400.00</span>
+          <span class="mar">权益参与计算+余额回溯计算</span>
+          <span>举例：</span>
+          <span>消费，1000，5折卡，卡里余额：100.00，剩余现金支付</span>
+          <span>需现金支付 = (1000.00*.5 - 100)/0.5 = 800.00</span>
+        </div>
+        <div v-if="detailskey === 2">
+          <span>如果“储值卡余额使用策略”为手工调整，则此选项只能是选项2.</span>
+        </div>
+      </div>
+      <div style="float:right">
+        <el-button type="primary" style="margin-right:10px;" @click="details=false">确定</el-button>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+<script>
+import api from '@/warehouse/store/discountproportionapi.js'
+export default {
+  data () {
+    return {
+      obj: {
+        med_insurance_offerrate: '',
+        com_insurance_offerrate: '',
+        third_org_offerrate: '',
+        selfpay_offerrate: '',
+        card_pay_strategy: '',
+        card_mixpay_strategy: '',
+        whether_wipe_zero: '',
+        wipe_zero_level: '',
+        wipe_zero_rounding_rule: '',
+        pay_mode: '',
+        account_merge_strategy: '',
+        reimbursement_account_validdate: '',
+        whether_allow_sign: '',
+        med_mixpay_allsuccess: '',
+        com_insurance_diffrole: '',
+        com_insurance_assignrole: ''
+      },
+      loading: false,
+      details: false,
+      disabled: false,
+      detailskey: 1,
+      api,
+      tableData: [],
+      loginfo: {
+        dialogVisible: false,
+        id: '',
+        disabled: false,
+        tableData: []
+      },
+      optionsArr: {
+        insurance: [], // 保险
+        jurisdiction: [
+          { id: '1', name: '整单互斥' },
+          { id: '2', name: '部分互斥' },
+          { id: '3', name: '不互斥' }
+        ]
+      }
+    }
+  },
+  methods: {
+    createReceivables (id) {
+      this.loginfo.id = id
+      api.selectSpecialByParamId({ paramId: id }).then(result => {
+        if (result.data.length === 0) {
+          this.loginfo.tableData = [{ value: '', orgId: '', productId: '' }]
+          this.loginfo.dialogVisible = true
+        } else {
+          let obj = []
+          result.data.forEach(item => {
+            obj.push(new Promise((resolve) => { this.layerchange(item, resolve) }))
+          })
+          Promise.all(obj).then(resolve => {
+            this.loginfo.tableData = result.data
+            this.loginfo.dialogVisible = true
+          })
+        }
+      })
+    },
+    list (key) {
+      this.loading = true
+      api.search().then(result => {
+        this.loading = false
+        if (result.data) {
+          let json = result.data
+          json.forEach(item => {
+            this.obj[item.code] = item
+          })
+        }
+      })
+    },
+    updateinfo () {
+      let params = []
+      for (let val in this.obj) {
+        params.push(this.obj[val])
+      }
+      api.update(params).then(result => {
+        this.$notify({
+          title: '',
+          message: '保存成功',
+          type: 'success'
+        })
+      })
+    },
+    addtype () {
+      let params = {
+        paramId: this.loginfo.id,
+        paramSpecialInfos: []
+      }
+      let data = this.loginfo.tableData
+      data.forEach((item, index) => {
+        if (item.orgId) {
+          params.paramSpecialInfos.push(JSON.parse(JSON.stringify(item)))
+          delete params.paramSpecialInfos[index]['insureProduct']
+        }
+      })
+      api.updateParamSpecial(params).then(result => {
+        this.$notify({
+          title: '',
+          message: '保存成功',
+          type: 'success'
+        })
+        this.loginfo.dialogVisible = false
+      })
+    },
+    getinsurance () {
+      api.getlist().then(result => {
+        this.optionsArr.insurance = result.data
+      })
+    },
+    layerchange (row, resolve) {
+      setTimeout(_ => {
+        row['insureProduct'] = [
+          { id: '111', typeName: '产品1' },
+          { id: '222', typeName: '产品2' },
+          { id: '333', typeName: '产品3' },
+          { id: '444', typeName: '产品4' },
+          { id: '555', typeName: '产品5' }
+        ]
+        if (resolve) {
+          resolve('1')
+        }
+      }, 500)
+      //   api.getListByOrgId({id: row.orgId}).then(result => {
+      //     if (result.data) {
+      //       row.insureProduct = result.data
+      //     }
+      //   })
+    },
+    addrow () {
+      this.loginfo.tableData.push({ value: '', orgId: '', productId: '' })
+    },
+    deleterow (index) {
+      let id = this.loginfo.tableData[index]['id'] || ''
+      if (id) {
+        this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          api.del({ paramSpecialId: this.loginfo.tableData[index]['id'] }).then(result => {
+            this.$notify({
+              title: '',
+              message: '删除成功',
+              type: 'success'
+            })
+            this.createReceivables(this.loginfo.id)
+          })
+        })
+      } else {
+        alert(1)
+        this.loginfo.tableData.splice(index, 1)
+      }
+    },
+    detailsbtn (val) {
+      this.details = true
+      this.detailskey = val
+    },
+    cardpaychange (val) {
+      if (val === '1') {
+        this.disabled = true
+        this.obj.card_mixpay_strategy.value = '2'
+      } else {
+        this.disabled = false
+        this.obj.card_mixpay_strategy.value = '2'
+      }
+    }
+  },
+  //   watch: {
+  //     'loginfo.dialogVisible': {
+  //       handler (newValue) {
+  //         if (!newValue) {
+  //           this.addqueryObj.code = ''
+  //           this.addqueryObj.name = ''
+  //           this.loginfo.disabled = false
+  //           this.loginfo.title = '新建支付方式'
+  //           this.loginfo.id = ''
+  //         }
+  //       },
+  //       immediate: true
+  //     }
+  //   },
+  created () {
+    this.list()
+    this.getinsurance()
+  }
+}
+</script>
+<style lang="less" scoped>
+.el-row {
+  margin-bottom: 15px;
+}
+.payment-module {
+  padding: 20px 20px 5px 20px;
+  border: 1px solid rgb(235, 237, 239);
+  margin-bottom: 20px;
+  label {
+    margin: 0 20px;
+  }
+  .el-select {
+    width: 250px;
+  }
+  .el-col-8 {
+    max-width: 200px;
+    height: 36px;
+    line-height: 36px;
+    &.max {
+      max-width: 280px;
+    }
+  }
+  .el-col-16 {
+    height: 36px;
+    line-height: 36px;
+  }
+}
+.details-layer {
+  span {
+    display: block;
+  }
+  .mar {
+    margin-top: 20px;
+  }
+}
+</style>
+

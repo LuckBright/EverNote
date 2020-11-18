@@ -1,0 +1,23 @@
+#messagebox .layout_main{margin: 0 105px;}
+#messagelist .layout_inner{margin: 0;padding: 20px 0 40px;}
+#messagelist .el-form,
+#messagelist .el-pagination{padding: 0 40px;}
+#messagelist .itemrow{padding: 15px 40px;}
+#messagelist .itemrow:hover{background: #F3F8FE;}
+#messagelist .itemrow .title,
+#messagelist .itemrow .time{padding: 5px 0;}
+#messagelist .itemrow .title a{color: #000;text-decoration: none;font-size: 14px;}
+#messagelist .itemrow .time a{color: #999999;text-decoration: none;font-size: 14px;}
+#messagelist .itemrow .title i{display: inline-block;width: 8px;height: 8px;background: #ee4433;border-radius: 50%;vertical-align: middle;margin-right: 4px;font-style: normal;}
+#messagelist .itemrow .time .iconfont{font-size: 12px;margin-left: 20px;}
+#messagelist .itemrow .tags label{display: inline-block;line-height: 22px;padding: 0 10px;background: rgba(28,123,239,.1);color: #1c7bef;border-radius: 3px;font-size: 12px;margin-top: 5px;}
+
+#messagecontent .layout_inner{padding: 0;margin: 0;}
+#messagecontent .layout_art{padding: 60px 95px;}
+#messagecontent .layout_art h2{font-size: 24px; color: #000; margin-bottom: 10px;}
+#messagecontent .layout_art h4{color: #999;margin-bottom: 10px;font-weight: normal;vertical-align: bottom;font-size: 14px;}
+#messagecontent .layout_art h4 span{display: inline-block;margin-right: 20px;}
+#messagecontent .layout_art p{margin: 0; padding: 15px 0;}
+#messagecontent .layout_art article{line-height: 30px;font-size: 16px;color: #000;}
+#messagecontent .layout_footer{padding: 20px 95px;border-top: 1px solid #ddd;}
+#messagecontent .layout_footer .el-button{padding: 12px 20px;}

@@ -1,0 +1,406 @@
+<template>
+  <div class="vouch">
+    <ever-bread-crumb name="会计科目定义" path="/financeistall/coaaccounts"></ever-bread-crumb>
+    <div class="layout_inner">
+      <div class="panel-body">
+        <h4>基本信息</h4>
+        <ever-form-model
+          :schema="schema"
+          v-model="obj"
+          :api="api"
+          ref="form"
+          :rules="rules"
+          labelWidth="140px"
+          label-position="right"
+        ></ever-form-model>
+        <h4 class="panel-hr">
+          <el-button
+            style="float:right;"
+            size="small"
+            type="primary"
+            @click.native.prevent="addRow"
+          >新增</el-button>
+          <el-button
+            style="float:right;"
+            size="small"
+            type="primary"
+            @click.native.prevent="importBtn"
+          >导入总账科目</el-button>
+          <upload-file2
+            btnTxt="导入"
+            v-if="objId"
+            @success="uploadSuccess"
+            btnSize="small"
+            previewInline="true"
+            uploadApiType="ucloud"
+            :maxNum="1"
+            :showFileList="false"
+            style="float:right;"
+          ></upload-file2>
+          <doc-download
+            @downFile="downFile"
+            class="docdownload"
+            ref="childMethods"
+            btnTxt="导出"
+            style="float:right;"
+          ></doc-download>
+          <!-- <el-button style="float:right;margin-right:20px" size="small" type="primary" @click.native.prevent="addRow()">导入总账科目</el-button> -->
+          详细信息
+        </h4>
+        <el-table :data="obj.details&&obj.details.fiPubAccountSheetDetail" style="width: 100%">
+          <el-table-column type="index" label="序号" width="80" align="center"></el-table-column>
+          <el-table-column prop="accountCode" label="科目代码" align="left">
+            <template slot-scope="scope">
+              <el-input
+                size="small"
+                v-model="scope.row.accountCode"
+                :disabled="scope.row.id>0"
+                placeholder="请填写科目代码"
+              ></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column prop="accountName" label="科目名称" align="left">
+            <template slot-scope="scope">
+              <el-input size="small" v-model="scope.row.accountName" placeholder="请填写科目名称"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column prop="bend" label="是否父级" align="left">
+            <template slot-scope="scope">
+              <el-radio-group v-model="scope.row.bend">
+                <el-radio class="radio" :label="false" disabled>是</el-radio>
+              </el-radio-group>
+            </template>
+          </el-table-column>
+          <el-table-column prop="fatherId" label="父级科目" align="left">
+            <template slot-scope="scope">
+              <el-select
+                size="small"
+                v-model="scope.row.fatherId"
+                placeholder="请选择科目"
+                :disabled="scope.$index<1"
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="visit in idOptions"
+                  :key="visit.id"
+                  :label="visit.accountCode"
+                  :value="visit.id"
+                ></el-option>
+              </el-select>
+            </template>
+          </el-table-column>
+          <el-table-column prop="type" label="科目属性" align="left">
+            <template slot-scope="scope">
+              <el-select
+                size="small"
+                v-model="scope.row.type"
+                placeholder="请选择科目"
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="visit in typeOptions"
+                  :key="visit.value"
+                  :label="visit.label"
+                  :value="Number(visit.value)"
+                ></el-option>
+              </el-select>
+            </template>
+          </el-table-column>
+          <el-table-column prop="bePost" label="是否过账" align="left">
+            <template slot-scope="scope">
+              <el-radio-group v-model="scope.row.bePost">
+                <el-radio class="radio" :label="true">是</el-radio>
+              </el-radio-group>
+            </template>
+          </el-table-column>
+          <el-table-column prop label="操作" width="200" align="left">
+            <template slot-scope="scope">
+              <el-button
+                size="small"
+                type="primary"
+                @click.native.prevent="createOrUpdate()"
+                v-if="!scope.row.id"
+              >保存</el-button>
+              <el-button
+                size="small"
+                type="primary"
+                @click.native.prevent="createOrUpdate()"
+                v-if="scope.row.id"
+              >修改</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <ever-pagination
+          :page-sizes="pageSizes"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :totalCount="totalCount"
+        ></ever-pagination>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+import api from '../store/coaaccountapi'
+// import form from '../../util/form'
+import sysvalue from '@/warehouse/store/sysvalueapi'
+import list from '../../util/list'
+
+var schema = [
+  {
+    name: 'code',
+    label: '会计科目代码',
+    type: 'text',
+    min: 1,
+    max: 40
+  },
+  {
+    name: 'name',
+    label: '映射名称',
+    type: 'text',
+    min: 1,
+    max: 40
+  }
+]
+// var fiPubAccountSheetDetail = {
+//   bend: true,
+//   type: '',
+//   accountCode: '',
+//   accountName: '',
+//   bePost: false,
+//   fatherId: ''
+// }
+export default {
+  mixins: [list],
+  data () {
+    var obj = this.$ever.createObjFromSchema(schema)
+    obj.id = this.$route.params.id
+    obj.details = {
+      fiPubAccountSheetDetail: []
+    }
+    var queryObj = {
+      requestSwitch: true
+    }
+    let arr = ['code', 'name']
+    if (this.$route.params.id) {
+      arr.forEach(function (item) {
+        schema.filter(function (v, i) {
+          return v.name === item
+        })[0].disabled = true
+      })
+    } else {
+      arr.forEach(function (item) {
+        schema.filter(function (v, i) {
+          return v.name === item
+        })[0].disabled = false
+      })
+    }
+    return {
+      schema,
+      obj: obj,
+      api: api,
+      queryObj: queryObj,
+      objId: this.$route.params.id,
+      idOptions: [],
+      typeOptions: [],
+      rules: {
+        code: [
+          { required: true, message: '必填项', trigger: 'blur' },
+          { min: 1, max: 40, message: '长度在 1 到 40 个字符', trigger: 'blur' }
+        ],
+        name: [
+          { required: true, message: '必填项', trigger: 'blur' },
+          { min: 1, max: 40, message: '长度在 1 到 40 个字符', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  created () {
+    sysvalue.cascade('THC_RCM_ACCOUNT_TYPE').then(options => {
+      this.typeOptions = options
+    })
+  },
+  methods: {
+    list () {
+      let params = {
+        offset: this.offset,
+        pagesize: this.pagesize,
+        id: this.obj.id
+      }
+      api.getById(params).then(response => {
+        Object.assign(this.obj, this.$route.query)
+        response.data.map(item => {
+          if (item.fatherId === '0') {
+            item.fatherId = '无'
+          }
+        })
+        this.obj.details.fiPubAccountSheetDetail = response.data
+        this.totalCount = response.totalCount
+      })
+    },
+    downFile () {
+      api.exportAccountSheet({
+        accountSheetId: this.objId
+      }).then(rs => {
+        let filename = this.$ever.fileUrl2 + rs.fileId
+        this.$refs.childMethods.downfile(filename)
+      })
+    },
+    uploadSuccess (result) {
+      api.importAccountSheet({
+        fileId: result.name.replace('/file/', '')
+      }).then(response => {
+        // console.log(response, 9999999999)
+      })
+    },
+    uplod () {
+      let params = {
+        name: this.obj.name,
+        code: this.obj.code
+      }
+      api
+        .importPart(params)
+        .then(result => {
+          if (result && result.head && result.head.errCode === 0) {
+            this.$notify({
+              message: result.head.errMsg || '导入成功',
+              type: 'success'
+            })
+            this.obj.id = result.data.id
+            this.$router.replace({
+              path: '/financeistall/coaaccount/' + this.obj.id
+            })
+            this.list()
+            // this.$router.push('/warehouse/coaaccount/' + this.obj.id)
+            // api.getById(this.obj.id).then(response => {
+            //   Object.assign(this.obj, response)
+            // })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    uplodEdit () {
+      let params = {
+        id: this.obj.id
+      }
+      api
+        .importEditPart(params)
+        .then(result => {
+          if (result && result.head && result.head.errCode === 0) {
+            this.$notify({
+              message: result.head.errMsg || '导入成功',
+              type: 'success'
+            })
+            this.list()
+            // this.obj.id = result.data.id
+            // this.$router.replace({
+            //   path: '/warehouse/coaaccount/' + this.obj.id
+            // })
+            // this.$router.push('/warehouse/coaaccount/' + this.obj.id)
+            // api.getById(this.obj.id).then(response => {
+            //   Object.assign(this.obj, response)
+            // })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    importBtn () {
+      if (this.obj.id) {
+        this.uplodEdit()
+      } else {
+        this.$refs.form.$refs.form.validate(valid => {
+          if (valid) {
+            this.uplod()
+          }
+        })
+      }
+    },
+    addRow () {
+      this.obj.details && this.obj.details.fiPubAccountSheetDetail && this.obj.details.fiPubAccountSheetDetail.push(
+        {
+          bend: true,
+          type: '',
+          accountCode: '',
+          accountName: '',
+          bePost: false,
+          fatherId: ''
+        }
+      )
+    },
+    createOrUpdate () {
+      if (this.obj.id) {
+        api.update(this.obj).then(result => {
+          let params = {
+            offset: this.offset,
+            pagesize: this.pagesize,
+            id: this.obj.id
+          }
+          api.getById(params).then(response => {
+            Object.assign(this.obj, response)
+            this.totalCount = response.totalCount
+          })
+        })
+      } else {
+        this.$refs.form.$refs.form.validate(valid => {
+          if (valid) {
+            api.create(this.obj).then(result => {
+              this.obj.id = result.data.split(',')[1]
+              this.$router.push('/financeistall/coaaccount/' + this.obj.id)
+              // api.getById(this.obj.id).then(response => {
+              //   Object.assign(this.obj, response)
+              // })
+            })
+          }
+        })
+      }
+    }
+  },
+  watch: {
+    'obj.id': {
+      handler (newValue) {
+        if (newValue) {
+          this.queryObj.requestSwitch = false
+          api.getAccountList(this.obj.id).then(result => {
+            this.idOptions = result.data
+          })
+        } else {
+          this.queryObj.requestSwitch = true
+        }
+      },
+      immediate: true
+    }
+  }
+}
+</script>
+<style scoped>
+.vouch /deep/ .el-upload-list__item:first-child {
+  margin-top: 0;
+}
+.docdownload /deep/ button {
+  padding: 9px 12px;
+  font-size: 12px;
+  margin-right: 10px;
+}
+.ever-upload-box /deep/ button {
+  margin-right: 10px;
+}
+.panel-hr /deep/ .el-button + .el-button {
+  margin-right: 10px;
+  margin-left: 0;
+}
+.panel-body {
+  padding-top: 5px;
+}
+.panel-body h4 {
+  margin-block-start: 0;
+}
+.panel-body /deep/ .el-button + .el-button {
+  margin-right: 10px;
+  margin-left: 0;
+}
+</style>
+

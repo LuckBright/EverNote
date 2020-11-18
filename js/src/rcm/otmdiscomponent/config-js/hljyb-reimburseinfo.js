@@ -1,0 +1,21 @@
+export const tableconfig = {
+  totalFee: '医疗费用总额',
+  personalCashPayedFee: '个人现金支付金额',
+  personalAccountPayedFee: '账户支付',
+  fundPayedFee: '统筹支付',
+  publicFunctionaryAllowancePayedFee: '公补支付',
+  largeAllowancePayedFee: '大额支付',
+  settlementBeforeAccountBalance: '结算前个人帐户余额',
+  settlementAfterAccountBalance: '结算后个人帐户余额',
+  thisYearSpecialDiseaseAccountPay: '本年特病账户支付',
+  carryOverSpecialDiseaseAccountPay: '结转特病账户支付',
+  thisYearSettlementSpecialDiseaseAccountBalance: '本年结算后特病账户余额',
+  carryOverSettlementSpecialDiseaseAccountBalance: '结转结算后特病账户余额',
+  lastFundTotalFee: '上次统筹支付累计',
+  passTopLinePersonalPay: '超封顶线个人自付',
+  residentIllnessInsurePayedFee: '居民大病保险支付',
+  lastIllnessInsurePayedFeeTotal: '上次居民大病保险支付累计',
+  residentOutpatientAllowancePayedFee: '居民门诊补贴支付',
+  outpatientAllowanceBalance: '门诊补贴余额',
+  recordReplenishInsurePay: '建档立卡补充保险支付'
+}

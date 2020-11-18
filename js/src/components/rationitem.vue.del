@@ -1,0 +1,81 @@
+<template>
+  <div class="rationWar">
+      <ever-form-model
+        :schema="schema"
+        v-model="value"
+        :rules="rules"
+        label-position="right"
+        labelWidth="50px">
+        <template slot="refValue">
+          <el-input placeholder="请输入数值" v-model="min" style="width: 90px;display:inline-block" size="small"></el-input> —
+          <el-input placeholder="请输入数值" v-model="max" style="width: 90px;display:inline-block" size="small"></el-input>
+        </template>
+      </ever-form-model>
+  </div>
+</template>
+
+<script>
+  var schema = [
+    {
+      name: 'unit',
+      span: 24,
+      label: '单位',
+      size: 'small'
+    },
+    {
+      name: 'refValue',
+      span: 24,
+      type: 'custom',
+      label: '参考值'
+    }
+  ]
+  export default {
+    props: ['value'],
+    data () {
+      return {
+        schema,
+        rules: {
+          unit: [
+            { required: true, message: '必填项', trigger: 'blur' }
+          ]
+        },
+        ref: {}
+      }
+    },
+    computed: {
+      min: {
+        set (val) {
+          this.ref = {min: val, max: this.max}
+          this.value.refValue = JSON.stringify(this.ref)
+        },
+        get () {
+          if (this.value.refValue) {
+            return JSON.parse(this.value.refValue).min
+          } else {
+            return ''
+          }
+        }
+      },
+      max: {
+        set (val) {
+          this.ref = {min: this.min, max: val}
+          this.value.refValue = JSON.stringify(this.ref)
+        },
+        get () {
+          if (this.value.refValue) {
+            return JSON.parse(this.value.refValue).max
+          } else {
+            return ''
+          }
+        }
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  .rationWar{width: 253px;padding: 0 15px;background: rgb(248,248,248);border: 1px solid #DDDDDD;border-radius: 4px;color: #666;position: relative; padding-top: 15px}
+  .rationWar:before{content: "";position: absolute;top:-5px;left: 7%;width: 8px;height: 8px;background: rgb(248,248,248);border: 1px solid #ddd;border-bottom:none;border-right: none;transform:rotate(45deg); }
+  .rationWar .el-form-item{margin: 0 0 15px; }
+  .rationWar .el-form-item__label{padding-right:8px }
+</style>

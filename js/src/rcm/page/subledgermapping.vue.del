@@ -1,0 +1,103 @@
+
+<template>
+  <div>
+    <ever-bread-crumb name="账套定义" path="/warehouse/subledgers"></ever-bread-crumb>
+    <div class="layout_inner">
+      <div class="panel-body">
+        <h4>
+          <el-button style="float:right" type="primary" @click.native.prevent="createMapping()">保存</el-button>
+          辅助纬度定义
+        </h4>
+        <el-table
+          :data="tableData"
+          style="width: 100%"
+          >
+          <el-table-column
+            type="index"
+            label="序号"
+            width="80"
+            align="center">
+          </el-table-column>
+          <el-table-column
+            prop="accountCode"
+            label="科目代码"
+            align="center">
+          </el-table-column>
+          <el-table-column
+            prop="accountName"
+            label="科目名称"
+            align="center">
+          </el-table-column>
+          <el-table-column
+            prop="bend"
+            label="是否父级"
+            align="center">
+            <template slot-scope="scope">
+              <el-radio-group v-model="scope.row.bend">
+                <el-radio class="radio" :label="false" disabled>是</el-radio>
+              </el-radio-group>
+            </template>
+          </el-table-column>
+          <template v-for="(item, index) in columnArr">
+            <el-table-column
+              prop=""
+              :label="item.value"
+              align="center">
+              <template slot-scope="scope">
+                <el-checkbox v-model="scope.row[item.key]"></el-checkbox>
+              </template>
+            </el-table-column>
+          </template>
+        </el-table>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  import api from '../store/subledgerapi'
+
+  export default {
+    data () {
+      return {
+        api,
+        tableData: [],
+        columnArr: []
+      }
+    },
+    created () {
+      api.getSobASListBySetId({
+        setId: this.$route.params.setid,
+        accId: this.$route.params.accid
+      }).then(result => {
+        this.columnArr = result.title
+        this.tableData = result.data
+      })
+    },
+    methods: {
+      createMapping () {
+        let common = 'calcu'
+        this.tableData.forEach((item, index) => {
+          item.statisticsDimension = {}
+          Object.keys(item).map((key) => {
+            if (key.includes(common) && item[key] && typeof item[key] === 'boolean') {
+              this.columnArr.forEach(ctem => {
+                if (ctem.key === key) {
+                  item.statisticsDimension[key] = ctem.value
+                  item[key + 'Name'] = ctem.value
+                }
+              })
+            }
+          })
+        })
+        api.updateSob({details: this.tableData}).then(result => {
+          if (result.head.errCode === 0) {
+            history.go(-1)
+          }
+        })
+      },
+      deleteRow (index, rows) {
+        rows.splice(index, 1)
+      }
+    }
+  }
+</script>

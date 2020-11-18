@@ -1,0 +1,59 @@
+<template>
+  <div>
+    <ever-bread-crumb name="检验项目详情" path="/warehouse/inspects" showTitle="true" ></ever-bread-crumb>
+    <div class="layout_inner">
+      <div class="panel-body">
+       <el-row class="linerow">
+        <el-col :span="2" class="textright" align="right"><i>*</i>检验项目名称</el-col>
+        <el-col :span="19">{{dataObj.name}}</el-col>
+      </el-row>
+      <el-row class="linerow">
+        <el-col :span="2" class="textright" align="right">英文缩写</el-col>
+        <el-col :span="19">{{dataObj.shortName}}</el-col>
+      </el-row>
+      <el-row class="linerow">
+        <el-col :span="2" class="textright" align="right">数据类型</el-col>
+        <el-col :span="19">{{dataObj.type === '1' ? '定量' : '定性'}}</el-col>
+        <el-col v-if="dataObj.type === '1'">
+          <div class="typeinfo">
+            <p>
+              <span>单位</span>{{dataObj.unit}}
+            </p>
+            <p>
+              <span>参考值</span>{{dataObj.refValue ? JSON.parse(dataObj.refValue).min + '~' + JSON.parse(dataObj.refValue).max  : ''}}
+            </p>
+          </div>
+        </el-col>
+      </el-row>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  import api from '../store/inspect'
+  import form from '@/util/form'
+
+  export default {
+    mixins: [form],
+    data () {
+      return {
+        id: this.$route.params.id,
+        dataObj: {}
+      }
+    },
+    created () {
+      api.getById(this.id).then(rs => {
+        this.dataObj = rs
+      })
+    }
+  }
+</script>
+<style scoped>
+  .linerow{font-size: 14px;line-height: 40px;color: #151515;}
+  .linerow .textright{font-weight: bold;margin-right: 20px}
+  .linerow .textright i{color: red;padding-right: 3px;}
+  .linerow .typeinfo{width: 264px;height: 60px;padding: 15px; background: #F8F8F8;border: 1px solid #DDDDDD;border-radius: 4px;margin-left: 105px;position: relative;margin-top: 2px;}
+  .linerow .typeinfo:before{content: "";position: absolute;top: -5px;left: 20px;width: 8px;height: 8px;border: 1px solid #ddd;border-right: none;border-bottom: none;transform: rotate(45deg);background: #F8F8F8;}
+  .typeinfo p{margin: 0;font-size: 14px;line-height: 28px;color: #000;}
+  .typeinfo span{margin-right: 20px;color: #666;display: inline-block;width: 45px;text-align: right;}
+</style>

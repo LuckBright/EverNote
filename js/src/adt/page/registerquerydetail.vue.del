@@ -1,0 +1,582 @@
+<template>
+  <div class="registerDetail">
+    <ever-form2
+      :schema="hosSchema"
+      v-model="hosModel"
+      :rules="rules"
+      ref="hosform"
+    >
+      <template slot="hospitalizedAreaName">
+        <el-select
+          v-model="hosModel.hospitalizedAreaName"
+          :disabled="flagdisabled"
+          value-key="name"
+          style="width:100%"
+        >
+          <el-option
+            v-for="item in admitWardSelect"
+            :key="item.id"
+            :label="item.name"
+            :value="item"
+          ></el-option>
+        </el-select>
+      </template>
+      <template slot="admitBed">
+        <el-select
+          v-model="hosModel.admitBed"
+          style="width:100%"
+          placeholder="请选择住院床位"
+          :disabled="flagdisabled"
+        >
+          <el-option
+            v-for="item in admitBedSelect"
+            :key="item.bedNum"
+            :label="`${item.roomName} | ${item.bedNum}`"
+            :value="item.bedNum"
+          ></el-option>
+        </el-select>
+      </template>
+      <template slot="admitDiagnosis">
+        <el-input
+          :disabled="true"
+          type="textarea"
+          :rows="1"
+          v-model="hosModel.admitDiagnosis"
+        ></el-input>
+      </template>
+      <template slot="insuranceCompany">
+        <insuranceSelect v-model="hosModel.insuranceCompany"></insuranceSelect>
+      </template>
+      <el-col
+        :span="24"
+        class="buttons"
+      >
+        <el-button
+          @click="submitandpay()"
+          type="primary"
+          style="margin-left: 120px !important;"
+        >保存</el-button>
+        <el-button
+          v-if="((hosModel.insuranceAuditStatus=='3f6bc746-7425-4480-b7d4-2f3304ba88bb') && (hosModel.inHour>23) && (['12','13','14'].indexOf(hosModel.hosStatus)>-1))"
+          @click="handlePrintNotice"
+        >通知单打印</el-button>
+      </el-col>
+    </ever-form2>
+    <div v-show="false">
+      <printmedicalnotice
+        id="page1"
+        :printobj="obj"
+        ref="printnotice"
+      ></printmedicalnotice>
+    </div>
+  </div>
+</template>
+<script>
+import api from '@/adt/store/register'
+import printmedicalnotice from '@/adt/page/printmedicalnotice'
+import insuranceSelect from '@/components/insuranceorgselect'
+import jcpjs from 'jcpjs'
+let hosschema = [
+  {
+    label: '入院科室',
+    name: 'admitDepartment',
+    comp: 'provider-select',
+    props: {
+      disabled: true,
+      filterable: true,
+      clearable: true,
+      placeholder: '请选择入院科室'
+    },
+    span: 6
+  },
+  {
+    label: '入院病区',
+    name: 'hospitalizedAreaName',
+    comp: 'custom',
+    props: {
+      placeholder: '请选择入院病区',
+      disabled: true
+    },
+    style: 'width: 100%',
+    span: 6
+  },
+  {
+    label: '入院床位',
+    name: 'admitBed',
+    comp: 'custom',
+    props: {
+      placeholder: '请选择住院床位',
+      disabled: true
+    },
+    style: 'width: 100%',
+    span: 6
+  },
+  {
+    label: '床型名称',
+    name: 'admitBedType',
+    comp: 'ever-select',
+    props: {
+      options: [],
+      filterable: true,
+      clearable: true,
+      disabled: true
+    },
+    span: 6
+  },
+  {
+    label: '住院医生',
+    name: 'residentDoctor',
+    comp: 'ever-select',
+    props: {
+      disabled: true,
+      clearable: true,
+      filterable: true,
+      options: []
+    },
+    style: 'width: 100%',
+    span: 6
+  },
+  {
+    label: '入院途径',
+    name: 'admitRoute',
+    comp: 'sys-type',
+    props: {
+      code: 'CV09.00.403',
+      useValue: true,
+      filterable: true,
+      clearable: true,
+      disabled: true
+    },
+    span: 6
+  },
+  {
+    label: '入院体重',
+    name: 'admitWeight',
+    comp: 'sys-text',
+    props: {
+      placeholder: '请输入住院体重',
+      append: 'KG',
+      type: 'number',
+      disabled: true
+    },
+    span: 6
+  },
+  {
+    label: '住院次数',
+    name: 'admitNumber',
+    comp: 'ever-price',
+    props: {
+      placeholder: '请输入住院次数',
+      append: '次',
+      type: 'number',
+      disabled: true
+    },
+    span: 6
+  },
+  {
+    label: '入院诊断',
+    name: 'admitDiagnosis',
+    comp: 'custom',
+    props: {
+      disabled: true
+    },
+    span: 24
+  },
+  {
+    label: '预入院时间',
+    name: 'preadmissionDatetime',
+    comp: 'datePicker',
+    props: {
+      placeholder: '请选择预入院时间',
+      type: 'datetime',
+      disabled: true
+    },
+    span: 6
+  },
+  {
+    label: '预入院天数',
+    name: 'preadmissionDays',
+    comp: 'ever-price',
+    props: {
+      placeholder: '请输入预计入院天数',
+      append: '天',
+      type: 'number',
+      disabled: true
+    },
+    span: 6
+  },
+  {
+    name: 'admitMethod',
+    label: '入院方式',
+    comp: 'sys-type',
+    props: {
+      code: 'CV09.00.403',
+      placeholder: '请选择入院方式',
+      filterable: true,
+      clearable: true,
+      disabled: true
+    },
+    span: 6
+  },
+  {
+    label: '入院情况',
+    name: 'admitSituation',
+    comp: 'sys-type',
+    props: {
+      code: 'CV09.00.403',
+      filterable: true,
+      clearable: true,
+      disabled: true
+    },
+    span: 6
+  },
+  {
+    label: '门诊科室',
+    name: 'outpatientDepartment',
+    comp: 'provider-select',
+    props: {
+      filterable: true,
+      clearable: true,
+      disabled: true,
+      placeholder: '请选择门诊科室'
+    },
+    span: 6
+  },
+  {
+    label: '门诊医生',
+    name: 'outpatientDoctor',
+    comp: 'ever-select',
+    props: {
+      filterable: true,
+      clearable: true,
+      disabled: true,
+      options: [],
+      placeholder: '请选择门诊医生'
+    },
+    span: 6
+  },
+  {
+    label: '介绍科室',
+    name: 'introductionDepartment',
+    comp: 'providerSelect',
+    props: {
+      placeholder: '请选择介绍科室',
+      disabled: true,
+      clearable: true,
+      filterable: true
+    },
+    span: 6
+  },
+  {
+    label: '介绍人',
+    name: 'introducer',
+    props: {
+      disabled: true
+    },
+    span: 6
+  },
+  {
+    label: '保险审核状态',
+    name: 'insuranceAuditStatus',
+    comp: 'sys-type',
+    props: {
+      code: 'THC_RCM_SI_CHECK_STATUS',
+      filterable: true,
+      clearable: true,
+      disabled: false
+    },
+    span: 6
+  },
+  {
+    label: '保险产品',
+    name: 'insuranceProductId',
+    comp: 'ever-select',
+    props: {
+      placeholder: '请选择保险产品',
+      options: [],
+      needObjFlag: true,
+      disabled: false,
+      customValue: 'productName'
+    },
+    span: 6
+  },
+  {
+    label: '商业保险公司',
+    name: 'insuranceCompany',
+    props: {
+      disabled: true
+    },
+    comp: 'custom',
+    span: 6
+  },
+  {
+    label: '入院押金',
+    name: 'admitDeposit',
+    comp: 'ever-price',
+    props: {
+      append: '￥',
+      type: 'number',
+      disabled: true
+    },
+    span: 6
+  }
+]
+export default {
+  props: ['obj'],
+  data () {
+    let validateHosAreaName = (rule, value, callback) => {
+      if (value === '' || value.id === '' || value.name === '') {
+        callback(new Error('住院病区不能为空'))
+      } else {
+        callback()
+      }
+    }
+    let hosrules = {
+      admitDepartment: [
+        {
+          required: true,
+          message: '请填入入院科室',
+          trigger: 'change'
+        }
+      ],
+      admitRoute: [
+        {
+          required: true,
+          message: '请选择入院途径',
+          trigger: 'change'
+        }
+      ],
+      preadmissionDatetime: [
+        {
+          required: true,
+          message: '请选择预入院时间',
+          trigger: 'change'
+        }
+      ],
+      hospitalizedAreaName: [
+        {
+          required: true,
+          validator: validateHosAreaName,
+          trigger: 'change'
+        }
+      ],
+      outpatientDoctor: [
+        {
+          required: true,
+          message: '请填入门诊医生',
+          trigger: 'change'
+        }
+      ]
+    }
+    let hosmodel = this.$ever.createObjFromSchema(hosschema)
+    return {
+      hosSchema: hosschema,
+      hosModel: hosmodel,
+      isPreRegister: false,
+      patientId: '',
+      // 根据科室查询住院医生下拉列表
+      residentDoctorSelect: [],
+      // 根据科室查询入院病区下拉列表
+      admitWardSelect: [],
+      // 根据科室查询床位列表
+      admitBedSelect: [],
+      basicinfoValidFlag: false,
+      hosValidFlag: false,
+      modalshow: false,
+      PayMethodTwoDialogVisible: false,
+      flagdisabled: false,
+      rules: hosrules,
+      oldAdmitWard: null
+    }
+  },
+  components: {
+    printmedicalnotice,
+    insuranceSelect
+  },
+  async created () {
+  },
+  watch: {
+    // 根据obj的变化更新表中数据
+    'obj': {
+      handler: function () {
+        this.updateData()
+      },
+      deep: true,
+      immediate: true
+    },
+    'obj.flag': {
+      handler: function (val) {
+        if (val === 'normal') {
+          this.disableOrUndisable(false)
+          this.flagdisabled = false
+          // 状态是待入科且有入院申请的，跟入院登记一样，四个disable
+          let disabledArr = ['admitDepartment', 'admitDiagnosis', 'outpatientDepartment', 'outpatientDoctor', 'insuranceCompany', 'admitDeposit']
+          disabledArr.map((item) => {
+            this.$ever.getFieldFromSchema(this.hosSchema, item).props.disabled = true
+          })
+        } else if (val === 'emergency') {
+          // 状态是待入科且无入院申请的，全部打开
+          this.disableOrUndisable(false)
+          this.flagdisabled = false
+        } else if (val === 'others') {
+          // 其他,只允许修改医保审核状态
+          this.disableOrUndisable(true)
+          this.flagdisabled = true
+          this.$ever.getFieldFromSchema(this.hosSchema, 'insuranceAuditStatus').props.disabled = false
+          this.$ever.getFieldFromSchema(this.hosSchema, 'insuranceProductId').props.disabled = false
+        }
+      },
+      immediate: true
+    },
+    // 根据病区获取床位列表
+    'hosModel.hospitalizedAreaName': {
+      handler: function (newValue) {
+        let admitBedSelectParams = {
+          relationId: newValue.id,
+          relationType: '201'
+        }
+        api.getAdmitBedSelect(admitBedSelectParams).then(result => {
+          this.admitBedSelect = result.data && result.data.resultList
+        })
+      },
+      immediate: true
+    },
+    // 根据入院科室查询住院医生列表和病区
+    'hosModel.admitDepartment': {
+      handler: function (providerId) {
+        // 根据科室获取医生，病区，床位的列表
+        this.getDoctorListByDep(providerId, 'residentDoctor')
+        // 获取科室病区
+        let admitWardSelectParams = {
+          relationType: 300, // 300代表科室
+          relationId: providerId
+        }
+        api.getAdmitWardSelect(admitWardSelectParams).then(
+          result => {
+            this.admitWardSelect = result.data
+          })
+      },
+      immediate: true
+    },
+    'hosModel.outpatientDepartment': {
+      handler: function (providerId) {
+        this.getDoctorListByDep(providerId, 'outpatientDoctor')
+      },
+      immediate: true
+    },
+    // 根据住院床位的值填充床类型的值
+    'hosModel.admitBed': function (val) {
+      if (val) {
+        let params = {
+          bedNum: val
+        }
+        api.getAdmitBedTypeByBedNum(params).then(result => {
+          this.hosModel.admitBedType = result.data.hospitalBedId
+        })
+      }
+    },
+    'hosModel.insuranceProductId': function (val) {
+      this.hosModel.insuranceCompany = val && val.insuranceOrgID
+    }
+  },
+  methods: {
+    submitandpay () {
+      this.$refs.hosform.$refs.form.validate((valid) => {
+        if (valid) {
+          let params = Object.assign({}, this.hosModel)
+          // 拆分住院病区的id跟病区名
+          params.admitWard = this.hosModel.hospitalizedAreaName.id
+          params.hospitalizedAreaName = this.hosModel.hospitalizedAreaName.name
+          // 拆分保险产品字段
+          params.insuranceProductId = this.hosModel.insuranceProductId.id || ''
+          // 如果病区有变化，则updateToSob为真，否则为假
+          params.updateToSob = this.oldAdmitWard !== this.hosModel.hospitalizedAreaName.id
+          api.updateAdmitInfo(params).then(result => {
+            this.$messageTips(this, 'success', '信息更新成功')
+            this.oldAdmitWard = null
+          })
+        } else {
+          return false
+        }
+      })
+    },
+    updateData () {
+      for (let key in this.hosModel) {
+        this.hosModel[key] = ''
+      }
+      this.hosModel = Object.assign(this.hosModel, this.obj)
+      // 记录刚传过来的病区id
+      this.oldAdmitWard = this.hosModel.hospitalizedAreaName.id
+    },
+    handlePrintNotice () {
+      this.hosModel.title = '海南现代医院'
+      // this.$refs.printnotice.print()
+      var mydoc = {
+        documents: document,
+        settingsId: '医保审核通知单',
+        copyrights: '杰创软件拥有版权 www.jatools.com'
+      }
+      if (window.navigator.userAgent.indexOf('Mac OS') === -1) {
+        jcpjs.getJCP().printPreview(mydoc)
+      } else {
+        console.log('jcp打印不支持Mac系统，请换windows系统')
+      }
+    },
+    getDoctorListByDep (providerId, doctorlist) {
+      let residentDoctorParams = {
+        relationType: 401, // 401代表根据科室查询
+        relationId: providerId,
+        staffType: '39' // 39代表医生
+      }
+      // 获取科室医生
+      api.getResidentDoctorSelect(
+        residentDoctorParams
+      ).then(result => {
+        this.$ever.getFieldFromSchema(this.hosSchema, doctorlist).props.options = result.data
+        if (doctorlist === 'residentDoctor') {
+          let resultArr = []
+          result.data.forEach((item, i) => {
+            resultArr.push([item.id, item])
+          })
+          let resultMap = new Map(resultArr)
+          if (!resultMap.has(this.hosModel[doctorlist])) {
+            this.hosModel[doctorlist] = ''
+          }
+        }
+      })
+    },
+    disableOrUndisable (flag) {
+      this.hosSchema.map((item) => {
+        this.$ever.getFieldFromSchema(this.hosSchema, item.name).props.disabled = flag
+      })
+    }
+  }
+}
+</script>
+<style scoped>
+.el-dialog__body {
+  padding: 0 !important;
+}
+.registerDetail {
+  background: white;
+  padding: 0;
+  margin: 0;
+}
+.registerDetail /deep/ .is-disabled .el-input-group__append,
+.registerDetail /deep/ .is-disabled .el-input__inner,
+.registerDetail /deep/ .is-disabled .el-textarea__inner {
+  color: #000;
+  background: #ccc;
+  border: 1px solid #bbb;
+}
+.el-dialog__header {
+  font-weight: bold;
+}
+.buttons {
+  text-align: right;
+}
+.registerDetail /deep/ .is-disabled input::-webkit-input-placeholder {
+  color: #000;
+}
+</style>
+

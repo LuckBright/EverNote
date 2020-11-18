@@ -1,0 +1,413 @@
+<template>
+  <el-form id="templateform" label-width="88px" label-position="right" :model="form" ref="tempform">
+    <el-row class="line">
+      <el-col :span="24">
+        <el-form-item label="模版名称" prop="name" :rules="rules.required">
+          <el-input v-model.trim="form.name" :maxlength="20"></el-input>
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <el-form-item label="排班设置" class="title"></el-form-item>
+    <el-row>
+      <el-col :span="24">
+        <el-form-item label="适用机构" prop="templetOrgList" :rules="rules.requiredArray">
+          <el-select
+            v-model="form.templetOrgList"
+            multiple
+            value-key="organId"
+            placeholder="请选择"
+            class="wb100"
+          >
+            <el-option
+              v-for="item in orgItemList"
+              :key="item.organId"
+              :value="item"
+              :label="item.organName"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="24">
+        <el-form-item label="部门类型" prop="deptType" :rules="rules.required">
+          <el-select v-model="form.deptType" placeholder="请选择" class="wb100" clearable>
+            <el-option v-for="item in deptType" :key="item.id" :value="item.id" :label="item.name"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <el-row class="line">
+      <el-col :span="24">
+        <el-form-item label="业务类型" prop="timeTrunkType" :rules="rules.required">
+          <el-select v-model="form.timeTrunkType" placeholder="请选择" class="wb100" clearable>
+            <el-option
+              v-for="item in timeTrunkType"
+              :key="item.id"
+              :value="item.id"
+              :label="item.name"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <el-form-item label="资源设置" class="title"></el-form-item>
+    <el-row>
+      <el-col :span="10" class="pdr10">
+        <el-form-item label="主资源" prop="resourcePtype" :rules="rules.requiredObject">
+          <el-select
+            v-model="form.resourcePtype"
+            placeholder="请选择"
+            class="wb100"
+            value-key="code"
+            @change="val => {setMainResourceSub(val)}"
+            clearable
+          >
+            <el-option
+              v-for="(item, i) in mainResourceType"
+              :key="i"
+              :value="item"
+              :label="item.name"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label label-width="0" prop="resourceType" :rules="rules.requiredObject">
+          <el-select
+            v-model="form.resourceType"
+            placeholder="请选择"
+            value-key="code"
+            class="wb100"
+            clearable
+          >
+            <el-option
+              v-for="(item, i) in subResourceType"
+              :key="i"
+              :value="item"
+              :label="item.name"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <el-row
+      :class="{line: i === form.templetResourceTypeList.length - 1}"
+      v-for="(item, i) in form.templetResourceTypeList"
+      :key="i"
+    >
+      <el-col :span="10" class="pdr10">
+        <el-form-item :label="i === 0 ? '关联资源' : ''">
+          <el-select
+            v-model="item.resourcePtype"
+            placeholder="请选择"
+            class="wb100"
+            value-key="code"
+            @change="val => {setTempResourceSub(val, i)}"
+            clearable
+          >
+            <el-option v-for="(opt, k) in mainResourceType" :key="k" :value="opt" :label="opt.name"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label label-width="0">
+          <el-select
+            v-model="item.resourceType"
+            placeholder="请选择"
+            value-key="code"
+            class="wb100"
+            clearable
+          >
+            <el-option
+              v-for="(opt, k) in item.resourceList"
+              :key="k"
+              :value="opt"
+              :label="opt.name"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-col>
+      <el-col :span="2">
+        <el-form-item label label-width="0">
+          <i class="iconfont icon-tianjia mrl10" @click="addOtherResourceType" v-if="i === 0"></i>
+          <i class="iconfont icon-delete mrl10" @click="delOtherResourceType(i)" v-if="i > 0"></i>
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <el-form-item label="服务设置" class="title"></el-form-item>
+    <el-row class="line">
+      <el-col :span="24">
+        <el-form-item label="服务类型" prop="serviceClass" :rules="rules.requiredArray">
+          <syscascater v-model="form.serviceClass"></syscascater>
+        </el-form-item>
+      </el-col>
+      <!-- 葛东说先不显示，但是传值为1 -->
+      <el-col :span="6" v-show="false">
+        <el-form-item label label-width="0">
+          <el-checkbox
+            v-model="form.provideManyService"
+            :true-label="1"
+            :false-label="0"
+            class="mrl10"
+          >同时段支持多个</el-checkbox>
+        </el-form-item>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="24" align="left" style="padding:15px 0;">
+        <el-form-item>
+          <el-button
+            type="primary"
+            @click="submitEvent"
+            v-ever-click-once="disabled"
+            :disabled="disabled"
+          >保存</el-button>
+          <el-button type @click="resetForm">清空</el-button>
+        </el-form-item>
+      </el-col>
+    </el-row>
+  </el-form>
+</template>
+
+<script>
+import api from '@/arrange/store/templateapi'
+import schedulingapi from '@/arrange/store/schedulingapi'
+import syscascater from '@/arrange/page/template/cascater.vue'
+export default {
+  props: ['value', 'flag'],
+  data () {
+    return {
+      api,
+      schedulingapi,
+      isSubmit: false,
+      disabled: false,
+      deptType: [
+        { id: '1', name: '科室' },
+        { id: '2', name: '病区' }
+      ],
+      timeTrunkType: [
+        { id: '1', name: '门诊' },
+        { id: '2', name: '住院' },
+        { id: '3', name: '护理' },
+        { id: '4', name: '医技' },
+        { id: '5', name: '科研' },
+        { id: '6', name: '体检' },
+        { id: '7', name: '检查预约' },
+        { id: '8', name: '手术室预约' },
+        { id: 'blood_room_arrange', name: '抽血室' },
+        { id: 'outpatient_operation_arrange', name: '门诊手术排班' }
+      ],
+      mainResourceType: [],
+      subResourceType: [],
+      orgItemList: [],
+      form: {
+        id: '',
+        name: '',
+        deptType: '',
+        timeTrunkType: '',
+        serviceType: 1,
+        templetOrgList: [],
+        resourcePtype: '',
+        resourceType: '',
+        provideManyService: 1,
+        serviceClass: [],
+        startDay: 0,
+        templetResourceTypeList: [{ resourcePtype: '', resourceType: '', resourceList: [] }]
+      },
+      rules: {
+        required: [
+          { required: true, message: '必填项', trigger: ['blur', 'change'] }
+        ],
+        requiredObject: [
+          { required: true, message: '必填项', trigger: ['blur', 'change'], type: 'object' }
+        ],
+        requiredArray: [
+          { required: true, message: '必填项', trigger: ['blur', 'change'], type: 'array' }
+        ]
+      }
+    }
+  },
+  watch: {
+    'flag' (val) {
+      if (!this.value) {
+        return false
+      }
+      let mydata = JSON.parse(JSON.stringify(this.value))
+      mydata.serviceClass = [mydata.serviceClassficationParent, mydata.serviceClassfication]
+      this.getSubResourceType(mydata.resourcePtype).then(rs => {
+        this.subResourceType = rs
+      })
+      if (mydata.templetResourceTypeList) {
+        mydata.templetResourceTypeList.map(item => {
+          item.resourcePtype = { code: item.resourceTypePcode, name: item.resourceTypePname }
+          item.resourceType = { code: item.resourceTypeCode, name: item.resourceTypeName }
+          item.resourceList = []
+          delete item.resourceTypePcode
+          delete item.resourceTypePname
+          delete item.resourceTypeCode
+          delete item.resourceTypeName
+          return item
+        })
+        mydata.templetResourceTypeList.map((item, i) => {
+          this.getSubResourceType(item.resourcePtype).then(rs => {
+            mydata.templetResourceTypeList[i].resourceList = rs
+          })
+        })
+        window.setTimeout(_ => {
+          Object.assign(this.form, mydata)
+        }, 200)
+      } else {
+        window.setTimeout(_ => {
+          Object.assign(this.form, mydata)
+          this.$set(this.form, 'templetResourceTypeList', [{ resourcePtype: '', resourceType: '', resourceList: [] }])
+        }, 200)
+      }
+    }
+  },
+  created () {
+    this.getMainResourceType()
+    this.getOrgList()
+  },
+  methods: {
+    submitEvent () {
+      let data = JSON.parse(JSON.stringify(this.form))
+      data.templetResourceTypeList = data.templetResourceTypeList.map(item => {
+        delete item.resourceList
+        return item
+      }).filter(item => {
+        return item.resourcePtype && item.resourceType
+      })
+      data.serviceClassficationParent = data.serviceClass[0]
+      data.serviceClassfication = data.serviceClass[1]
+      this.$refs.tempform.validate(valid => {
+        if (!valid) {
+          return false
+        }
+        this.api.updateArrangeTemplate(data).then(rs => {
+          if (rs.errCode) {
+            return false
+          }
+          this.$notify({
+            type: 'success',
+            title: '操作成功',
+            message: '排班模版保存成功',
+            duration: 500
+          })
+          this.$emit('update', true)
+          this.resetForm()
+          this.$refs.tempform.resetFields()
+        })
+      })
+    },
+    resetForm () {
+      this.form = {
+        id: '',
+        name: '',
+        deptType: '',
+        timeTrunkType: '',
+        serviceType: 1,
+        templetOrgList: [],
+        resourcePtype: '',
+        resourceType: '',
+        provideManyService: 1,
+        serviceClass: [],
+        startDay: 0,
+        templetResourceTypeList: [{ resourcePtype: '', resourceType: '', resourceList: [] }]
+      }
+    },
+    addOtherResourceType () {
+      this.form.templetResourceTypeList.push({ resourcePtype: '', resourceType: '', resourceList: [] })
+    },
+    delOtherResourceType (i) {
+      this.form.templetResourceTypeList.splice(i, 1)
+    },
+    getMainResourceType () {
+      this.api.getMainResourceType().then(rs => {
+        let data = []
+        if (rs.head.errCode) {
+          return false
+        }
+        rs.data.map(item => {
+          data.push({ code: item.code, name: item.name })
+        })
+        this.mainResourceType = data
+      })
+    },
+    setMainResourceSub (val) {
+      this.getSubResourceType(val).then(rs => {
+        this.subResourceType = rs
+      })
+    },
+    setTempResourceSub (val, i) {
+      this.getSubResourceType(val).then(rs => {
+        this.form.templetResourceTypeList[i].resourceList = rs
+      })
+    },
+    async getSubResourceType (val) {
+      if (!val) {
+        return false
+      }
+      return this.api.getSubResourceTypeByParentCode({ parentCode: val.code }).then(rs => {
+        let data = []
+        if (rs.head.errCode) {
+          return false
+        }
+        rs.data.map(item => {
+          data.push({ code: item.code, name: item.name })
+        })
+        return data
+      })
+    },
+    getOrgList () {
+      this.orgItemList = []
+      this.schedulingapi.getOrgList().then(rs => {
+        rs.data.map(item => {
+          this.orgItemList.push({ organId: '' + item.clinicId, organName: item.clinicName })
+        })
+      })
+    }
+  },
+  components: {
+    syscascater
+  }
+}
+</script>
+
+<style scoped>
+#templateform {
+  padding: 10px;
+  background: #fff;
+  height: 85vh;
+  overflow: auto;
+}
+#templateform .wb100 {
+  width: 100%;
+}
+#templateform .pdr10 {
+  padding-right: 10px;
+}
+#templateform .prb20 {
+  padding-bottom: 20px;
+}
+#templateform .mrl10 {
+  margin-left: 10px;
+}
+#templateform .iconfont {
+  color: #999;
+}
+#templateform /deep/ .title {
+  color: #000;
+  font-size: 16px;
+  font-weight: bold;
+  padding-bottom: 10px;
+  margin-bottom: 0;
+}
+#templateform /deep/ .line {
+  border-bottom: 1px solid #ddd;
+}
+#templateform /deep/ .mrb20 {
+  margin-bottom: 20px;
+}
+</style>
+

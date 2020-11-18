@@ -1,0 +1,84 @@
+<template>
+  <div class="settle_inner flex_column_full">
+    <purchasing-wh :api="api" :apiName="obj.apiName" :exportType="obj.exportType" class="flex_column_full"></purchasing-wh>
+  </div>
+</template>
+
+<script>
+import api from './purchasing/purchasingapi.js'
+import purchasingWh from './purchasing/purchasingwh'
+const apiName = {
+  '11': {
+    apiName: 'listDetailed',
+    exportType: '2'
+  },
+  '12': {
+    apiName: 'listSalesreturncount',
+    exportType: '3'
+  },
+  '13': {
+    apiName: 'listSalesreturndetail',
+    exportType: '4'
+  },
+  '14': {
+    apiName: 'suppliercontactscount',
+    exportType: '5'
+  },
+  '15': {
+    apiName: 'suppliercontactsdetail',
+    exportType: '6'
+  }
+}
+export default {
+  data () {
+    return {
+      obj: {
+        apiName: 'listSummary',
+        exportType: '1'
+      },
+      api,
+    }
+  },
+  components: {
+    purchasingWh
+  },
+  methods: {
+    getRoute (status) {
+      if (!status) {
+        this.obj.apiName = 'listSummary'
+        this.obj.exportType = '1'
+      } else {
+        this.obj.apiName = apiName[status].apiName
+        this.obj.exportType = apiName[status].exportType
+      }
+    }
+  },
+  created () {
+    this.getRoute(this.$route.params.status)
+  },
+  watch: {
+    '$route.params.status' (val) {
+      this.getRoute(val)
+    },
+    deep: true,
+    immediate: true
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+// .settle_inner /deep/ .el-tabs__header {
+//   background-color: #fff;
+//   font-family: PingFangSC-Semibold;
+//   font-size: 16px;
+//   color: #000;
+//   line-height: 52px;
+//   border-bottom: 1px solid #eee;
+//   border-radius: 4px 4px 0 0;
+//   padding: 0 20px;
+//   margin: 0;
+// }
+// .settle_inner /deep/ .el-tabs__header .el-tabs__nav {
+//   height: 50px;
+// }
+</style>

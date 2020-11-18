@@ -1,0 +1,1032 @@
+@import "app-variables";
+/**
+  el-table的样式整理
+ */
+@table-th-bg: #eee;
+@table-tr-hover: #deeeff; // 较浅的hover色
+@table-tr-selected: #deeeff; // 选中色
+@drag-dotted-border: 2px dashed #666;
+@drag-end-border: 3px solid @col_o_05;
+//@a-visited: #7663a7;
+//@a-visited: #551A8B;
+@a-visited: #7251BD;
+/* 表格默认
+  行高 30px
+  默认边框 不要竖边框 （el-table 不添加border属性即可）
+  表格外边的边框 #ccc
+  td 上下边框颜色 #ccc
+  td 左右边框颜色 #ddd
+  一般的表格hover是：
+  背景色#deeeff 文字不变
+*/
+@border-ccc: 1px solid #ccc;
+@border-ddd: 1px solid #ddd;
+.table-text-btn {
+  background-color: transparent;
+  border: none;
+}
+
+.table-text-btn-hover {
+  background-color: #fff;
+  border: none;
+}
+
+/* el-table 的全局样式 */
+.el-table {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  transition: all 0.3s linear;
+
+  a {
+    cursor: pointer;
+    color: @col_o_05;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+    &:visited {
+      color: @a-visited;
+    }
+  }
+
+  // 给表格加上外边框
+  border-left: @border-ccc;
+  border-top: @border-ccc;
+  // 当表格没有border属性时需要右边框，有border属性时不再需要右边框
+  &:not(.el-table--border) {
+    border-right: @border-ccc;
+  }
+
+  /* 表头背景色 */
+
+  th {
+    color: @col_font_01;
+    background-color: @table-th-bg;
+  }
+
+  /* 单元格行高 */
+
+  th, td {
+    padding: 3px 0;
+    /* 单元格左右边距 */
+
+    .cell {
+      padding: 0 10px;
+    }
+    border-right-color: #ddd;
+  }
+  // 左右padding较小的表格
+  &.small-padding {
+    th, td {
+      .cell {
+        padding: 0 5px;
+      }
+    }
+  }
+  // 左右padding为0的表格 一般配合 first-column-10 或者 first-column-15 使用
+  &.none-padding {
+    th, td {
+      .cell {
+        padding: 0;
+      }
+    }
+  }
+  // 第一列的左边距为10px
+  &.first-column-10 {
+    th:first-child, td:first-child {
+      .cell {
+        padding-left: 10px
+      }
+    }
+  }
+  // 第一列的左边距为15px
+  &.first-column-15 {
+    th:first-child, td:first-child {
+      .cell {
+        padding-left: 15px
+      }
+    }
+  }
+
+  // 行高为40的表格
+  &.tr-height-40 {
+    th, td {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+  }
+
+  // 没有边框的表格
+  &.no-border, &.bor_no {
+    &::before,
+    &.el-table--group::after,
+    &.el-table--border::after,
+    .el-table__fixed::before, .el-table__fixed-right::before {
+      height: 0;
+    }
+
+    border: none;
+
+    th, td {
+      border: none;
+    }
+  }
+
+  // 没有横向边框的表格
+  &.no-horizontal-border {
+    th, td {
+      border-bottom: none;
+    }
+  }
+
+  // 默认的hover效果
+  &:not(.no-hover) {
+    tr.hover-row td,
+    tr:hover td {
+      background-color: @table-tr-hover;
+      //a {
+      //  text-decoration: underline;
+      //}
+    }
+  }
+  // 单元格不换行
+  &.el-table-nowrap {
+    .cell {
+      white-space: nowrap;
+    }
+  }
+  // 选中行的样式
+  .current-row,
+  .selected,
+  .remember-row,
+  .el-table__body tr.current-row {
+    td {
+      background-color: @table-tr-selected;
+    }
+  }
+  // 没有行hover样式的表格的hover效果 需要覆盖element-table默认的效果
+  &.no-hover .el-table__body tr:not(.selected):not(.current-row):hover > td,
+  &.no-hover .el-table__body tr:not(.selected):not(.current-row).hover-row > td {
+    background-color: inherit;
+  }
+
+  // 表格中的按钮效果
+  .el-button {
+    transition: all .1s;
+    font-weight: 400;
+    // 表格内的按钮样式：
+    &, &.el-button--small, &.el-button--mini {
+      border-radius: 2px;
+      font-size: 14px;
+      padding: 2px 5px;
+    }
+
+    &.el-button--primary {
+      color: @col_btn_01;
+      background: @col_btn_02;
+      border-color: @col_btn_03;
+
+      a {
+        &:hover {
+          color: @col_b_01;
+        }
+      }
+
+      &:hover {
+        color: @col_b_01;
+        background: @col_btn_01;
+        border-color: @col_btn_01;
+
+        a {
+          color: @col_b_01;
+        }
+      }
+    }
+
+    &.el-button--success {
+      color: @col_btn_04;
+      background: @col_btn_05;
+      border-color: @col_btn_06;
+
+      &:hover {
+        color: @col_b_01;
+        background: @col_btn_04;
+        border-color: @col_btn_04;
+      }
+    }
+
+    &.el-button--info {
+      color: @col_btn_07;
+      background: @col_btn_08;
+      border-color: @col_btn_09;
+
+      &:hover {
+        color: @col_b_01;
+        background: #878D99;
+        border-color: #878D99;
+      }
+    }
+
+    &.el-button--warning {
+      color: @col_btn_10;
+      background: @col_btn_11;
+      border-color: @col_btn_12;
+
+      &:hover {
+        color: @col_b_01;
+        background: @col_btn_10;
+        border-color: @col_btn_10;
+      }
+    }
+
+    &.el-button--danger {
+      color: @col_btn_13;
+      background: @col_btn_14;
+      border-color: @col_btn_15;
+
+      &:hover {
+        color: @col_b_01;
+        background: @col_btn_13;
+        border-color: @col_btn_13;
+      }
+    }
+
+    &.is-disabled,
+    &.is-disabled:focus,
+    &.is-disabled:hover {
+      color: #bfcbd9;
+      cursor: not-allowed;
+      background-image: none;
+      background-color: #eef1f6;
+      border-color: #d1dbe5;
+    }
+  }
+
+  .el-button + .el-button, .el-button + .el-dropdown {
+    margin-left: 5px;
+  }
+
+  .el-dropdown-link > i {
+    color: #999;
+    font-size: 16px;
+  }
+
+  // 第一列出现蓝色竖条的情况
+  tr.remember-row td:first-child, // 被记住的行
+  &:not(no-hover).table-hover-blue tr.selected td:first-child,
+  &:not(no-hover).table-hover-blue tr.current-row td:first-child {
+    position: relative;
+    &::before {
+      position: absolute;
+      content: '';
+      display: block;
+      height: 100%;
+      width: 3px;
+      background-color: @col_o_05;
+      left: 0;
+      top: 0;
+    }
+  }
+
+  // 反色hover效果
+  &:not(no-hover).table-hover-blue {
+    tr:hover td,
+    tr.hover-row td {
+      background-color: @col_o_05;
+      color: #fff;
+    }
+
+    //.current-row {
+    //  background-color: #bedeff;
+    //  td:first-child {
+    //    border-left: @col_o_05 5px solid;
+    //  }
+    //}
+    // 反色表格中的按钮效果
+    button:not(.el-popover__reference) {
+      &.el-button--primary {
+        color: @col_btn_01;
+        .table-text-btn;
+
+        a {
+          &:hover {
+            color: @col_b_01;
+          }
+        }
+
+        &:hover {
+          color: @col_btn_01 !important;
+          .table-text-btn-hover;
+
+          a {
+            color: @col_b_01;
+          }
+        }
+      }
+
+      &.el-button--text {
+        color: @col_btn_01;
+        .table-text-btn;
+
+        &:hover {
+          color: @col_btn_01 !important;
+          .table-text-btn-hover;
+        }
+      }
+
+      &.el-button--success {
+        color: @col_btn_04;
+        .table-text-btn;
+
+        &:hover {
+          color: @col_btn_04 !important;
+          .table-text-btn-hover;
+        }
+      }
+
+      &.el-button--info {
+        color: @col_btn_07;
+        .table-text-btn;
+
+        &:hover {
+          color: @col_btn_07 !important;
+          .table-text-btn-hover;
+        }
+      }
+
+      &.el-button--default {
+        color: @col_btn_07;
+        .table-text-btn;
+
+        &:hover {
+          color: @col_btn_07 !important;
+          .table-text-btn-hover;
+        }
+      }
+
+      &.el-button--warning {
+        color: @col_btn_10;
+        .table-text-btn;
+
+        &:hover {
+          color: @col_btn_10 !important;
+          .table-text-btn-hover;
+        }
+      }
+    }
+
+    // 删除按钮有个popover
+    .el-button--danger {
+      color: @col_btn_13;
+      .table-text-btn;
+
+      &:hover {
+        color: @col_btn_13 !important;
+        .table-text-btn-hover;
+      }
+    }
+
+    /* 如果行被hover，则需要将按钮，下拉框的颜色改为白色 但如果该行为被选中状态，则颜色不变*/
+
+    tr.hover-row > td,
+    tr:hover td {
+      button,
+      button.el-button--primary,
+      .el-dropdown-link,
+      .el-dropdown-link > i,
+      a,
+      span.icon,
+      span.cell-span,
+      span.white-span,
+      *.iconfont {
+        color: #fff;
+      }
+    }
+  }
+  &.flex-table {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    .el-table__body-wrapper {
+      flex: 1;
+      overflow: auto;
+    }
+  }
+}
+
+.ever-table {
+
+  &.el-table {
+    .icon.ever-table-config {
+      color: #666;
+      font-size: 14px;
+      line-height: 14px;
+      margin-top: 4px;
+      position: absolute;
+      right: 10px;
+      z-index: 1;
+    }
+    .ever-table-cell {
+      display: inline-block;
+    }
+
+    // 排序箭头
+    .caret-wrapper {
+      height: 18px;
+
+      .sort-caret.ascending {
+        top: -3px;
+      }
+
+      .sort-caret.descending {
+        bottom: -1px;
+      }
+    }
+
+    // 过滤器
+    .el-table__column-filter-trigger {
+      line-height: 20px;
+    }
+
+    th, td {
+      .cell {
+        padding: 0 10px;
+      }
+    }
+    &.small-padding {
+      th, td {
+        .cell {
+          padding: 0 5px;
+        }
+      }
+    }
+    &.none-padding {
+      th, td {
+        .cell {
+          padding: 0;
+        }
+      }
+    }
+    &.first-column-10 {
+      th:first-child, td:first-child {
+        .cell {
+          padding-left: 10px
+        }
+      }
+    }
+    &.first-column-15 {
+      th:first-child, td:first-child {
+        .cell {
+          padding-left: 15px
+        }
+      }
+    }
+    // 只去掉table外的边框
+    &.no-table-border {
+      border: none;
+      &::before,
+      &.el-table--group::after,
+      &.el-table--border::after,
+      .el-table__fixed::before, .el-table__fixed-right::before {
+        height: 0;
+      }
+      // 当表格有border属性时，去掉最右侧的border-right
+      &.el-table--border {
+        // 倒数第一个th,倒数第二个th和td让其border-right为none
+        th:last-child, th:nth-last-of-type(2), td:last-child {
+          border-right: none;
+        }
+      }
+    }
+    // todo 2019-04-24 表格中按钮默认背景色为透明，边框为透明，hover 背景色保持不变，文字颜色保持不变，边框去掉
+    // todo 2019-04-24 这一期先保持原来的样子
+    //.el-button--primary {
+    //  color: @col_o_05;
+    //  background: transparent;
+    //  border: none;
+    //
+    //  a {
+    //    &:hover {
+    //      color: @col_b_01;
+    //    }
+    //  }
+    //
+    //  &:hover {
+    //    color: @col_b_01;
+    //    background: @col_o_05;
+    //
+    //    a {
+    //      color: @col_b_01;
+    //    }
+    //  }
+    //}
+    //
+    //.el-button--success {
+    //  color: @col_btn_04;
+    //  background: transparent;
+    //  border: none;
+    //
+    //  &:hover {
+    //    color: @col_b_01;
+    //    background: @col_btn_04;
+    //  }
+    //}
+    //
+    //.el-button--info {
+    //  color: @col_btn_07;
+    //  background: transparent;
+    //  border: none;
+    //
+    //  &:hover {
+    //    color: @col_b_01;
+    //    background: #878D99;
+    //  }
+    //}
+    //
+    //.el-button--warning {
+    //  color: @col_btn_10;
+    //  background: transparent;
+    //  border: none;
+    //
+    //  &:hover {
+    //    color: @col_b_01;
+    //    background: @col_btn_10;
+    //  }
+    //}
+    //
+    //.el-button--danger {
+    //  color: @col_o_08;
+    //  background: transparent;
+    //  border: none;
+    //
+    //  &:hover {
+    //    color: @col_b_01;
+    //    background: @col_o_08;
+    //  }
+    //}
+    //
+    //.el-button.is-disabled,
+    //.el-button.is-disabled:focus,
+    //.el-button.is-disabled:hover {
+    //  color: #bfcbd9;
+    //  cursor: not-allowed;
+    //  background-image: none;
+    //  background-color: transparent;
+    //  border: none;
+    //}
+  }
+
+  &.el-table.draggable-table {
+    /* 被拖拽的一列的td样式 */
+
+    th.draggable:hover {
+      position: relative;
+
+      &, .cell, .thead-cell {
+        background-color: #ccc !important;
+      }
+
+      &::before {
+        content: '';
+        display: block;
+        position: absolute;
+        height: 34%;
+        width: 0;
+        z-index: 2;
+        border-left: 2px dotted #999;
+        left: 5px;
+        top: 33%;
+      }
+    }
+
+    th.drag-start {
+      border: @drag-dotted-border;
+      opacity: 0.3;
+    }
+
+    th {
+      span.thead-cell {
+        display: inline-block;
+      }
+
+      &.drag-active-left, &.drag-active-right {
+        position: relative;
+
+        &:hover {
+          &, .cell, .thead-cell {
+            background-color: @table-th-bg !important;
+          }
+        }
+      }
+
+      &.drag-active-left {
+        &::before {
+          content: '';
+          display: block;
+          position: absolute;
+          z-index: 1;
+          width: 4px;
+          height: 100%;
+          background-color: @col_o_05;
+          top: 0;
+          left: 0;
+        }
+      }
+
+      &.drag-active-right {
+        &::before {
+          content: '';
+          display: block;
+          position: absolute;
+          z-index: 1;
+          width: 4px;
+          height: 100%;
+          background-color: @col_o_05;
+          top: 0;
+          right: 0;
+        }
+      }
+    }
+
+    .thead-cell {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      cursor: move;
+      overflow: initial;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 8px; // 留8px的空间给改变列宽使用
+        bottom: 0;
+        left: 0;
+      }
+    }
+
+    &.moving {
+      th .thead-cell {
+        cursor: move !important;
+      }
+
+      .el-table__fixed {
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+.ever-table.el-table {
+  /* 初/复诊 单元格样式 被选中 被hover 都不能改变其样式 */
+
+  td.spe-cell.danger {
+    background-color: #fa5555 !important;
+    color: #fff !important;
+  }
+
+  /* 身份证颜色 */
+
+  .demo-male {
+    color: #00a8cb;
+  }
+
+  .demo-female {
+    color: #fa5555;
+  }
+}
+
+/* config table hover时的 样式 */
+.config-table.el-table {
+  margin-top: 0;
+  margin-bottom: 0;
+  user-select: none;
+
+  tr:not(.selected):not(.current-row):hover td,
+  &.el-table--enable-row-hover tr:not(.selected):not(.current-row):hover > td {
+    color: inherit;
+    background-color: #ccc;
+  }
+
+  tr:not(.undraggable-row):hover td {
+    &.el-table-column--selection {
+      position: relative;
+
+      &::before {
+        content: '';
+        display: block;
+        position: absolute;
+        height: 34%;
+        width: 0;
+        z-index: 2;
+        border-left: 2px dotted #999;
+        left: 5px;
+        top: 33%;
+      }
+    }
+  }
+
+  .config-width-input {
+    width: 50px;
+
+    input.el-input__inner {
+      padding: 0 5px;
+      height: 20px;
+      line-height: 20px;
+      color: @col_o_05;
+      font-weight: bold;
+      border-width: 0;
+
+      &:hover {
+        border-width: 1px;
+      }
+    }
+  }
+
+  .bold {
+    font-weight: bold;
+  }
+
+  .undraggable-row .draggable-td {
+    cursor: default;
+  }
+
+  .draggable-td {
+    cursor: move;
+  }
+
+  tr.drag-end-row {
+    &:hover td {
+      background-color: #fff !important;
+    }
+
+    &.up td {
+      border-top: @drag-end-border;
+    }
+
+    &.down td {
+      border-bottom: @drag-end-border;
+    }
+  }
+
+  tr.drag-start-row {
+    td {
+      border-top: @drag-dotted-border;
+      border-bottom: @drag-dotted-border;
+      background-color: #ccc;
+      opacity: 0.3;
+
+      &:first-child {
+        border-left: @drag-dotted-border;
+      }
+
+      &:last-child {
+        border-right: @drag-dotted-border;
+      }
+    }
+  }
+}
+
+
+.layout_inner {
+  &.spe {
+    .main-wrap {
+      .el-table {
+        margin: 0 0 15px 0
+      }
+    }
+  }
+
+  &.spe2 {
+    .main-wrap {
+      .el-table {
+        margin: 0 0 15px 0
+      }
+    }
+  }
+}
+
+.el-table.spe_border {
+  td {
+    position: relative;
+
+    .cell {
+      white-space: normal;
+
+      .el-button {
+        margin: 0 10px 0 0;
+      }
+
+      .el-icon-plus {
+        position: absolute;
+        top: 50%;
+        right: @10px;
+        margin-top: -@1px * 6;
+        font-size: @1px * 12;
+        z-index: 100;
+      }
+    }
+  }
+}
+
+.el-table.el-table--border.spe_border {
+  th, td {
+    border-right: 1px solid @col_g_06;
+  }
+}
+
+.el-popover.task_popover {
+  .el-table {
+    margin: 0;
+
+    .el-table__body-wrapper {
+      overflow-x: hidden;
+    }
+  }
+
+  .el-table {
+    .current {
+      color: @col_o_05;
+    }
+
+    .unnormal {
+      color: @col_o_08;
+    }
+
+    .disabled {
+      color: @col_b_04;
+    }
+  }
+}
+
+.no-padding .el-table__body th, .no-padding .el-table__body td {
+  padding: 0 !important
+}
+// 
+// .purchaseorder_drug .el-table {
+//   margin: 0;
+// }
+
+.sub-table {
+  .el-table th > .cell {
+    background-color: transparent;
+  }
+
+  .el-table th {
+    background-color: transparent;
+  }
+}
+
+.el-table .el-form-item {
+  margin-bottom: 0;
+}
+
+.el-table .warning-red-text {
+  color: red;
+}
+
+.custom_table.el-table tr td {
+  border-bottom: 1px solid #ddd !important;
+}
+
+.custom_table.el-table tr:last-child td {
+  border-bottom: none;
+}
+
+.custom_table /deep/ .el-table__expanded-cell {
+  padding: 0 !important;
+  border-bottom: none !important;
+}
+
+.custom_table /deep/ .el-table__expand-icon--expanded {
+  display: none
+}
+
+.el-dropdown-menu.table-button-menu {
+  padding: 1px 0;
+
+  .el-dropdown-menu__item {
+    white-space: nowrap;
+  }
+
+  .el-dropdown-menu__item + .el-dropdown-menu__item {
+    border-top: 1px solid #bbb;
+  }
+}
+
+.-wrap {
+  // 分页器样式
+  .el-pagination {
+    .el-input--mini .el-input__inner,
+    span:not([class*=suffix]),
+    button {
+      height: 24px;
+      line-height: 24px;
+    }
+
+    .el-pager li {
+      height: 24px;
+      line-height: 22px;
+    }
+  }
+
+  .el-pagination__editor.el-input .el-input__inner {
+    height: 24px;
+  }
+}
+.no-padding-expanded-cell .el-table__expanded-cell {
+  padding: 0;
+}
+.non-expand-row .el-table__expand-icon {
+  display: none;
+}
+.diff-before {
+  color: #e43;
+}
+.diff-after {
+  color: #5cbc2c;
+}
+.el-table .el-dropdown .el-button + .el-button {
+  margin-left: 0;
+}
+// 2019-09-17 将所有表格中的输入框高度改为28px
+.el-table .cell .el-input input.el-input__inner {
+  height: 28px;
+}
+.el-table .cell .el-input .el-input__icon {
+  line-height: 28px;
+}
+// 所有日期输入框 清除按钮 距离右侧改为0px 默认为5px
+.el-input.el-input--suffix .el-input__suffix{
+  right: 0;
+}
+.el-cascader__search-input {
+  margin-left: 10px;
+}
+// fixtreetable看起来歧义的问题
+.fixLeftPos .cell {overflow: visible;}
+.fixLeftPos .el-table [class*='el-table__row--level'] /deep/ .el-table__expand-icon {
+  position: relative;
+  left: -20px;
+  margin-right: -19px;
+}
+
+/**
+主题为浅色的表格
+应用场景示例：phr表格
+ */
+.light-theme-table.ever-table-wrap {
+  background-color: #fff;
+  border-radius: 4px;
+  padding: 0 12px;
+  font-size: 14px;
+  .el-table {
+    border: none;
+    &::before,
+    &.el-table--group::after,
+    &.el-table--border::after,
+    .el-table__fixed::before, .el-table__fixed-right::before {
+      height: 0;
+    }
+    // 当表格有border属性时，去掉最右侧的border-right
+    &.el-table--border {
+      // 倒数第一个th,倒数第二个th和td让其border-right为none
+      th:last-child, th:nth-last-of-type(2), td:last-child {
+        border-right: none;
+      }
+    }
+    th, td {
+      background-color: #fff;
+      border-color: #E8ECEF;
+      .cell {
+        padding: 3px 10px;
+      }
+    }
+    th {
+      color: #666;
+      font-family: PingFangSC-Medium;
+      .cell {
+        padding: 4px 10px;
+      }
+    }
+    td {
+      color: #333;
+      font-family: PingFangSC-Regular;
+    }
+
+    th:first-child, td:first-child {
+    }
+
+    tr.hover-row td,
+    tr:hover td {
+      background: #E7F2FF;
+    }
+    tr:last-of-type {
+      td {
+        border-bottom: none;
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+<template>
+  <div class="icon-body">
+    <span><icons :addOrDelette="PROPERTY_COMPARE[0].id"></icons>新增项目</span>
+    <span><icons :addOrDelette="PROPERTY_COMPARE[1].id"></icons>删除项目</span>
+  </div>
+</template>
+<script>
+import {PROPERTY_COMPARE} from '@/util/common'
+import icons from './icons'
+export default {
+  data () {
+    return {
+      PROPERTY_COMPARE
+    }
+  },
+  components: {
+    icons
+  }
+}
+</script>
+<style scoped lang="scss">
+ul li {list-style-type: none;}
+.icon-body {
+  span {
+    display: inline-block;
+    margin-left: 20px;
+  }
+}
+</style>

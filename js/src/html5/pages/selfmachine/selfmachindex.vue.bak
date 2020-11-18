@@ -1,0 +1,600 @@
+<template>
+  <div class="selfMachCon">
+    <sl-timer :mark="marks" @time-out="quit(0)" :delay="delayTime"></sl-timer>
+    <div class="roomSelect">
+      <ul>
+        <span class="select left" @click="pre"></span>
+        <li class="roomItem" v-for="(item, index) in roomList" :key="index">
+          <p
+            class="roomName"
+            :class="{'roomStop': item.drawBloodRoomState, 'roomCurt': item.drawBloodRoomId === selfMachCurt.drawBloodRoomId}"
+          >{{item.drawBloodRoomName}}</p>
+          <p
+            v-if="!item.drawBloodRoomState"
+            :class="{'roomCurt': item.drawBloodRoomId === selfMachCurt.drawBloodRoomId}"
+          >等待人数：{{item.waitingQueueNum}}</p>
+          <p v-else class="roomStop">已停用</p>
+        </li>
+        <span class="select right" @click="next"></span>
+      </ul>
+    </div>
+    <div class="operate">
+      <el-row>
+        <el-col class="operateLines">
+          <el-input ref="input" v-model="patientCardNo" placeholder="请您先刷卡" clearable></el-input>
+        </el-col>
+        <el-col :span="12" class="operateLines">
+          <sl-button
+            message="抽血排队取号"
+            type="large"
+            @click="queuNumber"
+            :disabled="disabledFlag || queuFlag"
+          ></sl-button>
+        </el-col>
+        <el-col :span="12" class="operateLines" align="right">
+          <sl-button
+            message="检验报告查询"
+            type="large"
+            @click="queryReport"
+            :disabled="disabledFlag || queryFlag"
+          ></sl-button>
+        </el-col>
+        <el-col class="operateLines">
+          <sl-button message="退出" type="supper" @click="quit(1)" :disabled="disabledFlag"></sl-button>
+        </el-col>
+      </el-row>
+    </div>
+    <div class="message">
+      <p class="tips">提示：本机取号只能在{{selfMachCurt.drawBloodRoom}}抽血</p>
+      <p class="useFlow">自助机使用流程： 1.刷卡 2.排队取号/报告查询 3.关闭退出</p>
+    </div>
+    <sl-message :type="messageType" :visible="showMessage" @quit-mes="quitMes"></sl-message>
+    <sl-dialog v-if="showDialog" class="printDialog">
+      <div slot="content">
+        <div class="printChoose">
+          <h1 class="title">请先选择打印号条使用的打印机：</h1>
+          <el-radio
+            v-model="currentPrint"
+            :label="print"
+            border
+            v-for="(print, index) in printList"
+            :key="index"
+          >{{print}}</el-radio>
+        </div>
+        <div class="operate">
+          <sl-button message="保存" type="normal" @click="savePrint"></sl-button>
+        </div>
+      </div>
+    </sl-dialog>
+    <div class="callCount">
+      <div id="page1">
+        <div style="margin:0;text-align:center">
+          <p class="alignCenter title" style="font-size:24px">海南现代妇女儿童医院</p>
+          <p class="alignCenter">{{countNumberInfo.clinicName}}</p>
+          <p class="alignCenter number" style="font-size:30px">{{countNumberInfo.queueSn}}</p>
+          <p class="paddingLeft" style="text-align:left">您的检查诊室是： {{countNumberInfo.clinicName}}</p>
+          <p class="paddingLeft" style="text-align:left">您的前面还有{{countNumberInfo.waitingNum}}人在等待！</p>
+          <p class="smallFont" style="text-align:left;font-size:13px">注：请按顺序等候，错过叫号检查，须重新排号！</p>
+          <p
+            class="smallFont"
+            style="text-align:left;font-size:13px"
+          >取号时间： {{countNumberInfo.createTime}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import jcpjs from 'jcpjs'
+import api from '../../store/selfmachapi.js'
+import slMessage from '../../components/message'
+import slDialog from '../../components/dialog'
+import slButton from '../../components/button'
+import slTimer from '../../components/timer'
+import { debounce1 } from '@/util/common'
+
+export default {
+  data () {
+    return {
+      roomList: [],
+      patientCardNo: '',
+      disabledFlag: true,
+      queuFlag: true,
+      queryFlag: true,
+      showMessage: false,
+      messageType: '',
+      current: 1,
+      offset: 0,
+      pagesize: 4,
+      totalCount: 0,
+      marks: 0,    // 记录页面操作,初始值 0，退出及不显示计时器 0，有操作 > 0
+      timer: '',
+      patientInfo: {},
+      jcpjs,
+      countNumberInfo: {},
+      printList: [],
+      currentPrint: '',
+      showDialog: false
+    }
+  },
+  computed: {
+    selfMachCurt () {
+      if (window.localStorage.getItem('currentinfo')) {
+        return JSON.parse(window.localStorage.getItem('currentinfo'))
+      } else {
+        this.$messageTips(this, 'warning', '未获取到当前自助机信息，请重新设置！', '提示')
+        setTimeout(() => {
+          this.$router.push('/html5/selfmachlogin')
+        }, 1000)
+        return {}
+      }
+    },
+    delayTime () {
+      if (window.localStorage.getItem('currentinfo')) {
+        return JSON.parse(window.localStorage.getItem('currentinfo')).screensaverTime
+      } else {
+        setTimeout(() => {
+          this.$router.push('/html5/selfmachlogin')
+        }, 1000)
+        return 20
+      }
+    },
+    curOrigin () {
+      if (window.localStorage.getItem('currentOrigin')) {
+        return JSON.parse(window.localStorage.getItem('currentOrigin'))
+      } else {
+        this.$messageTips(this, 'warning', '未获取到当前机构医院信息，请重新设置！', '提示')
+        setTimeout(() => {
+          this.$router.push('/html5/selfmachlogin')
+        }, 1000)
+        return {}
+      }
+    }
+  },
+  watch: {
+    'patientCardNo': debounce1(function (val) {
+      if (!this.patientCardNo) {
+        this.marks = 0
+        return false
+      }
+      this.marks++
+      // 查询患者信息
+      let params = {
+        visitNo: this.patientCardNo,    // '00000000000000'
+        appId: 'hnxd_SelfMachine'
+      }
+      // todo 判断条件优化(跟产品要一下判断长度，不能一位数字也去查一下，虽然这种输入的场景很少)
+      if (params.visitNo.length > 4) {
+        api.getPatientInfo(params).then(res => {
+          if (res.head && res.head.errCode === 0 && res.data !== null) {
+            this.disabledFlag = false
+            this.queuFlag = false
+            this.queryFlag = false
+            this.patientInfo = res.data
+            window.sessionStorage.setItem('patientCardNo', this.patientCardNo)
+            window.sessionStorage.setItem('patientInfo', JSON.stringify(this.patientInfo))
+          } else {
+            this.disabledFlag = true
+            this.queuFlag = true
+            this.queryFlag = true
+            window.sessionStorage.removeItem('patientInfo')
+            this.$messageTips(this, 'warning', '该患者不存在！', '提示')
+          }
+        })
+      }
+    }, 300),
+    selfMachCurt (val) {
+      if (!window.localStorage.getItem('currentinfo')) {
+        this.$router.push('/html5/selfmachlogin')
+      }
+    }
+  },
+  created () {
+    this.getDrawBloodRoomList()
+    if (window.sessionStorage.getItem('patientCardNo')) {
+      this.patientCardNo = window.sessionStorage.getItem('patientCardNo')
+    }
+    // 每10秒更新抽血室数据
+    this.timer = setInterval(() => {
+      this.getDrawBloodRoomList()
+    }, 10000)
+  },
+  mounted () {
+    if (window.localStorage.getItem('currentPrint')) {
+      this.currentPrint = window.localStorage.getItem('currentPrint')
+    } else {
+      this.setPrint()
+    }
+    this.$refs.input.focus()
+  },
+  methods: {
+    isWindows () {
+      return /windows|win32/i.test(navigator.userAgent)
+    },
+    // 获取打印机信息
+    setPrint () {
+      if (this.isWindows()) {
+        jcpjs.getJCP().getPrinters((printers) => {
+          this.printList = printers
+          this.showDialog = true
+          console.log(printers, 'printers')
+        })
+      }
+    },
+    // 保存选择的打印机信息
+    savePrint () {
+      if (!this.currentPrint) {
+        return false
+      }
+      this.showDialog = false
+      window.localStorage.setItem('currentPrint', this.currentPrint)
+      this.$messageTips(this, 'success', '打印机设置成功', '提示')
+    },
+    // 检验当前抽血室是否可用
+    checkDrawBloodRoom () {
+      let stopStatus = false
+      this.roomList.filter(item => {
+        if (item.drawBloodRoomId === this.selfMachCurt.drawBloodRoomId && item.drawBloodRoomState) {
+          this.$messageTips(this, 'warning', '该抽血室已停用', '提示')
+          stopStatus = true
+        }
+      })
+      if (!stopStatus) {
+        return true
+      } else {
+        false
+      }
+    },
+    // 获取所有抽血室列表
+    getDrawBloodRoomList () {
+      let params = {
+        orgId: this.curOrigin.clinicId,
+        offset: this.offset,
+        pagesize: this.pagesize
+      }
+      api.getDrawBloodRoomList(params).then(res => {
+        if (res.head.errCode === 0 && res.data && res.data.resultList && res.data.resultList.length > 0) {
+          this.roomList = res.data.resultList
+          this.totalCount = res.data.totalCount
+        }
+      })
+    },
+    // 上一页抽血室
+    pre () {
+      if (this.patientCardNo) {
+        this.marks++
+      }
+      if (this.offset) {
+        this.current--
+        this.offset = (this.current - 1) * this.pagesize || 0
+        this.getDrawBloodRoomList()
+      }
+    },
+    // 下一页抽血室
+    next () {
+      if (this.patientCardNo) {
+        this.marks++
+      }
+      if (this.offset < Math.floor(this.totalCount / this.pagesize)) {
+        this.current++
+        this.offset = (this.current - 1) * this.pagesize || 0
+        this.getDrawBloodRoomList()
+      }
+    },
+    // 点击取号，查询患者是否有待抽血的检验项
+    async queuNumber () {
+      if (!this.patientCardNo) {
+        this.showMessage = true
+        this.messageType = 'fail'
+        return false
+      }
+      if (!window.sessionStorage.getItem('patientInfo')) {
+        this.$messageTips(this, 'warning', '请刷就诊卡！', '提示')
+        return false
+      }
+      if (this.checkDrawBloodRoom()) {
+        this.marks++
+        this.queuFlag = true
+        let params = {
+          patientId: this.patientInfo.id
+        }
+        let res = await api.checkPatient(params)
+        if (res.head.errCode === 0 && res.data > 0) {
+          this.offerNumber()
+        } else {
+          this.marks++
+          this.$messageTips(this, 'warning', '该患者没有待抽血的检验项', '提示')
+        }
+      } else {
+        this.marks++
+      }
+    },
+    // 取号
+    offerNumber () {
+      this.marks++
+      let params = {
+        patientId: this.patientInfo.id,
+        selfMachineId: this.selfMachCurt.id
+      }
+      // let params = {
+      //   patientId: 'H9jzeE81AkyBDXv9C8I',
+      //   selfMachineId: 'c7ebed8f-383d-425b-adde-53f53b902319'
+      // }
+      api.queuNumber(params).then(res => {
+        if (res.head.errCode === 0 && res.data) {
+          this.countNumberInfo = res.data
+          // 记录操作行为，开始倒计时
+          this.marks++
+          this.$nextTick(() => {
+            // 设置打印机
+            var settings = {
+              printer: this.currentPrint,
+              marginTop: 0,
+              marginLeft: 0,
+              marginRight: 0,
+              marginBottom: 0
+            }
+            var myDoc = {
+              documents: document,
+              settings: settings,
+              copyrights: '杰创软件拥有版权 www.jatools.com'
+            }
+            let _this = this
+            myDoc.done = function (err) {
+              if (!err) {
+                this.$messageTips(_this, 'success', '取号成功', '提示')
+              }
+            }
+            jcpjs.getJCP().print(myDoc)
+          })
+        } else {
+          this.marks++
+          this.queuFlag = false
+          this.$messageTips(this, 'warning', '取号失败', '提示')
+        }
+      })
+    },
+    // 取检验报告
+    queryReport () {
+      if (!this.patientCardNo) {
+        this.showMessage = true
+        this.messageType = 'fail'
+        return false
+      }
+      // if (!this.checkDrawBloodRoom()) {
+      //   this.marks++
+      //   return false
+      // }
+      if (!window.sessionStorage.getItem('patientInfo')) {
+        this.$messageTips(this, 'warning', '该患者不存在！', '提示')
+        return false
+      }
+      this.queryFlag = true
+      let params = {
+        offset: 0,
+        pagesize: 20,
+        patientId: this.patientInfo.id,
+        startTime: '',
+        endTime: ''
+      }
+      // let params = {
+      //   offset: 0,
+      //   pagesize: 20,
+      //   patientId: '3ENbXb6oyAGfTrbwouO',
+      //   startTime: '2018-08-28',
+      //   endTime: '2018-11-5'
+      // }
+      api.getReportList(params).then(res => {
+        if (res.head.errCode === 0 && res.data && res.data.resultList.length > 0) {
+          this.$router.push({
+            name: 'selfmachresult'
+          })
+        } else {
+          this.marks++
+          this.$messageTips(this, 'warning', '当前患者没有可取的检验报告！', '提示')
+        }
+      })
+    },
+    // 倒计时结束退出
+    quit (flag) {
+      if (flag) {
+        this.showMessage = true
+        this.messageType = 'success'
+      }
+      this.marks = 0
+      this.patientCardNo = ''
+      // this.countNumberInfo = {}
+      this.disabledFlag = true
+      this.queuFlag = true
+      this.queryFlag = true
+      this.$refs.input.focus()
+      window.sessionStorage.removeItem('patientCardNo')
+      window.sessionStorage.removeItem('patientInfo')
+    },
+    // message 消失 回调
+    quitMes () {
+      this.showMessage = false
+    }
+  },
+  beforeDestroy () {
+    clearInterval(this.timer)
+  },
+  components: {
+    slMessage,
+    slDialog,
+    slButton,
+    slTimer
+  }
+}
+</script>
+<style lang="scss" scoped>
+.selfMachCon {
+  padding: 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  font-family: PingFangSC-Semibold;
+  background: url("../../../../static/assets/html5/img/selfmachbg.png")
+    no-repeat;
+  background-size: cover;
+  .roomSelect {
+    height: 150px;
+    padding: 0 10px;
+    margin-top: 113px;
+    ul {
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      display: flex;
+    }
+    .select {
+      float: left;
+      height: 150px;
+      line-height: 150px;
+      width: 80px;
+      cursor: pointer;
+    }
+    .select.left {
+      background: url("../../../../static/assets/html5/img/left.png") no-repeat
+        center center;
+    }
+    .select.right {
+      background: url("../../../../static/assets/html5/img/right.png") no-repeat
+        center center;
+    }
+    .roomItem {
+      float: left;
+      height: 150px;
+      line-height: 150px;
+      text-align: center;
+      flex-grow: 1;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      p {
+        margin: 0;
+        font-weight: bold;
+        font-family: PingFangSC-Semibold;
+        font-size: 36px;
+        color: #517997;
+        line-height: 25px;
+      }
+      p.roomCurt {
+        color: #1c7bef;
+      }
+      p.roomName {
+        line-height: 90px;
+      }
+      p.roomStop {
+        color: #ee4433;
+      }
+    }
+  }
+  .operate {
+    width: 880px;
+    margin: 42px auto;
+    /deep/ .el-input__inner {
+      height: 120px;
+      line-height: 120px;
+      font-size: 50px;
+      color: #000;
+      border: 2px solid #bbbbbb;
+    }
+    /deep/ input::-webkit-input-placeholder {
+      color: #999999;
+    }
+    /deep/ input::-moz-placeholder {
+      color: #999999;
+    }
+    /deep/ input:-moz-placeholder {
+      color: #999999;
+    }
+    /deep/ input:-ms-input-placeholder {
+      color: #999999;
+    }
+    .operateLines {
+      margin-bottom: 55px;
+      .buttonCon {
+        width: 100%;
+      }
+    }
+  }
+  .message {
+    text-align: center;
+    .tips {
+      font-size: 38px;
+      color: #ee4433;
+      margin: 0;
+    }
+    .useFlow {
+      margin: 50px 0;
+      font-size: 32px;
+      color: #527b97;
+    }
+  }
+  .printDialog {
+    .title {
+      text-align: left;
+      font-size: 50px;
+      line-height: 80px;
+      color: #000;
+      margin-bottom: 50px;
+    }
+    /deep/ .el-radio {
+      padding: 20px 20px 0 10px;
+      height: 60px;
+      .el-radio__input {
+        line-height: 2;
+      }
+      .el-radio__inner {
+        width: 20px;
+        height: 20px;
+      }
+      .el-radio__inner::after {
+        width: 6px;
+        height: 6px;
+      }
+      .el-radio__label {
+        font-size: 20px;
+      }
+    }
+  }
+  .callCount {
+    position: fixed;
+  }
+}
+</style>
+<style scoped>
+#page1 p {
+  margin: 0;
+  line-height: 20px;
+}
+#page1 .alignCenter {
+  text-align: center;
+  color: #000;
+  font-size: 15px;
+}
+#page1 .title {
+  font-size: 24px;
+  line-height: 30px;
+}
+#page1 .number {
+  font-size: 40px;
+  font-weight: bold;
+  line-height: 50px;
+}
+#page1 .paddingLeft {
+  color: #000;
+  font-size: 15px;
+  text-indent: 20px;
+}
+#page1 .smallFont {
+  color: #000;
+  font-size: 13px;
+  line-height: 20px;
+  text-indent: 10px;
+}
+</style>
+

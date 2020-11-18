@@ -1,0 +1,47 @@
+.user_task_card{
+  dl,dt,dd{margin:0;padding:0;}
+  position:relative;
+  .patient_tips{
+    position:absolute;
+    top:10px;
+    right:10px;
+    color:#F9C553;
+  }
+  .top{
+    padding:5%;
+  }
+  .patient_avatar{
+    width:40px;
+    height:40px;
+    border-radius:100%;
+    border:1px solid #ddd;
+    margin-right:5%;
+    overflow:hidden;
+    img{
+      width:100%;
+    }
+  }
+  .patient_info{
+    max-width:75%;
+    height:95px;
+    dt{
+      margin-bottom:5px;
+      white-space:nowrap;
+      b{font-size:16px;}
+      span{margin-left:5%;font-size:14px;color:#999}
+    }
+    dd{
+      width:100%;
+      font-size:14px;
+      line-height:25px;
+      color:#666;
+      white-space:nowrap;
+      text-overflow: ellipsis;
+      overflow:hidden;
+      .el-tooltip{
+        display:inline-block;
+        max-width:100%;
+      }
+    }
+  }
+}

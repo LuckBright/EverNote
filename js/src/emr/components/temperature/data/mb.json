@@ -1,0 +1,156 @@
+[
+	[{
+		"point": {
+			"datetime": "2020-04-20 02:00:00",
+			"yw": null,
+			"kw": null,
+			"gw": null,
+			"sw": "",
+			"jw": "",
+			"xl": 80,
+			"ml": 100,
+			"hx": null,
+			"patientStatus": false,
+			"pacemakerStatus": false
+		},
+		"value": 100,
+		"x": 6.761904761904762,
+		"y": 285.7142857142857
+	}, {
+		"point": {
+			"datetime": "2020-04-21 02:00:00",
+			"yw": "36",
+			"kw": null,
+			"gw": null,
+			"sw": "",
+			"jw": 35,
+			"xl": "190",
+			"ml": "191",
+			"hx": null,
+			"patientStatus": false,
+			"pacemakerStatus": false
+		},
+		"value": "191",
+		"x": 87.90476190476191,
+		"y": 0
+	}, {
+		"point": {
+			"datetime": "2020-04-22 02:00:00",
+			"yw": null,
+			"kw": null,
+			"gw": 37,
+			"sw": "",
+			"jw": 35,
+			"xl": "50",
+			"ml": "90",
+			"hx": null,
+			"patientStatus": false,
+			"pacemakerStatus": true
+		},
+		"value": "90",
+		"x": 169.04761904761904,
+		"y": 321.42857142857144
+	}, {
+		"point": {
+			"datetime": "2020-04-23 02:00:00",
+			"yw": null,
+			"kw": "39",
+			"gw": null,
+			"sw": 40,
+			"jw": "",
+			"xl": "90",
+			"ml": "90",
+			"hx": null,
+			"patientStatus": false,
+			"pacemakerStatus": false
+		},
+		"value": "90",
+		"x": 250.19047619047618,
+		"y": 321.42857142857144
+	}, {
+		"point": {
+			"datetime": "2020-04-24 02:00:00",
+			"yw": null,
+			"kw": null,
+			"gw": null,
+			"sw": "",
+			"jw": "",
+			"xl": 90,
+			"ml": 120,
+			"hx": null,
+			"patientStatus": false,
+			"pacemakerStatus": false
+		},
+		"value": 120,
+		"x": 331.33333333333337,
+		"y": 214.28571428571425
+	}, {
+		"point": {
+			"datetime": "2020-04-25 02:00:00",
+			"yw": "37",
+			"kw": null,
+			"gw": null,
+			"sw": "38",
+			"jw": 36,
+			"xl": "50",
+			"ml": "90",
+			"hx": null,
+			"patientStatus": false,
+			"pacemakerStatus": false
+		},
+		"value": "90",
+		"x": 412.4761904761905,
+		"y": 321.42857142857144
+	}, {
+		"point": {
+			"datetime": "2020-04-25 10:00:00",
+			"yw": "37",
+			"kw": null,
+			"gw": null,
+			"sw": "",
+			"jw": "",
+			"xl": null,
+			"ml": "80",
+			"hx": null,
+			"patientStatus": false,
+			"pacemakerStatus": false
+		},
+		"value": "80",
+		"x": 439.5238095238095,
+		"y": 357.14285714285717
+	}, {
+		"point": {
+			"datetime": "2020-04-25 18:00:00",
+			"yw": null,
+			"kw": 37.2,
+			"gw": null,
+			"sw": "",
+			"jw": "",
+			"xl": null,
+			"ml": "84",
+			"hx": null,
+			"patientStatus": false,
+			"pacemakerStatus": false
+		},
+		"value": "84",
+		"x": 466.57142857142856,
+		"y": 342.85714285714283
+	}, {
+		"point": {
+			"datetime": "2020-04-25 22:00:00",
+			"yw": null,
+			"kw": null,
+			"gw": 37.4,
+			"sw": "",
+			"jw": "",
+			"xl": null,
+			"ml": "88",
+			"hx": null,
+			"patientStatus": false,
+			"pacemakerStatus": false
+		},
+		"value": "88",
+		"x": 480.0952380952381,
+		"y": 328.5714285714286
+	}]
+]

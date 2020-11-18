@@ -1,0 +1,118 @@
+<template>
+  <div>
+    <div class="layout_inner">
+      <div class="main-head">
+        <ever-query-form :schema="querySchema" v-model="queryObj" @query="query"></ever-query-form>
+        <div
+          class="main-option"
+          v-if="$hasPermission('Auth_menu_clinic_medicalset_serviceset_btn')"
+        >
+          <router-link :to="'/warehouse/servicesetadd'">
+            <el-button type="primary">新建</el-button>
+          </router-link>
+        </div>
+      </div>
+      <el-table v-loading.body="loading" :data="tableData" style="width: 100%" border>
+        <el-table-column type="index" label="序号" align="center" width="70"></el-table-column>
+        <el-table-column prop="name" label="名称"></el-table-column>
+        <el-table-column align="center" prop="code" label="项目编号"></el-table-column>
+        <el-table-column align="center" label="物资分类">
+          <template slot-scope="scope">
+            <sys-value type="THC_WH_OBJECT_SUB_TYPE" :code="scope.row.serviceSetClassification"></sys-value>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="unitName" label="包装单位"></el-table-column>
+        <el-table-column prop="price" align="right" label="销售价">
+          <template slot-scope="scope">{{scope.row.price}} 元</template>
+        </el-table-column>
+        <el-table-column prop="isValid" align="center" label="状态" width="55">
+          <template slot-scope="scope">
+            <sys-value type="THC_SOB_AVAILABLE_STATE" :code="scope.row.isValid"></sys-value>
+          </template>
+        </el-table-column>
+        <el-table-column prop label="操作" width="150" align="center">
+          <template slot-scope="scope">
+            <el-button
+              type="primary"
+              size="small"
+              v-if="$hasPermission('Auth_menu_clinic_medicalset_serviceset_btn')"
+              @click="$router.push('/warehouse/serviceset/' + scope.row.id)"
+            >编辑</el-button>
+            <el-button
+              size="small"
+              type="danger"
+              v-if="$hasPermission('Auth_menu_clinic_medicalset_serviceset_btn')"
+              @click="handleDelete(scope.$index, scope.row)"
+            >删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-row type="flex" justify="end">
+        <ever-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :totalCount="totalCount"
+          :current="current"
+        ></ever-pagination>
+      </el-row>
+    </div>
+  </div>
+</template>
+
+<script>
+
+import api from '../store/servicesetapi'
+import list from '../../util/list'
+let schema = [
+  {
+    name: 'code',
+    type: 'text',
+    label: '项目编号'
+  },
+  {
+    startName: 'createStartTime',
+    endName: 'createEndTime',
+    name: 'daterange',
+    type: 'daterange',
+    dateType: 'daterange',
+    label: '创建时间',
+    format: 'unix',
+    editable: false
+  },
+  {
+    name: 'isValid',
+    type: 'systype',
+    code: 'THC_SOB_AVAILABLE_STATE',
+    useValue: true,
+    label: '状态'
+  },
+  {
+    name: 'serviceSetClassification',
+    type: 'systype',
+    code: 'THC_WH_OBJECT_SUB_TYPE',
+    useValue: false,
+    label: '物资分类'
+  },
+  {
+    name: 'name',
+    type: 'text',
+    label: '项目名称'
+  }
+]
+export default {
+  mixins: [list],
+  data () {
+    var obj = this.$ever.createObjFromSchema(schema)
+    obj.createStartTime = ''
+    obj.createEndTime = ''
+    return {
+      tableData: [],
+      querySchema: schema,
+      queryObj: obj
+    }
+  },
+  beforeCreate () {
+    this.api = api
+  }
+}
+</script>

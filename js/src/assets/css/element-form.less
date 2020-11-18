@@ -1,0 +1,505 @@
+@import "app-variables";
+
+@error-text-color: #ee4433;
+@error-background-color: #FFDEDE;
+.error-color {
+  color: @error-text-color;
+}
+
+.error-background-color {
+  background: @error-background-color;
+}
+.error-item {
+  .error-background-color;
+  .error-color;
+}
+
+/* app.less中有关表单的样式提取到这里 */
+.el-form--inline .el-form-item__label {
+  float: left;
+  display: flex;
+}
+
+.el-form {
+  /* 重写表单元素的margin-bottom 自定义表单样式，底部边距 15 非自定义的 10 */
+  &.custom-form {
+    .el-form-item--small.el-form-item {
+      margin-bottom: 15px;
+    }
+  }
+  &:not(.custom-form) {
+    .el-form-item--small.el-form-item:not(.custom-form-item) {
+      margin-bottom: 10px;
+    }
+  }
+  /* 最后一个去掉右侧margin */
+  .el-form-item:last-child{
+    margin-right: 0
+  }
+  /* 为了解决按钮比前面高1px的问题，搜索按钮的图标定位，element原生无此问题 */
+  // .el-form-item [class^="el-icon-"]{
+  //   vertical-align: top;position: relative; top:1px
+  // }
+  // // 上传组件内的图标的定位有小问题，重置回去
+  // .el-form-item .el-upload [class^="el-icon-"]{
+  //   vertical-align: middle;
+  //   top: 0
+  // }
+
+  .el-input-number.is-without-controls .el-input__inner {
+    text-align: left;
+  }
+
+  .el-cascader.is-disabled .el-cascader__label,
+  .el-input.is-disabled .el-input__inner,
+  .el-textarea.is-disabled .el-textarea__inner {
+    color: #000 !important;
+  }
+
+  .el-checkbox__input.is-disabled.is-checked .el-checkbox__inner::after {
+    border-color: #666;
+  }
+
+  .el-input-group__append, .el-input-group__prepend {
+    padding: 0 10px;
+  }
+  .el-form-item__label {
+    height: 32px; // 文字不折行时垂直居中
+    line-height: 18px; // 文字折行时行高减小
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 10px 0 0;
+  }
+  &.el-form--label-top {
+    .el-form-item__label {
+      height: 32px; // label在输入框上方时不考虑文字折行问题
+      line-height: 32px;
+      padding: 0;
+      font-weight: bold;
+      color: #000;
+      justify-content: flex-start; // label在输入框上方时文字左对齐
+    }
+
+    .el-form-item {
+      margin-bottom: 10px;
+    }
+
+    .el-select {
+      display: block;
+    }
+  }
+
+  .el-button {
+    .iconfont {
+      font-size: 14px;
+    }
+  }
+}
+// 修改一个历史问题，表单label左对齐右对齐，by lvjiagntao
+.el-form.el-form--label-left{
+  .el-form-item__label{
+    justify-content: flex-start;
+  }
+}
+.el-form.el-form--label-right{
+  .el-form-item__label{
+    justify-content: flex-end;
+  }
+}
+.el-form.el-form--label-top{
+  .el-form-item__label{
+    justify-content: flex-start;
+  }
+}
+
+.remote-form{
+  .el-form-item{
+    .el-form-item__content{
+      .el-radio{
+        padding: 5px 0;
+      }
+    }
+  }
+}
+
+.el-form.ever_form_inline {
+  padding-bottom: 15px;
+
+  .el-form-item {
+    margin-bottom: 5px;
+
+    .p_handle_btn {
+      white-space: nowrap;
+
+      span {
+        padding: 5px;
+        margin-right: 5px;
+
+        .icon-delete {
+          font-size: 16px;
+          color: #aaa;
+        }
+
+        .icon-tianjia {
+          font-size: 14px;
+          color: #666;
+        }
+      }
+    }
+  }
+
+  .el-form-item.bottom-tips {
+    margin-bottom: 0;
+    position: absolute;
+    left: 10px;
+    bottom: -10px;
+
+    .el-form-item__content {
+      font-size: 12px;
+      line-height: 14px;
+      color: #666;
+    }
+  }
+}
+
+.el-form.ever_form_01 {
+  .error-msg {
+    color: #ff4949;
+  }
+}
+
+.el-form.ever_form_spe {
+  .el-form-item {
+    margin-bottom: 10px;
+  }
+}
+
+.el-form.ever_form_spe.label_bold {
+  .el-form-item__label {
+    font-weight: bold;
+  }
+}
+
+.el-form-item.is-success .el-input__inner,
+.el-form-item.is-success .el-input__inner:focus,
+.el-form-item.is-success .el-textarea__inner,
+.el-form-item.is-success .el-textarea__inner:focus {
+  border-color: #ccc !important
+}
+
+.form-is-error () {
+  .el-input {
+    input {
+      .error-item;
+    }
+
+    .input_suffix_01 {
+      .error-item;
+    }
+  }
+  .el-range-separator {
+    .error-color;
+  }
+  .el-range-editor, .el-range-input, .el-radio__inner, .el-checkbox__inner, .el-textarea__inner, .el-input__inner {
+    .error-item;
+    &::-webkit-input-placeholder {
+      .error-color;
+    }
+  }
+}
+.form-is-required () {
+  .el-input {
+    input {
+      background: @c_form;
+    }
+
+    .input_suffix_01 {
+      background: @c_form;
+    }
+  }
+  .el-range-editor, .el-range-input, .el-radio__inner, .el-checkbox__inner, .el-textarea__inner, .el-cascader__search-input {
+    background: @c_form;
+
+    &.is-disabled {
+      background: @col_g_06;
+    }
+  }
+  .is-checked {
+    &.is-disabled {
+      .el-radio__inner, .el-checkbox__inner {
+        background: @c_form;
+      }
+    }
+
+    .el-radio__inner, .el-checkbox__inner {
+      background: @col_o_05;
+    }
+  }
+  .cascader-multi {
+    background: @c_form;
+  }
+  .is-disabled {
+    .el-range-editor, .el-range-input, .el-radio__inner, .el-checkbox__inner, .el-textarea__inner {
+      background: @col_g_01;
+    }
+
+    input {
+      background: @col_g_01;
+    }
+
+    .input_suffix_01 {
+      background: @col_g_01;
+    }
+  }
+}
+
+.form-normal-bg () {
+  .el-input {
+    input {
+      color: @col_b_02;
+      background: @col_b_01;
+    }
+
+    .input_suffix_01 {
+      background: @col_b_01;
+    }
+    &.is-disabled {
+      input {
+        background: @col_g_06;
+      }
+      .input_suffix_01 {
+        background: @col_g_06;
+      }
+      background: @col_g_06;
+    }
+  }
+  .el-range-editor, .el-range-input, .el-radio__inner, .el-checkbox__inner, .el-textarea__inner {
+    background: @col_b_01;
+  }
+  .is-checked {
+    &.is-disabled {
+      .el-radio__inner, .el-checkbox__inner {
+        background: @col_b_01;
+      }
+    }
+    // 选中的checkbox 或者 radio的背景色
+    .el-radio__inner, .el-checkbox__inner {
+      background: @col_o_05;
+    }
+  }
+  .cascader-multi {
+    background: @col_b_01;
+  }
+}
+
+/* test margin modify */
+.el-form {
+  .el-form-item {
+    //margin-bottom: 15px;
+    .el-form {
+      .el-form-item {
+        margin-bottom: 0;
+      }
+    }
+
+    .no-input-form-item {
+      margin-bottom: 0;
+    }
+
+    &.is-required:not(.not-required) {  // 样式不启用新版的表单校验样式 增加class="not-required"
+      .form-is-required;
+
+      .el-form--child-comp {
+        .is-required {
+          .form-is-required;
+        }
+      }
+    }
+
+    .el-form--child-comp {
+      .form-normal-bg;
+    }
+  }
+  &:not(.custom-form) {
+    .el-form-item {
+      &.is-error:not(.not-required) {
+        &.is-required:not(.not-required) {
+          // 样式不启用新版的表单校验样式 增加class="not-required"
+          .form-is-error;
+
+          .el-form--child-comp {
+            .is-error {
+              .form-is-error;
+            }
+          }
+        }
+      }
+      .el-form-item:not(.is-required) {
+        .form-normal-bg;
+      }
+    }
+    .el-form-item:not(.is-required){
+      .el-form--child-comp {
+        .el-form-item {
+          &.is-required:not(.not-required) {
+            .form-normal-bg;
+            &.is-error{
+              .form-normal-bg;
+            }
+          }
+        }
+      }
+    }
+    // .is-error:not(.not-required) {
+    //   // 样式不启用新版的表单校验样式 增加class="not-required"
+    //   .form-is-error;
+
+    //   .el-form--child-comp {
+    //     .is-error {
+    //       .form-is-error;
+    //     }
+    //   }
+    // }
+  }
+}
+
+
+// 非form表单情况下使用必填效果
+.is-required:not(.not-required) { // 样式不启用新版的表单校验样式 增加class="not-required"
+  .form-is-required;
+
+  .el-form--child-comp {
+    .is-required {
+      .form-is-required;
+    }
+  }
+}
+
+.el-form-item__error {
+  padding-top: 1px
+}
+
+.el-form .el-form-item.is-error .el-form-item__label {
+  font-weight: bold
+}
+
+// .form-required-color.el-form .el-form-item.is-required .el-input input{ background: #FEF5BE;}
+// .form-required-color .is-required .el-radio__input{ background: #FEF5BE;}
+// .el-form-item.is-required:not(.is-no-asterisk) > .el-form-item__label:before {
+//   display: none;
+//   font-size: 18px;
+//   font-family: '\5B8B\4F53';
+//   .error-color;
+//   margin-right: 2px !important;
+// }
+
+// 重置勾选框禁用时的样式
+.el-checkbox__input.is-disabled .el-checkbox__inner,
+.el-checkbox__input.is-disabled.is-checked .el-checkbox__inner {
+  background: #ccc;
+  border-color: #999;
+}
+
+.el-checkbox__input.is-disabled .el-checkbox__inner::after,
+.el-checkbox__input.is-disabled.is-checked .el-checkbox__inner::after {
+  border-color: #666;
+}
+.el-form:not(.custom-form) {
+  // 表单元素容器相对定位
+  .el-form-item:not(.custom-form-item) .el-form-item__content {
+    position: relative;
+    .el-form-item__error {
+      position: absolute;
+      padding: 6px 8px 6px 24px !important;
+      border: 1px solid @error-text-color;
+      .error-background-color;
+      border-radius: 2px;
+      color: #000 !important;
+      font-size: 14px;
+      line-height: 1;
+      top: auto !important;
+      margin-top: 4px;
+      right: 0;
+      left: auto !important;
+      z-index: 999;
+      &::before {
+        content: '';
+        position: absolute;
+        display: block;
+        width: 8px;
+        height: 8px;
+        .error-background-color;
+        top: -5px;
+        right: 30px;
+        border: 1px solid @error-text-color;
+        transform: rotate(45deg);
+        border-right: 0;
+        border-bottom: 0;
+        z-index: 1;
+      }
+      &::after {
+        font-family: "iconfont" !important;
+        font-size: 14px;
+        font-style: normal;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        content: '\e7b2';
+        .error-color;
+        position: absolute;
+        left: 6px;
+        top: 6px;
+      }
+    }
+  }
+}
+// 内置的特性样式 start
+.custom-form-item {
+  // radio 控件 错误提示样式
+  &.custom-form-item-radio .el-form-item__error {
+    margin-top: -4px;
+    padding-top: 0;
+  }
+  // radio 按钮组控件
+  &.custom-form-item-radio-button .el-form-item__error {
+    // 待添加 添加后删除此注释
+  }
+  // transfer 控件
+  &.custom-form-item-transfer .el-form-item__error {
+    // 待添加 添加后删除此注释
+  }
+  // checkbox 控件
+  &.custom-form-item-checkbox-group .el-form-item__error {
+    // 待添加 添加后删除此注释
+  }
+  // switch 控件
+  &.custom-form-item-switch .el-form-item__error {
+    // 待添加 添加后删除此注释
+  }
+}
+// 内置的特性样式 end
+// 特例样式可以写在这里，这是一个例子，在el-form-item上加上了 extra-form-item 类名，对这个类名进行样式覆盖
+.el-form:not(.custom-form) {
+  .el-form-item.extra-form-item:not(.custom-form-item) .el-form-item__content {
+    .el-form-item__error {
+      right: 75px;
+    }
+  }
+}
+
+// checkbox高度，label 内容是 32px 但是 父元素变成了 37px fix这个问题
+.el-form .el-checkbox-group,.el-form .el-radio-group {
+  line-height: initial;
+  vertical-align: middle;
+  // 发送医嘱区样式乱了 先注释了 再沟通一下吧
+  // display: inline-block;
+}
+
+.el-form-item--small .el-form-item__content {
+  line-height: 33px
+}
+
+// select 选中效果样式修改（单选和多选）
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover{color: #fff}
+.el-select-dropdown__item.is-disabled.hover, .el-select-dropdown__item.is-disabled:hover{color: #c0c4cc}
+.el-select-dropdown.is-multiple .el-select-dropdown__item.selected.hover{color: #fff}

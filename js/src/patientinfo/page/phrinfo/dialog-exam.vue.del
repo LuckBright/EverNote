@@ -1,0 +1,76 @@
+<template>
+  <!-- 检验医嘱信息 -->
+  <el-dialog :title="title" :visible.sync="dialogVisible" class="ui_dialog_02">
+    <el-table
+      :data="examTable"
+      height="250"
+      border
+      style="width: 100%">
+      <el-table-column
+        prop="inspectItemName"
+        label="医嘱名称"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="price"
+        label="金额">
+      </el-table-column>
+      <el-table-column
+        prop="createTime"
+        label="开嘱时间"
+        width="160">
+      </el-table-column>
+      <el-table-column
+        prop="updateTime"
+        label="执行时间"
+        width="160">
+      </el-table-column>
+      <el-table-column
+        prop="remark"
+        show-overflow-tooltip
+        label="嘱托">
+      </el-table-column>
+      <el-table-column
+        label="操作">
+        <template slot-scope="scope">
+          <el-button @click="showReport(scope.row)">查看</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <dialog-exam-detail :examTableDetail="examTable" :title="'查看检验报告'" :visible.sync="innerDialogVisible" :append-to-body="true" @close="closeReport" @update="updateReport"></dialog-exam-detail>
+  </el-dialog>
+</template>
+<script>
+import dialogExamDetail from '../../page/phrinfo/dialog-exam-detail'
+export default {
+  props: ['examTable', 'visible', 'title'],
+  data () {
+    return {
+      dialogVisible: false,
+      innerDialogVisible: false
+    }
+  },
+  watch: {
+    visible (val) {
+      this.dialogVisible = val
+    },
+    dialogVisible (val) {
+      this.$emit('update', val)
+    }
+  },
+  methods: {
+    showReport (data) {
+      this.innerDialogVisible = true
+    },
+    closeReport () {
+      this.innerDialogVisible = false
+    },
+    updateReport (val) {
+      this.innerDialogVisible = val
+    }
+  },
+  components: {
+    dialogExamDetail
+  }
+}
+</script>

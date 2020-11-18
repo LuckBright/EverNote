@@ -1,0 +1,421 @@
+<template>
+  <div>
+    <ever-form2
+      :schema="schema"
+      v-model="queryObj"
+      ref="form"
+      :inline="true"
+      :isQuery="false"
+      v-if="systemType == STENCIL_TYPE[0].id">
+      <template slot="classifyId">
+        <ever-select
+          v-model="queryObj.type1"
+          filterable
+          placeholder="一级分类"
+          :clearable="true"
+          :options="options1"
+          class="queryClass"
+        ></ever-select>
+        <ever-select
+          v-if="queryObj.type1 && options2.length"
+          filterable
+          v-model="queryObj.type2"
+          placeholder="二级分类"
+          :clearable="true"
+          :options="options2"
+          class="queryClass"
+        ></ever-select>
+        <ever-select
+          v-if="queryObj.type2 && options3.length"
+          filterable
+          v-model="queryObj.type3"
+          placeholder="三级分类"
+          :clearable="true"
+          :options="options3"
+          class="queryClass"
+        ></ever-select>
+      </template>
+      <template slot="default">
+        <el-form-item>
+          <el-button type="default" @click="query(queryObj)">
+            <i class="el-icon-search"></i>查询
+          </el-button>
+        </el-form-item>
+      </template>
+    </ever-form2>
+    <ever-query-form :schema="querySchema" v-model="queryObj" @query="query" v-if="queryList"></ever-query-form>
+    <el-table
+      ref="multipleTable"
+      v-loading.body="loading"
+      :data="tableData"
+      style="width: 100%"
+      @selection-change="handleSelectionChange"
+      :stripe="false">
+      <el-table-column type="selection" :selectable="checkboxT"></el-table-column>
+      <!-- <el-table-column show-overflow-tooltip
+        :resizable="false"
+        :label="`${customTypeName}编码`"
+        width="200"
+        prop="code"
+        v-if="STENCIL_TYPE[1] != systemType">
+      </el-table-column>-->
+      <el-table-column
+        show-overflow-tooltip
+        :resizable="false"
+        :label="`${customTypeName}名称`"
+        prop="name">
+        <template slot-scope="scope">
+          <div v-if="!isBtnDetails">
+            <div v-if="!customSearchProperties">
+              <!-- <a v-if="scope.row.classifyId == BLOOD_CLASSIFYID" @click="handleLookDetail(scope.row.id, scope.row)">
+                {{_resetMaterialName({rows: scope.row.materialPropertys, code: GENERAL_CODE, attributeValue: 'materialPropertyValues', isInfo: false })}}
+              </a>
+              <a v-else @click="handleLookDetail(scope.row.id, scope.row)">
+                {{_resetMaterialName({rows: scope.row.materialPropertys, code: MATERILA_NAME_CODE, isInfo: false })}}
+              </a> -->
+              <a @click="handleLookDetail(scope.row.id, scope.row)">
+                {{parserComplex({data: scope.row.ext, propertys: GOLBAL_VAL_MATERIL_NAME.NAME_ONE})}}
+              </a>
+            </div>
+            <a v-else @click="handleLookDetail(scope.row.id, scope.row)">
+              {{_resetMaterialName({rows: scope.row[customSearchProperties], code: [cutomNameCode]})}}
+            </a>
+          </div>
+          <div v-else>
+            <span v-if="!customSearchProperties">
+              {{_resetMaterialName({rows: scope.row.materialPropertys, code: MATERILA_NAME_CODE, isInfo: false})}}
+            </span>
+            <span v-else>
+              {{_resetMaterialName({rows: scope.row[customSearchProperties], code: [cutomNameCode], isInfo: false})}}
+            </span>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        :resizable="false"
+        :label="STENCIL_TYPE[0].id == systemType ? '规格' : '性别'"
+        width="120"
+        prop
+        v-if="STENCIL_TYPE[0].id == systemType || STENCIL_TYPE[2].id == systemType">
+        <template slot-scope="scope">
+          <div v-if="STENCIL_TYPE[0].id == systemType">
+            <span v-if="scope.row.classifyId == BLOOD_CLASSIFYID">
+              {{parserComplex({data: scope.row.ext, propertys: BLOOD_SPECIFICATION})}}
+              <!-- {{_resetMaterialName({rows: scope.row.materialPropertys, code: [BLOOD_SPECIFICATION], attributeValue: 'materialPropertyValues', isInfo: false})}} -->
+              </span>
+            <span v-else>
+              {{parserComplex({data: scope.row.ext, propertys: SPU_SPEC_CODE})}}
+              <!-- {{_resetMaterialName({rows: scope.row.materialPropertys, code: [SPU_SPEC_CODE], isInfo: false})}} -->
+            </span>
+          </div>
+          <span
+            v-else
+          >{{_resetMaterialName({rows: scope.row[customSearchProperties], code: [[STAFF_CODE[1]]], attributeValue: STENCIL_TYPE[2].attributeValue})}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column
+        show-overflow-tooltip
+        :resizable="false"
+        :label="STENCIL_TYPE[0].id == systemType ? '生产厂商' : '人员类型'"
+        prop
+        v-if="STENCIL_TYPE[0].id == systemType || STENCIL_TYPE[2].id == systemType">
+        <template slot-scope="scope">
+          <span v-if="STENCIL_TYPE[0].id == systemType">
+            {{parserComplex({data: scope.row.ext, propertys: PRODUCER})}}
+            <!-- {{_resetMaterialName({rows: scope.row.materialPropertys, code: [PRODUCER], isInfo: false})}} -->
+          </span>
+          <span v-else>
+            {{_resetMaterialName({rows: scope.row[customSearchProperties], code: [[STAFF_CODE[2]]], attributeValue: STENCIL_TYPE[2].attributeValue})}}
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column
+        :resizable="false"
+        :label="STENCIL_TYPE[0].id == systemType ? `${customTypeName}类型` : '所属科室'"
+        prop
+        v-if="STENCIL_TYPE[0].id == systemType || STENCIL_TYPE[2].id == systemType">
+        <template slot-scope="scope">
+          <span v-if="STENCIL_TYPE[0].id == systemType">
+            {{parserComplex({data: scope.row.ext, propertys: 'classifyObject'})}}
+            <!-- {{templateTypeName(scope.row.classifyVoObject)}} -->
+          </span>
+          <div v-html="levelSectionList(scope.row.levelSectionName)"></div>
+          <!-- <span v-else>{{_resetMaterialName({rows: scope.row[customSearchProperties], code: [[STAFF_CODE[3]]], attributeValue: STENCIL_TYPE[2].attributeValue})}}</span> -->
+        </template>
+      </el-table-column>
+      <el-table-column :resizable="false" label="状态" prop v-if="STENCIL_TYPE[2].id == systemType">
+        <template slot-scope="scope">
+          <span>{{scope.row.statue ? '禁用' : '启用'}}</span>
+        </template>
+      </el-table-column>
+      <!-- <el-table-column
+        :resizable="false"
+        label="操作"
+        width="220"
+        prop="">
+        <template slot-scope="scope">
+          <div class="">
+            <el-button size="small" type="primary" @click="handleEdit(scope.row.id)">编辑</el-button>
+            <el-button size="small" type="primary" @click="handleHistory(scope.row.id)">历史记录</el-button>
+            <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+          </div>
+        </template>
+      </el-table-column>-->
+    </el-table>
+    <el-button type="primary" @click="relationloal">{{this.customRelationId ? '引用' : '引用至本地'}}</el-button>
+    <el-row type="flex" justify="end">
+      <ever-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current="current"
+        :totalCount="totalCount"
+      ></ever-pagination>
+    </el-row>
+  </div>
+</template>
+<script>
+import list from '@/util/list'
+import selectInquireList from '@/warehouse/util/selectinquirelist'
+import classify from '@/warehouse/util/classify'
+import { parserComplex, GOLBAL_VAL_MATERIL_NAME, STENCIL_TYPE, SPU_SPEC_CODE, PRODUCER, MATERILA_NAME_CODE, patch, STAFF_CODE, BLOOD_CLASSIFYID, GENERAL_CODE, BLOOD_SPECIFICATION, SEARCH_CODE, MATERILA_PINYIN_CODE } from '@/util/common'
+import historyLog from '@/warehouse/dialog/historylog'
+// 获取历史记录api（暂时不用）
+// import modifyRecordApi from '@/warehouse/page/institutionmaterial/store/modifyrecordapi'
+// let schema = [
+//   {
+//     name: 'name',
+//     label: '物资名称',
+//     props: {
+//       placeholder: '商品名/通用名/证件编号'
+//     },
+//     style: 'width: 200px'
+//   }
+// ]
+export default {
+  /**
+   * 机构关联集团组件
+   * @param customApi                   需要传入当前类型api(因用list.js,列表api需命名list,除物资外取集团api)
+   * @param customLocalApi              需要传入关联本地api
+   * @param systemType                  当前类型id
+   * @param customTypeName              当前类型名称
+   * @param cutomNameCode               当前类型名code
+   * @param customSearchCode            当前类型查询code
+   * @param customSearchProperties      当前类型查询properties名
+   * @param customParent                返回父级列表页
+   * @param customSeeRoute              查看集团父详情页
+   * @param customBackRoute             返回当前页
+   * @param isBtnDetails                是否查看详情(true不查看)
+   * @param customSearchForCorrelation  是否部门、科室关联查询表
+   * @param customRelationId            关联关系id
+   * @param customRelationType          关联关系类型
+   * @param queryList                   是否查询待关联数据
+   * @param querySchema                 查询待关联数据的参数
+   */
+  props: ['customApi', 'systemType', 'cutomNameCode', 'customSearchCode', 'customTypeName', 'customSearchProperties', 'customLocalApi', 'customParent', 'customSeeRoute', 'customBackRoute', 'isBtnDetails', 'customSearchForCorrelation', 'customRelationId', 'customRelationType', 'queryList', 'querySchema'],
+  mixins: [list, classify, selectInquireList],
+  data () {
+    var queryObj = {}
+    if (this.queryList) queryObj = this.$ever.createObjFromSchema(this.querySchema)
+    return {
+      queryObj,
+      schema: [],
+      deleteId: '',
+      inUseDialog: false,
+      notUseDialog: false,
+      routeName: this.$route.name,
+      thisMaterialList: [],
+      api: this.customApi,
+      STENCIL_TYPE,
+      SPU_SPEC_CODE,
+      PRODUCER,
+      MATERILA_NAME_CODE,
+      STAFF_CODE,
+      codesMatchValuesCodes: [],
+      GOLBAL_VAL_MATERIL_NAME,
+      BLOOD_CLASSIFYID,
+      GENERAL_CODE,
+      BLOOD_SPECIFICATION,
+      routerPath: '',
+      parserComplex
+    }
+  },
+  created () {
+    if (this.systemType === STENCIL_TYPE[0].id) {
+      if (!this.customSearchProperties) {
+        this.schema.push({ name: 'classifyId', label: '物资类型', comp: 'custom' }, { name: 'name', label: '物资名称', props: { placeholder: '商品名/通用名/证件编号' }, style: 'width: 200px' })
+      } else {
+        this.schema.push({ name: 'name', label: '物资名称', props: { placeholder: '商品名/通用名/证件编号' }, style: 'width: 200px' })
+      }
+      this.queryObj = this.$ever.createObjFromSchema(this.schema)
+      // Object.assign(this.queryObj, { type: '', type2: '', type3: '', systemType: this.systemType }) // 看不懂的为什么要重复assign 和 type／type2／type3  都是干啥的 出现了bug  先这么注释着吧
+      Object.assign(this.queryObj, { systemType: this.systemType })
+    }
+    if (this.customSearchForCorrelation) Object.assign(this.queryObj, { searchForCorrelation: 1 })
+    if (!this.customSearchProperties) {
+      this.codesMatchValuesCodes.push(...SEARCH_CODE, ...MATERILA_PINYIN_CODE, ...GENERAL_CODE)
+      this.queryObj.codesMatchValues = [{ codes: this.customSearchCode, value: '' }]
+    } else {
+      this.codesMatchValuesCodes.push(STAFF_CODE[0])
+      this.queryObj.codesMatchValues = [{ codes: [this.customSearchCode], value: '' }]
+    }
+    if (this.customRelationId) Object.assign(this.queryObj, { relationId: this.customRelationId, relationType: this.customRelationType })
+    // this.$ever.getFieldFromSchema(this.schema, 'name').label = `${this.customTypeName}名称`
+  },
+  methods: {
+    // 查看关联科室
+    levelSectionList (data) {
+      if (!data) return ''
+      let parentName = []
+      data.map(parent => {
+        if (Array.isArray(parent)) {
+          let childName = []
+          parent.map(child => {
+            childName.push(child)
+          })
+          parentName.push(`<div>${childName.join('/')}</div>`)
+        } else {
+          parentName.push(`<div>${parent}</div>`)
+        }
+      })
+      return parentName.join('')
+    },
+    relationloal () {
+      let params = {
+        ids: [],
+        relationId: this.customRelationId
+      }
+      const materLen = this.thisMaterialList.length
+      if (!materLen) {
+        this.$messageTips(this, 'warning', '请选择需要引用数据进行引用', '')
+        return
+      }
+      if (materLen) {
+        for (let i = 0; i < materLen; i++) {
+          if (!this.thisMaterialList[i].relevance) {
+            params.ids.push(this.thisMaterialList[i].id)
+          }
+        }
+        if (!this.customSearchProperties) { // 物资关联接口
+          let tempParams = []
+          params.ids.forEach(item => {
+            tempParams.push({
+              materialSpuId: item
+            })
+          })
+          this.customApi.relationloal(tempParams).then(result => {
+            if (result) {
+              if (result.length !== 0) this.$messageTips(this, 'success', '关联成功')
+              this.$router.push('/warehouse/materiallists')
+            }
+          })
+        } else {
+          if (this.customRelationId) {
+            Object.assign(params, { relationType: this.customRelationType })
+          }
+          this.customLocalApi.createOrUpdate(params).then(result => {
+            if (result && (result.length || result.flag)) {
+              if (result.length || result.flag) this.$messageTips(this, 'success', '关联成功')
+              // this.$router.push(this.customParent)
+              this.$router.go(-1)
+            }
+          })
+        }
+      }
+    },
+    checkboxT (row, index) {
+      if (row) {
+        return row.relevance ? 0 : 1
+      }
+    },
+    handleSelectionChange (v) {
+      this.thisMaterialList = v
+    },
+    handleLookDetail (id, v) {
+      let curTab = this.routerPath.split('/').pop()
+      const localId = localId || 0
+      let curPath = '/warehouse/materiallistsee'
+      this.$router.push(`${curPath}/${id}?source=${curTab}&localId=${localId}`)
+    },
+    ...patch
+    // handleInUse () {
+    //   this.inUseDialog = !this.inUseDialog
+    // },
+    // handleNotUse () {
+    //   this.notUseDialog = !this.notUseDialog
+    // },
+    // handleInUseConfirm () {
+    //   this.customApi.del(this.deleteId).then(result => {
+    //     if (result && result.flag) {
+    //       this.$messageTips(this, 'success', '删除成功', '删除')
+    //       this.list()
+    //       this.handleNotUse()
+    //     }
+    //   })
+    // },
+    // handleDelete (data) {
+    //   if (data.isInUse) {
+    //     this.handleInUse()
+    //     return
+    //   }
+    //   this.deleteId = data.id
+    //   this.handleNotUse()
+    // },
+    // handleEdit (id) {
+    //   this.$router.push(`/things/dictionary/${id}`)
+    // },
+    // handleHistory (correspondId) {
+    //   let params = {
+    //     correspondId,
+    //     objectName: 'MaterialDict'
+    //   }
+    //   modifyRecordApi.list(params).then(result => {
+    //     this.$refs.history.open(result)
+    //   })
+    // }
+  },
+  watch: {
+    'queryObj.classifyId' (val) {
+      if (!this.customSearchProperties) {
+        this.query(this.queryObj)
+      }
+    },
+    'tableData' (val) {
+      // 表格渲染完成后 动态改变已经关联了的物资选框
+      this.$nextTick(() => {
+        val.forEach(item => {
+          if (item.relevance) {
+            this.$refs.multipleTable.toggleRowSelection(item, true)
+          }
+        })
+      })
+    },
+    '$route' (v) {
+      this.routerPath = v.path
+      if (this.pathName !== v.name) {
+        // this.initSchema(v.name)
+        // this._getList(v.name)
+      }
+    }
+  },
+  components: {
+    historyLog
+  }
+}
+</script>
+<style lang="less" scoped>
+.el-table__body .el-table__row td .cell .btn {
+  display: none;
+}
+.el-table__body .el-table__row:hover td .cell .btn {
+  display: block;
+}
+.queryClass {
+  width: 180px;
+  display: inline-block;
+  margin-right: 5px;
+}
+.template.pos_ab {
+  right: 40px;
+}
+</style>

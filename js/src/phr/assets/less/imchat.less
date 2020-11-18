@@ -1,0 +1,118 @@
+.chat {
+  display: flex;
+  align-items: flex-start;
+  .avatar {
+    width: 41px;
+    height: 41px;
+    border-radius: 4px;
+    flex: none;
+  }
+  .iconfont {
+    font-size: 41px;
+    width: 41px;
+    height: 41px;
+    line-height: 41px;
+    color: #ccc;
+  }
+  .text {
+    padding: 8.5px 15px;
+    // max-width: calc(100% - 132px);
+    font-family: PingFang-SC-Regular;
+    font-size: 17px;
+    color: #191919;
+    position: relative;
+    border-radius: 4px;
+    word-break: break-all;
+    .emoji {
+      width: 21.5px;
+      transform: translateY(3px);
+    }
+  }
+  .text::after{
+    content: ' ';
+    position: absolute;
+    top: 15px;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }
+  .image {
+    max-width: 125px;
+  }
+  .audio {
+    display: flex;
+    align-items: center;
+    font-family: PingFangSC-Regular;
+    font-size: 14px;
+    color: #191919;
+    padding: 10px 15px;
+    .audio-icon {
+      display: flex;
+      align-items: center;
+      width: 20px;
+      height: 15px;
+      .audio1 {
+        width: 3.5px;
+        height: 4px;
+      }
+      .audio2 {
+        width: 7px;
+        height: 8px;
+      }
+      .audio3 {
+        width: 10px;
+        height: 15px;
+      }
+    }
+  }
+}
+.chat-left {
+  justify-content: flex-start;
+  .avatar, .iconfont {
+    margin-right: 10px;
+  }
+  .text {
+    background-color: #fff;
+  }
+  .text::after{
+    left: -5px;
+    border-right: 5px solid #fff;
+  }
+  .audio {
+    justify-content: flex-start;
+    .audio-icon {
+      img {
+        margin-right: 9px;
+      }
+    }
+  }
+}
+.chat-right {
+  justify-content: flex-end;
+  .avatar, .iconfont {
+    margin-left: 10px;
+  }
+  .text {
+    background-color: #95EB69;
+  }
+  .text::after{
+    right: -5px;
+    border-left: 5px solid #95EB69;
+  }
+  .audio {
+    justify-content: flex-end;
+    .audio-icon {
+      img {
+        transform: rotate(180deg);
+      }
+      .audio1 {
+        margin-left: 15.5px;
+      }
+      .audio2 {
+        margin-left: 12px;
+      }
+      .audio3 {
+        margin-left: 9px;
+      }
+    }
+  }
+}

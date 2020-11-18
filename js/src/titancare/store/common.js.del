@@ -1,0 +1,82 @@
+// import { messageTips } from '@/util/common'
+// import { setName } from '@/titancare/utils/fn'
+// import BASECONFIG from './config'
+//
+// // 去左右空格
+// function trim (str) {
+//   return str.replace(/(^\s*)|(\s*$)/g, '')
+// }
+// const ever = {}
+// const diction = {
+//   createObjFromSchema: function (schema) {
+//     var obj = {}
+//     let self = this
+//     for (let field of schema) {
+//       self.setProp(obj, field.name, '')
+//       if (field.startName || field.endName) {
+//         obj[field.startName] = ''
+//         obj[field.endName] = ''
+//       }
+//     }
+//     return obj
+//   },
+//   getFieldFromSchema (schema, name) {
+//     var arr = schema.filter(field => {
+//       return field.name === name
+//     })
+//     var field = arr.length ? arr[0] : null
+//     return field
+//   },
+//   setProp: (obj, path, value) => {
+//     if (!path) {
+//       return
+//     }
+//     var pList = path.split('.')
+//     var len = pList.length
+//     for (var i = 0; i < len - 1; i++) {
+//       var elem = pList[i]
+//       if (!obj[elem]) obj[elem] = {}
+//       obj = obj[elem]
+//     }
+//     obj[pList[len - 1]] = (typeof value === 'string') ? trim(value) : value
+//   },
+//   getProp: (obj, prop) =>
+//     prop.reduce((xs, x) => {
+//       if (xs && xs[x] && (typeof xs[x] === 'string')) {
+//         return trim(xs[x])
+//       } else {
+//         return (xs && xs[x]) ? xs[x] : null
+//       }
+//     }, obj)
+// }
+// Object.assign(diction, BASECONFIG)
+//
+// ever.install = function (Vue) {
+//   Vue.prototype.$ever = diction
+//   // 权限方法
+//   Vue.prototype.$filters = Vue.options.filters
+//
+//   Vue.prototype.$hasPermission = function (resource) {
+//     if (!resource || !resource.length || !this.$store.state.resources) {
+//       return true
+//     }
+//     let _pos = false
+//     if (Array.isArray(resource)) {
+//       for (var str of resource) {
+//         if (this.$store.state.resources.indexOf(str) > -1) {
+//           return true
+//         }
+//       }
+//     } else {
+//       _pos = this.$store.state.resources.indexOf(resource) > -1
+//     }
+//     return _pos
+//   }
+//   // 消息提示
+//   Vue.prototype.$messageTips = messageTips
+//   // 数组赋值
+//   Vue.prototype.$setName = setName
+// }
+//
+// export { diction, ever }
+// export default diction

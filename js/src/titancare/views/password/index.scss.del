@@ -1,0 +1,8 @@
+.el-button-01{
+  width:100%;
+}
+.el-button-02{
+  width:112px;
+  border-color:#ddd;
+  &:hover,&:focus{border-color:#1c7bef}
+}

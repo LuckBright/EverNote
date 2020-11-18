@@ -1,0 +1,10 @@
+.custom-sort-icon {
+  .caret-wrapper {
+    .sort-caret.ascending {
+      display: none
+    }
+    .sort-caret.descending {
+      bottom: 3px !important
+    }
+  }
+}

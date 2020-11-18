@@ -1,0 +1,46 @@
+<template>
+    <el-dialog
+    title=""
+    class="appoint"
+    :fullscreen="true"
+    :visible.sync="showDialog"
+    width="100%">
+    <month-arrange :value="value" @success="auditSuccess" v-if="showDialog"></month-arrange>
+  </el-dialog>
+</template>
+<script>
+  import api from '@/arrange/store/settingapi'
+  import { APPOINT_STATUS } from '@/util/common'
+  import monthArrange from '@/arrange/page/setting/months.vue'
+  export default {
+    props: ['show', 'value'],
+    data () {
+      return {
+        api,
+        showDialog: false,
+        remark: '',
+        stateStyle: APPOINT_STATUS
+      }
+    },
+    watch: {
+      'show' (val) {
+        this.showDialog = val
+      },
+      'showDialog' (val) {
+        this.$emit('update:show', val)
+      }
+    },
+    methods: {
+      auditSuccess (val) {
+        this.showDialog = false
+        this.$emit('success', val)
+      }
+    },
+    components: {
+      monthArrange
+    }
+  }
+</script>
+<style scoped>
+  .appoint /deep/ .el-dialog__body{padding: 5px 0;}
+</style>

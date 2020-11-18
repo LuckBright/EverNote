@@ -1,0 +1,358 @@
+<template>
+  <div class='certificateManage'>
+    <ever-bread-crumb name='凭证详细信息' :showTitle='true' path='/income/certificateManage'></ever-bread-crumb>
+    <div class='layout_inner'>
+      <div class='main-head'>
+        <ever-form2 ref="form" :schema="schema" v-model="obj" label-position="left" :is-query="true" @query="list(true)" class='form'>
+          <template slot="code">
+            <el-form-item prop="code" label="凭证单据编号">
+              <el-input disabled v-model="obj.code"></el-input>
+            </el-form-item>
+          </template>
+          <template slot="sourceType">
+            <el-form-item prop="sourceType" label="凭证类别">
+              <ever-select v-model="obj.sourceType" :options="periodArr" :clearable='true' style="width: 100%" :disabled='true'>
+              </ever-select>
+            </el-form-item>
+          </template>
+          <template slot="name">
+            <el-form-item prop="name" label="总账期间">
+              <el-input disabled v-model="obj.name"></el-input>
+            </el-form-item>
+          </template>
+          <template slot="status">
+            <el-form-item prop="status" label="状态">
+              <ever-select v-model="obj.status" :options="statusArr" style="width: 100%" :clearable='true' :disabled='true'>
+              </ever-select>
+            </el-form-item>
+          </template>
+          <template slot="description">
+            <el-form-item prop="description" label="凭证概要">
+              <el-input disabled v-model="obj.description"></el-input>
+            </el-form-item>
+          </template>
+          <template slot="docDate">
+            <el-form-item prop="docDate" label="记账日期">
+              <el-input disabled v-model="obj.docDate"></el-input>
+            </el-form-item>
+          </template>
+          <template slot="total">
+            <el-form-item prop="total" label="合计">
+              <el-input disabled v-model="obj.total"></el-input>
+            </el-form-item>
+          </template>
+          <template slot="md">
+            <el-form-item prop="md" label="合计贷">
+              <el-input disabled v-model="obj.md"></el-input>
+            </el-form-item>
+          </template>
+          <template slot="default">
+          </template>
+        </ever-form2>
+        <div class="main-option">
+          <el-button type="primary" @click='goDetail'>收入明细</el-button>
+          <!-- <el-button type="primary" @click='goBillDetail'>收款明细</el-button> -->
+          <!-- <el-button type="primary" @click='sure'>稽核确认</el-button> -->
+          <!-- <el-button type="primary" @click='uploadBill'>传送至总账</el-button> -->
+
+          <el-button type="primary" @click='vouchSure' v-show='obj.status == 1'>凭证确认</el-button>
+          <el-button type="primary" @click='vouchCancel' v-show='obj.status == 2 || obj.status == 1'>凭证取消</el-button>
+          <el-button type="primary" @click='vouchSend' v-show='obj.status == 2'>凭证传递至总账</el-button>
+          <el-button type="primary" @click='vouchWithdraw' v-show='obj.status == 3'>凭证冲销撤回</el-button>
+
+          <!-- <el-button type="primary" @click='del'>删除</el-button> -->
+        </div>
+      </div>
+      <div>
+        <el-table ref="multipleTable" :data="cerData" tooltip-effect="dark" style="width: 100%" @selection-change="handleSelectionChange">
+          <el-table-column type="index" width="80" label="序号">
+          </el-table-column>
+          <el-table-column label="会计科目" prop='acode' width="120">
+            <template slot-scope="scope">{{ scope.row.acode}}</template>
+          </el-table-column>
+          <el-table-column prop="acodeName" label="会计科目说明">
+            <template slot-scope="scope">{{ scope.row.acodeName }}</template>
+          </el-table-column>
+          <el-table-column prop="memo" label="摘要" show-overflow-tooltip>
+          </el-table-column>
+          <el-table-column prop="md" label="借" show-overflow-tooltip>
+            <template slot-scope="scope">{{ scope.row.md | formatToFinacial}}</template>
+          </el-table-column>
+          <el-table-column prop="mc" label="贷" show-overflow-tooltip>
+            <template slot-scope="scope">{{ scope.row.mc | formatToFinacial}}</template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+import {
+  getTradeTypeEnum,
+  getTempVoucherDetail,
+  deleteTempVoucher,
+  verify,
+  createFinacialVoucher,
+  writeOff
+} from '../../../store/income/account/summary.js'
+let schema = [
+  {
+    name: 'code',
+    comp: 'custom',
+    noWrap: true
+  },
+  {
+    name: 'sourceType',
+    comp: 'custom',
+    noWrap: true,
+    props: {
+      clearable: true
+    }
+  },
+  {
+    name: 'name',
+    comp: 'custom',
+    noWrap: true
+  },
+  {
+    name: 'status',
+    comp: 'custom',
+    noWrap: true
+  },
+  {
+    name: 'description',
+    comp: 'custom',
+    noWrap: true
+  },
+  {
+    name: 'docDate',
+    comp: 'custom',
+    noWrap: true
+  },
+  {
+    name: 'total',
+    comp: 'custom',
+    noWrap: true
+  }
+]
+export default {
+  data () {
+    let obj = this.$ever.createObjFromSchema(schema)
+    obj.beginDate = ''
+    obj.endDate = ''
+    return {
+      voucherId: this.$route.query.voucherId,
+      id: this.$route.query.id,
+      obj: obj,
+      delId: '',
+      schema: schema,
+      periodArr: [],
+      statusArr: [
+        {
+          id: '0',
+          name: '新建'
+        },
+        {
+          id: '1',
+          name: '已经生成临时凭证'
+        },
+        {
+          id: '2',
+          name: '已审核'
+        },
+        {
+          id: '3',
+          name: '已经传送总账'
+        },
+        {
+          id: '4',
+          name: '已红冲'
+        }
+      ],
+      cerData: []
+    }
+  },
+  filters: {
+    filterTradeType (value) {
+      switch (parseFloat(value)) {
+        case 1:
+          return '门诊收费'
+        case 2:
+          return '门诊挂号'
+        case 3:
+          return '疗程执行'
+        case 4:
+          return '应收收款核销'
+        default:
+          return ''
+      }
+    },
+    filterStatus (value) {
+      switch (parseFloat(value)) {
+        case 0:
+          return '新建'
+        case 1:
+          return '已经生成临时凭证'
+        case 2:
+          return '已审核'
+        case 3:
+          return '已经传送总账'
+        case 4:
+          return '已红冲'
+        default:
+          return ''
+      }
+    }
+  },
+  created () {
+    this.getList()
+    this.list()
+  },
+  methods: {
+    goDetail () {
+      this.$router.push({
+        path: '/income/incomeDetail',
+        query: {
+          id: this.id
+        }
+      })
+    },
+    goBillDetail () {},
+    sure () {},
+    uploadBill () {},
+    async getList () {
+      try {
+        let data = await getTradeTypeEnum()
+        if (data && data.data) {
+          data.data.map(item => {
+            for (let key in item) {
+              this.periodArr.push({ name: item[key], id: key })
+            }
+          })
+        }
+      } catch (err) {}
+    },
+    async list () {
+      this.cardloading = true
+      let params = {
+        id: this.voucherId
+      }
+      try {
+        let data = await getTempVoucherDetail(params)
+        data.data.voucherDetail.push({
+          mc: data.data.summaryAmount.ac,
+          md: data.data.summaryAmount.md,
+          acode: '合计'
+        })
+
+        this.cerData = data.data.voucherDetail
+
+        this.obj.ac = data.data.summaryAmount.ac
+        this.obj.md = data.data.summaryAmount.md
+        this.delId = data.data.voucherHeader.id
+        Object.assign(this.obj, data.data.voucherHeader)
+        this.obj.status = this.obj.status + ''
+      } catch (err) {
+        this.cardloading = false
+      }
+    },
+    handleSelectionChange () {},
+    // 凭证确认
+    async vouchSure () {
+      try {
+        let params = {
+          id: this.voucherId
+        }
+        let data = await verify(params)
+        if (data && data.head && data.head.errCode === 0) {
+          this.$notify({
+            message: data.hean.errMsg || '成功',
+            type: 'success'
+          })
+          this.list()
+        }
+      } catch (err) {}
+    },
+    // 凭证取消
+    async vouchCancel () {
+      try {
+        let params = {
+          id: this.voucherId
+        }
+        let data = await deleteTempVoucher(params)
+        if (data.head && data.head.errCode === 0) {
+          this.$notify({
+            message: data.head.errMsg || '删除成功！',
+            type: 'success'
+          })
+          history.go(-1)
+        }
+      } catch (err) {}
+    },
+    // 凭证传递至总账
+    async vouchSend () {
+      try {
+        let params = {
+          id: this.voucherId
+        }
+        let data = await createFinacialVoucher(params)
+        if (data.head && data.head.errCode === 0) {
+          this.$notify({
+            message: data.head.errMsg || '传递至总账成功！',
+            type: 'success'
+          })
+          this.list()
+        }
+      } catch (err) {}
+    },
+    // 凭证冲销撤回
+    async vouchWithdraw () {
+      try {
+        let params = {
+          id: this.voucherId
+        }
+        let data = await writeOff(params)
+        if (data.head && data.head.errCode === 0) {
+          this.$notify({
+            message: data.head.errMsg || '冲销成功！',
+            type: 'success'
+          })
+          this.list()
+        }
+      } catch (err) {}
+    }
+  }
+}
+</script>
+<style scoped>
+.certificateManage /deep/ .el-form-item {
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: top;
+}
+.certificateManage /deep/ .el-form-item__label {
+  text-align: left;
+  vertical-align: middle;
+  float: left;
+  font-size: 14px;
+  color: #48576a;
+  line-height: 1;
+  padding: 11px 12px 11px 0;
+  box-sizing: border-box;
+  width: auto !important;
+}
+.certificateManage /deep/ .el-form-item__content {
+  margin-left: 0 !important;
+  display: inline-block;
+  vertical-align: top;
+}
+.certificateManage /deep/ .form {
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+.setMg {
+  margin-left: 10px;
+}
+</style>
+

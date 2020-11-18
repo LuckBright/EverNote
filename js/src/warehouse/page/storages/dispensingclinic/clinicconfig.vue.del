@@ -1,0 +1,11 @@
+<template>
+  <hosipital-config></hosipital-config>
+</template>
+<script>
+  import hosipitalConfig from '../dispensinghospital/hospitalconfig.vue'
+  export default {
+    components: {
+      hosipitalConfig
+    }
+  }
+</script>

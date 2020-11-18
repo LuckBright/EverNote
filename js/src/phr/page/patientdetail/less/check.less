@@ -1,0 +1,17 @@
+@import "var";
+.option-item{
+  height: 30px;
+  line-height: 30px;
+  background: @block-bg;
+  display: inline-block;
+  border-radius: 200px;
+  padding: 0 10px;
+  min-width: 40px;
+  text-align: center;
+  margin-right: 10px;
+  margin-bottom: 5px;
+  &.checked{
+    background: @primary-color;
+    color: #fff;
+  }
+}
